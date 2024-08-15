@@ -1,0 +1,51 @@
+{
+    "locale": {
+        "en": "English",
+        "nl": "Dutch"
+    },
+    "route::home": {
+        "title": "Jeff-frontend boilerplate",
+        "divider": "🇬🇧",
+        "description": [
+            "This is a boilerplate for a frontend application using Vue 3, Typescript, Vue Router, Pinia, Vite, Lodash, PouchDB, Sass & normalize.css.",
+        "It is made as a scaffolding framework to quickly get up and running to develop a webapplication build upon the headless [Payload](https://payloadcms.com) CMS."
+        ],
+        "payload-test": {
+            "title": "Test Payload REST connection",
+            "subtitle": "Configure the .env file of your project to match it with the right Payload server configuration (see README.md)" 
+        },
+        "payload-auth-test": {
+            "title": "Test Payload authentication",
+            "login": "Login",
+            "logout": "Logout",
+            "welcome": "Welcome %{ username }",
+            "confirmMessage": "If there is an existing account for %{ confirmMessage }, there will be an e-mail on its way with a password reset link.",
+            "registerAccount": "Register account"
+        }
+    },
+    "component::auth/login": {
+        "email": "Email address",
+        "password": "Password",
+        "login": "Login",
+        "goBack": "Go back",
+        "resetPassword": "Reset password",
+        "forgotPassword": "Forgot password?"
+    },
+    "component::auth/register": {
+        "email": "Email address",
+        "username": "Username",
+        "password": "Password",
+        "register": "Register"
+    },
+    "component::auth/resetPassword": {
+        "resetPassword": "Reset password",
+        "newPassword": "New password"
+    },
+    "component::rest-demo": {
+        "submit": "Submit",
+        "outputMessage": "Output of the **%{method}** request to _%{url}_."
+    },
+    "component::language-selector": {
+        "selectLanguage": "Select language"
+    }
+}

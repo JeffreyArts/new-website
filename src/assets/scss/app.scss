@@ -1,0 +1,51 @@
+#app {
+    min-height: 100%;
+    display: flex;
+}
+  
+:root {
+    --primary-bg-color: #fafafa;
+    --secondary-bg-color: #fff;
+    --bg-size: 8px;
+  }
+
+  
+html,
+body {    
+    min-height: 100vh;
+    display: flex;
+}
+html {
+    background-color: var(--primary-bg-color);
+}
+
+body {
+    width: 100%;
+    background-image: linear-gradient(to bottom, transparent 0px, transparent calc(var(--bg-size) - 2px), var(--secondary-bg-color) calc(var(--bg-size) - 2px), var(--secondary-bg-color) var(--bg-size)),
+                    linear-gradient(to right, transparent 0px, transparent calc(var(--bg-size) - 2px), var(--secondary-bg-color) calc(var(--bg-size) - 2px), var(--secondary-bg-color) var(--bg-size));
+    // linear-gradient(to right, #ececec 50%, #fff 50%);
+    background-size: var(--bg-size) var(--bg-size);
+}
+
+* {
+    box-sizing: border-box;
+
+    // Disable text selection
+    // -webkit-user-select: none; /* Safari */        
+    // -moz-user-select: none; /* Firefox */
+    // -ms-user-select: none; /* IE10+/Edge */
+    // user-select: none; /* Standard */
+}
+
+.container {
+    padding: 20px;
+    width: 100%;
+    max-width: 1280px;
+    margin:auto; 
+}
+
+.svg-icon {
+    display: block;
+    fill: currentColor;
+}
+
