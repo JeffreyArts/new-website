@@ -157,7 +157,7 @@ export default defineComponent({
     }
 
     &:hover {
-        background-color: $light-grey;
+        background-color: var(--contrast-color);
     }
 
     &.__isActive {

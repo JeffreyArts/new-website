@@ -1,5 +1,6 @@
 <template>
     <div class="home">
+    <h1>Home</h1>
         <section class="container">
             <button>click here</button>
         </section>
@@ -36,19 +37,15 @@ export default defineComponent ({
         ]
     },
     mounted() {
-        gsap.to("html", {
-            "--secondary-bg-color":"#000",
-            "--primary-bg-color":"#111", 
-            yoyo:true,
-            repeat:20,
-            repeatDelay: 3.2,
-            duration:.8
-        })
-        gsap.to("html", {
-            "--bg-size": 32,
-            yoyo:true,
-            repeat:20,
-            repeatDelay: 1.6,
+
+        // Animation for Title block
+        gsap.fromTo("h1", {
+            fontWeight: 400,
+            fontStretch: 80,
+        },{
+            fontWeight: 800,
+            fontStretch: 100,
+            ease:"bounce.out",
             duration: .8 
         })
     },
@@ -61,5 +58,12 @@ export default defineComponent ({
 
 <style lang="scss">
 @import "@/assets/scss/variables.scss";
-
+@supports (font-variation-settings: "wdth" 115) {
+  h1 {
+    // color: #f09;
+    display: inline-block;
+    width: 200px;
+    text-align: center;
+  }
+}
 </style>

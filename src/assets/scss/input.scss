@@ -13,7 +13,7 @@
     
     &:focus {
         outline: none;
-        border: 1px solid $primaryColor;
+        border: 1px solid var(--primary-color);
     }
 
     &.large {

@@ -2,9 +2,9 @@
 
 .button {
     background-color: transparent;
-    border: 1px solid $light-grey;
+    border: 1px solid var(--contrast-color);
     border-radius: 32px;
-    background-color: $light-grey;
+    background-color: var(--contrast-color);
     height: 36px;
     display: inline-block;
     align-items: center;
@@ -27,103 +27,103 @@
     
 
     &.c-accent {
-        background-color: $accentColor;
-        border-color: $accentColor;
-        color: $white;
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--bg-color);
         &.ghost {
-            color: $accentColor;
+            color: var(--accent-color);
         }
     }
     
     &.c-blue {
-        background-color: $blue;
-        border-color: $blue;
-        color: $white;
+        background-color: var(--blue);
+        border-color: var(--blue);
+        color: var(--bg-color);
         &.ghost {
-            color: $blue;
+            color: var(--blue);
         }
     }
 
     &.c-pink {
-        background-color: $pink;
-        border-color: $pink;
-        color: $white;
+        background-color: var(--pink);
+        border-color: var(--pink);
+        color: var(--bg-color);
         &.ghost {
-            color: $pink;
+            color: var(--pink);
         }
     }
 
     &.c-red {
-        background-color: $red;
-        border-color: $red;
-        color: $white;
+        background-color: var(--red);
+        border-color: var(--red);
+        color: var(--bg-color);
         &.ghost {
-            color: $red;
+            color: var(--red);
         }
     }
     &.c-green {
-        background-color: $green;
-        border-color: $green;
-        color: $white;
+        background-color: var(--green);
+        border-color: var(--green);
+        color: var(--bg-color);
         &.ghost {
-            color: $green;
+            color: var(--green);
         }
     }
 
     &.ghost {
         border: 1px solid currentColor;
         background-color: transparent;
-        color: $grey;
+        color: var(--contrast-color);
     }
     
     &:hover {
-        background-color: $grey;
-        border-color: $grey;
-        color: $white;
+        background-color: var(--contrast-color);
+        border-color: var(--contrast-color);
+        color: var(--bg-color);
         
         &.ghost {
-            color: $white;
+            color: var(--bg-color);
         }
 
         &.c-blue {
-            background-color: $white;
-            color: $blue;
-            border-color: $blue;
+            background-color: var(--bg-color);
+            color: var(--blue);
+            border-color: var(--blue);
             &.ghost {
-                background-color: $blue;
+                background-color: var(--blue);
             }
         }
         &.c-pink {
-            background-color: $white;
-            color: $pink;
-            border-color: $pink;
+            background-color: var(--bg-color);
+            color: var(--pink);
+            border-color: var(--pink);
             &.ghost {
-                background-color: $pink;
+                background-color: var(--pink);
             }
         }
         &.c-red {
-            background-color: $white;
-            color: $red;
-            border-color: $red;
+            background-color: var(--bg-color);
+            color: var(--red);
+            border-color: var(--red);
             &.ghost {
-                background-color: $red;
+                background-color: var(--red);
             }
         }
         &.c-accent {
-            background-color: $white;
-            color: $accentColor;
-            border-color: $accentColor;
+            background-color: var(--bg-color);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
             &.ghost {
-                background-color: $accentColor;
-                color: $white;
+                background-color: var(--accent-color);
+                color: var(--bg-color);
             }
         }
         &.c-green {
-            background-color: $white;
-            color: $green;
-            border-color: $green;
+            background-color: var(--bg-color);
+            color: var(--green);
+            border-color: var(--green);
             &.ghost {
-                background-color: $green;
+                background-color: var(--green);
             }
         }
         
