@@ -28,7 +28,7 @@ This will build the project, and output the files to the dist directory.
 
 ### Payload
 
-This project has authentication support intergrated for Payload v2. Modify the `.env` file to specify the desired endpoint for the Payload back-end (VITE_PAYLOAD_REST_ENDPOINT=http://localhost:3000/api). More details about the way Payload handles its authentication can be found in [https://payloadcms.com/docs/authentication/overview](their documentation)
+This project has authentication support intergrated for Payload v2. Modify the `.env` file to specify the desired endpoint for the Payload back-end (`VITE_PAYLOAD_REST_ENDPOINT=http://localhost:3000/api`). More details about the way Payload handles its authentication can be found in [their documentation](https://payloadcms.com/docs/authentication/overview).
 
 ### Generate routes
 
@@ -96,7 +96,7 @@ The default behaviour of $t remains intact, but there is an additional `$text` m
 
 ## [License](https://github.com/JeffreyArts/create-jeff-backend/blob/master/LICENSE)
 
-Copyright © 2023 <Jeffrey Arts>
+Copyright © 2024 <Jeffrey Arts>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
