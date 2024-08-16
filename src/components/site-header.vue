@@ -4,23 +4,18 @@
             <span class="site-header-logo" ref="logo"></span>
         </RouterLink>
         <nav class="site-header-navigation">
-            <span class="site-header-navigation-item">
-                <RouterLink to="/projects">
-                    Projects
+            <span class="site-header-navigation-item" v-for="navItem, key in nav" :key="key" @click="expand($event, navItem)" @mouseenter="expand($event, navItem)" @mouseleave="closeExpandedItem($event, navItem)">
+                
+                <RouterLink :to="navItem.link" v-if="navItem.subitems.length === 0 || (navItem.subitems.length > 0 && navItem.expanded)">
+                    {{ navItem.name }}
                 </RouterLink>
-            </span>
-            <span class="site-header-navigation-item">
-                <RouterLink to="/tools">
-                    Thoughts
-                </RouterLink>
-            </span>
-            <span class="site-header-navigation-item">
-                <RouterLink to="/about/me">
-                    About
-                </RouterLink>
-                <div class="site-header-navigation-dropdown __isHidden" id="dropdown-about">
-                    <RouterLink class="site-header-navigation-dropdown-item" to="/about/me">Me</RouterLink>
-                    <RouterLink class="site-header-navigation-dropdown-item" to="/about/others">Others</RouterLink>
+
+                <span v-if="navItem.subitems.length > 0 && !navItem.expanded">
+                    {{ navItem.name }}
+                </span>
+
+                <div class="site-header-navigation-dropdown" v-if="navItem.subitems" :id="`item${navItem.id}`">
+                    <RouterLink class="site-header-navigation-dropdown-item" :to="subItem.link" v-for="subItem, subKey in navItem.subitems" :key="subKey" @click="navItem.expanded = false">{{subItem.name}}</RouterLink>
                 </div>
             </span>
         </nav>
@@ -31,35 +26,177 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import { Icon } from "jao-icons"
+import Navigation from "@/services/payload/navigation"
+import _ from "lodash"
+import gsap from "gsap"
 
+type NavItem = {
+    id: string,
+    link: string,
+    name: string,
+    expanded?: boolean,
+    subitems: {
+        id: string,
+        link: string,
+        name: string,     
+    }[],
+
+}
 export default defineComponent({
     name: "languageSelector",
     components: {
     },
-    setup() {
-    },
     data: () => {
         return {
             selection: "en",
-            isOpen: false
+            nav: [] as NavItem[],
+            tweens: [] as gsap.core.Tween[],
+            expendedItem: undefined as undefined | NavItem,
         }
     },
     computed: {
     },
+    beforeCreate() {
+        Navigation.getNav("header").then(res => {
+            this.nav = res.data.docs[0].items
+        }) 
+    },
     mounted() {
+        console.log(this.nav)
         const logo = this.$refs["logo"] as HTMLElement
         const icon = Icon("medium/logo")
+        // this.loadMenu()
         if (logo && icon) {
             logo.appendChild(icon)
         }
     },
     methods: {
+        closeExpandedItem(e: Event, navItem: NavItem) {
+            if (!navItem) {
+                return
+            }
+            
+            const targetEl = this.$el.querySelector(`#item${navItem.id}`)
+            if (!targetEl) {
+                return
+            }
+            // Kill any existing animations
+            if (this.tweens.length > 0) {
+                this.tweens.forEach( t => {t.kill()})
+                this.tweens = []
+            }
+            
+            const children = targetEl.querySelectorAll(".site-header-navigation-dropdown-item")
+            const childTween = gsap.fromTo(children, {
+                x: 0,
+                opacity: 1
+            },{
+                x: 8,
+                opacity: 0,
+                pointerEvents: "none",
+                stagger: {
+                    each: .16,
+                    from: "end",
+                    ease: "power2.inOut",
+                },
+                onComplete: () => {
+                    navItem.expanded = false
+                    this.expendedItem = undefined
+                },
+            })
+            
+            this.tweens.push(childTween)
+        },
+        cancelExpension(navItem: NavItem) {
+            if (!navItem) {
+                return
+            }
+            const el = this.$el
+            if (!el || !navItem) {
+                return
+            }
+
+            const targetEl = el.querySelector(`#item${navItem.id}`)
+            const children = targetEl.querySelectorAll(".site-header-navigation-dropdown-item")
+            gsap.killTweensOf(children)
+            gsap.to(children, {
+                // x: 0,
+                opacity: 0,
+                pointerEvents: "none",
+                duration: .16,
+                stagger: {
+                    each: .08,
+                    from: "end",
+                    ease: "power2.inOut",
+                },
+                onComplete: () => {
+                    navItem.expanded = false
+                }
+            })
+        },
+        expand(e:Event, navItem: NavItem) {
+            // e.preventDefault()
+            
+            navItem.expanded = true
+            const el = this.$el
+            if (!el) {
+                return
+            }
+            if (this.expendedItem?.id == navItem.id) {
+                return
+            }
+            
+            
+            this.expendedItem = navItem
+
+            this.nav.forEach((item) => {
+                if (item.id != navItem.id) {
+                    this.cancelExpension(item)
+                }
+            })  
+            
+            // Kill any existing animations
+            if (this.tweens.length > 0) {
+                this.tweens.forEach( t => {
+                    t.kill()
+                })
+                this.tweens = []
+            }
+            
+            if (navItem.expanded) {
+                const targetEl = el.querySelector(`#item${navItem.id}`)
+                const children = targetEl.querySelectorAll(".site-header-navigation-dropdown-item")
+
+
+                const childTween = gsap.fromTo(children, {
+                    x: 0,
+                    y: -8,
+                    opacity: 0
+                },{
+                    x: 0,
+                    y: 8,
+                    opacity: 1,
+                    pointerEvents: "all",
+                    stagger: {
+                        each: .16,
+                        from: "start",
+                        ease: "power2.inOut",
+                    },
+                    duration: .48,
+                    onComplete: () => {
+                        this.expendedItem = navItem
+                    }
+                })
+
+                this.tweens.push(childTween)
+            }
+        }
     }
 })
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables.scss";
+@import "./../assets/scss/variables";
 .site-header-logo {
     height: 36px;
     padding: 7px;
@@ -95,15 +232,19 @@ export default defineComponent({
 
 .site-header-navigation-dropdown {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% - 4px);
     display: flex;
     flex-flow: column;
     width: 128px;
-    gap: 8px;
+    
 }
 
 .site-header-navigation-dropdown-item {
     display: inline-block;
+    padding: 4px 0;
+    font-size: .8em;
+    opacity: 0;
+    pointer-events: none;
 }
 
 @media all and (min-width: 640px) {
@@ -121,8 +262,8 @@ export default defineComponent({
         padding-left: 24px;
     }
 
-    .site-header-navigation-dropdown-item {
-        font-size: .8em;
+    .site-header-navigation-dropdown {
+        top: calc(100%);
     }
 }
 
