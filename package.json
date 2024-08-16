@@ -6,10 +6,9 @@
   "scripts": {
     "add-route": "bash ./scripts/add-route.sh",
     "dev": "vite",
-    "build": "vue-tsc && vite-ssg build",
+    "build": "node ./src/generateRoutes.js && vue-tsc && vite-ssg build",
     "deploy": "NODE_ENV=staging bash deploy.sh",
     "production": "NODE_ENV=production bash deploy.sh",
-    "generate-routes": "node ./src/generateRoutes.js",
     "preview": "vite preview"
   },
   "engines": {

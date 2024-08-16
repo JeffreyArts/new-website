@@ -1,8 +1,8 @@
 <template>
     <div class="home">
-    <h1>Home</h1>
+    <h1>ASF</h1>
         <section class="container">
-            <button>click here</button>
+            {{ page }}
         </section>
     </div>
 </template>
@@ -11,33 +11,61 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import payloadStore from "@/stores/payload"
+import Page, { PageType } from "@/services/payload/page"
 import gsap from "gsap"
+import { useHead }  from "@unhead/vue"
+import { useRoute } from "vue-router"
 
 export default defineComponent ({ 
-    name: "homePage",
+    name: "defaultTemplate",
     components: { 
     },
     props: [],
     setup() {
         const Payload = payloadStore()
+        const route = useRoute()
+        const title = route.name as string
+        const meta = [] as Array<{
+            name: string,
+            content: string
+        }>
 
+        if (typeof route.meta?.description === "string" && route.meta.description.length > 0) {
+            meta.push({
+                name: "description",
+                content: route.meta.description
+            })
+        }
+
+        if (typeof route.meta?.keywords === "string" && route.meta.keywords.length > 0) {
+            meta.push({
+                name: "keywords",
+                content: route.meta.keywords
+            })
+        }
+
+        useHead({
+            title,
+            meta
+        })
         return { Payload }
     },
     data() {
         return {
+            page: {} as PageType
         }
     },
-    head: { 
-        title: "Home",
-        meta: [
-            {
-                name: "description",
-                content: "Lorem ipsum dolor samet...",
-            },
-        ]
+    watch: {
+        "$route.path": {
+            handler() {
+                // Remove old content
+                this.loadPage()
+                // Add new content
+            }, 
+            immediate: true
+        }
     },
     mounted() {
-
         // Animation for Title block
         gsap.fromTo("h1", {
             fontWeight: 400,
@@ -50,6 +78,21 @@ export default defineComponent ({
         })
     },
     methods: {
+        async loadPage() {
+            try {
+                const res = await Page.getPageByPath(this.$route.path)
+                if (!res.data || res.data.docs.length !== 1) {
+                    this.$router.push("/404")
+                    return
+                }
+
+                this.page = res.data.docs[0]
+
+            } catch (error) {
+                console.error("Error loading page:", error)
+                this.$router.push("/404")
+            }
+        }
         
     }
 })

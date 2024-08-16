@@ -11,6 +11,7 @@ const result = []
 
 // Fetch the API URL from the environment variable
 const apiUrl = process.env.VITE_PAYLOAD_REST_ENDPOINT
+const clientUrl = process.env.VITE_CLIENT_URL
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -22,9 +23,24 @@ const generateRoutes = async (url) => {
             throw new Error("No documents found for", url)
         }
         response.data.docs.forEach(data => {
+            const meta = {}
+            if (typeof data.metaDescription == "string") {
+                meta.description = data.metaDescription
+            }
+            if (data.metaTags.length > 0) {
+                meta.keywords = data.metaTags.join(", ")
+            }
+            if (typeof data.redirect === "string" && data.redirect.length > 0) {
+                if (data.redirect[0] == "/") {
+                    data.redirect = clientUrl + data.redirect
+                }
+                meta.redirect = `${data.redirect}`
+            }
+
             result.push({
                 path: data.path,
                 name: data.title,
+                meta,
                 template: "default"
             })
         })
@@ -40,7 +56,6 @@ const generateRoutes = async (url) => {
 
 // Call the function with the API URL
 if (apiUrl) {
-    console.log()
     generateRoutes(`${apiUrl}/pages`)
 } else {
     console.error("API URL is not defined in the .env file.")

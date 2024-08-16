@@ -17,7 +17,8 @@
 import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import gsap from "gsap"
-import { iconsMap } from "jao-icons"
+import  * as jaoIcons  from "jao-icons"
+const { iconsMap } = jaoIcons
 
 /* 
 This icon component uses a two-dimensional grid, with cells of 8x8 pixels - with a gap of 1px around each cell
@@ -106,9 +107,10 @@ export default defineComponent ({
         },
         "custom":{
             handler: function () {
-                if (!this.$el) {
+                if (!this.$el || typeof window === "undefined") {
                     return
                 }
+                
                 if (this.custom && this.custom.length > 0) {
                     this.originalGrid = []
                     const activeColor = window.getComputedStyle(this.$el).color
@@ -195,7 +197,7 @@ export default defineComponent ({
                 if (!this.icon[point.y]) {
                     this.icon.push([])
                 }
-                this.icon[point.y].push(!!point.value)
+                this.icon[point.y].push(point.value === 1 ? 1 : 0)
             })
         },
         transit(opts = {

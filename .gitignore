@@ -31,3 +31,4 @@ package-lock.json
 gsap-bonus.tgz
 *.log
 .vite-ssg-temp
+generated-routes.json

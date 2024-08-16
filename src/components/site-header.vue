@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { Icon } from "jao-icons"
+import Icon from "jao-icons"
 import Navigation from "@/services/payload/navigation"
 import jaoIcon from "@/components/jao-icon.vue"
 import gsap from "gsap"

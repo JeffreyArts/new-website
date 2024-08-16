@@ -139,7 +139,6 @@ echo ""
 if [ "$skip_build" = false ]; then
 start_log "👷‍♂️ Building project"
 {
-  yarn generate-routes
   yarn build
 } 2>&1 | tee -a deploy.log
 

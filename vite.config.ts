@@ -5,6 +5,9 @@ import path from "path"
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
+    ssgOptions: {
+        script: "async",
+    },
     resolve: {
         "alias": [{
             "find": "@",
