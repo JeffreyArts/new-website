@@ -9,6 +9,7 @@
     "build": "vue-tsc && vite-ssg build",
     "deploy": "NODE_ENV=staging bash deploy.sh",
     "production": "NODE_ENV=production bash deploy.sh",
+    "generate-routes": "node ./src/generateRoutes.js",
     "preview": "vite preview"
   },
   "engines": {
@@ -17,6 +18,7 @@
   "dependencies": {
     "axios": "^1.7.4",
     "dayjs": "^1.11.12",
+    "dotenv": "^16.4.5",
     "events": "^3.3.0",
     "gsap": "^3.12.5",
     "jao-icons": "^1.2.2",

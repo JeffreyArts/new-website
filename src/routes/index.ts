@@ -1,6 +1,8 @@
 import Home from "@/routes/home.vue"
+import defaultTemplate from "@/routes/templates/default.vue"
 import ResetPassword from "@/routes/auth/password-reset.vue"
 import { createWebHistory, createRouter } from "vue-router"
+import generatedRoutes from "./generated-routes.json"
 
 const routes = [
     {
@@ -14,6 +16,26 @@ const routes = [
         component: ResetPassword,
     }
 ]
+
+if (generatedRoutes) {
+    generatedRoutes.forEach(route => {
+        let component
+        if (route.template === "default") {
+            component = defaultTemplate
+        }
+
+        if (!component) {
+            console.error(`Invalid template (${route.template}) for route ${route.path}`)
+            return
+        }
+        
+        routes.push({
+            path: route.path,
+            name: route.name,
+            component
+        })
+    })
+}
 
 
 const router = createRouter({

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/about/others",
+    "name": "About others",
+    "template": "default"
+  },
+  {
+    "path": "/tools",
+    "name": "Tools",
+    "template": "default"
+  },
+  {
+    "path": "/about",
+    "name": "About",
+    "template": "default"
+  },
+  {
+    "path": "/about/me",
+    "name": "About me",
+    "template": "default"
+  },
+  {
+    "path": "/projects",
+    "name": "Projects",
+    "template": "default"
+  },
+  {
+    "path": "/",
+    "name": "Homepage",
+    "template": "default"
+  }
+]

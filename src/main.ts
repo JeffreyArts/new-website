@@ -11,7 +11,6 @@ import messages from "@/locale"
 import $text from "@/services/vue-i18n-markdown"
 
 import "./assets/scss/index.scss"
-
   
 export const createApp = ViteSSG(
     App,
