@@ -1,23 +1,5 @@
 # Jeff frontend
 
-This is a boilerplate for a frontend application using Vue3, Typescript, Vue Router, Pinia, Vite-SSG, Lodash, PouchDB, Sass, normalize.css & SocketIO. It is has default support for using Payload as the back-end.
-
-## Features
-
-- [Axios](https://github.com/axios/axios)
-- [GSAP](https://github.com/greensock/GSAP)
-- [Lodash](https://github.com/lodash/lodash)
-- [normalize.css](https://github.com/necolas/normalize.css)
-- [Pinia](https://github.com/vuejs/pinia)
-- [PouchDB](https://github.com/pouchdb/pouchdb)
-- [Sass](https://github.com/sass/sass)
-- [SocketIO](https://github.com/socketio/socket.io-client)
-- [TypeScript](https://github.com/microsoft/TypeScript)
-- [Vite-SSG](https://github.com/antfu/vite-ssg)
-- [Vite](https://github.com/vitejs/vite)
-- [Vue 3](https://github.com/vuejs/vue)
-- [Vue-i18n](https://github.com/intlify/vue-i18n-next)
-- [Vue Router](https://github.com/vuejs/vue-router)
 
 ## Getting started
 
@@ -47,6 +29,16 @@ This will build the project, and output the files to the dist directory.
 ### Payload
 
 This project has authentication support intergrated for Payload v2. Modify the `.env` file to specify the desired endpoint for the Payload back-end (VITE_PAYLOAD_REST_ENDPOINT=http://localhost:3000/api). More details about the way Payload handles its authentication can be found in [https://payloadcms.com/docs/authentication/overview](their documentation)
+
+### Generate routes
+
+Because vue-router will complain that routes don't exist, as well as for the generation of static HTML pages for vite-ssg. There is an additional step required in the build process to generate routes, this is already included in the `build` command. But in case you'd like to run in manually, use the following command:
+
+```
+$ npm run generate-routes
+$ yarn generate-routes
+```
+
 
 ## Deployment
 By default this application has a build-in feature to deploy the static generated website to a remote server. For this to work, you'll have to configure a `.env.staging` or `.env.production` file. Which is basically a copy of the `.env` or `.env.local` file, with the addition of the following 4 lines:
