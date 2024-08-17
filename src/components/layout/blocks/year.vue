@@ -6,6 +6,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import _ from "lodash"
+import gsap from "gsap"
 import  * as jaoIcons  from "jao-icons"
 const { Icon } = jaoIcons
 
@@ -45,10 +47,13 @@ export default defineComponent ({
             return
         }
         this.updateSVG()
-        window.addEventListener("resize", this.updateSVG)
+        window.addEventListener("layoutChange", this.updateSVG)
+        window.addEventListener("layoutChange", this.onResize)
     },
     unmounted() {
-        window.removeEventListener("resize", this.updateSVG)
+        window.removeEventListener("layoutChange", this.onResize)
+        window.removeEventListener("layoutChange", this.updateSVG)
+        //
         //
     },
     methods: {
@@ -75,6 +80,34 @@ export default defineComponent ({
             targetEL.appendChild(svg)
 
             setTimeout(() => {
+                const colorV1 = window.getComputedStyle( this.$el.querySelector("rect[v='1']")).fill
+                const colorV0 = window.getComputedStyle( this.$el.querySelector("rect[v='0']")).fill
+                const rects = this.$el.querySelectorAll("rect")
+                let res = _.map(rects, rect => {
+                    const val = parseInt(rect.getAttribute("v"), 10)
+                    rect.setAttribute("v", "0")
+                    return {
+                        el: rect,
+                        v:  val,
+                    }
+                })
+
+                res = _.shuffle(res)
+                _.each(res, (obj, i) => {
+                    let color = colorV0
+                    if (obj.v === 1) {
+                        color = colorV1
+                    }
+
+                    gsap.to(obj.el, {
+                        duration:.54,
+                        delay: 0.0032*i,
+                        fill: color,
+                        onComplete: () => {
+                            obj.el.setAttribute("v", obj.v.toString())
+                        }
+                    })
+                })
                 this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
             })
         }
