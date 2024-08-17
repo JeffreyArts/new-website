@@ -1,6 +1,7 @@
 <template>
     <Layout v-if="page.layout" :options="{
         layoutGap: 40,
+        id: page.id,
         layoutSize: layoutSize,
         blocks: page.layout.blocks
     }"/>
@@ -126,7 +127,6 @@ export default defineComponent ({
             this.breakpoint = breakPoint
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
             this.layoutSize = this.page.layout[size]
-            console.log("updateLayoutSize: ",breakPoint, window.innerWidth)
         }
     }
 })

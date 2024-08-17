@@ -57,7 +57,6 @@ export default defineComponent ({
             }
             const svg = Icon(this.options.year, size)
             const targetEL = this.$refs["year"]
-            console.log("targetEL",targetEL)
               
             if (!targetEL) {
                 return
@@ -69,6 +68,10 @@ export default defineComponent ({
             }
 
             targetEL.appendChild(svg)
+
+            setTimeout(() => {
+                this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+            })
         }
     }
 })

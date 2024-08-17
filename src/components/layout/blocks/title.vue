@@ -8,7 +8,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
-import gsap from "gsap"
 
 export type titleBlock = {
     size: number
@@ -43,7 +42,7 @@ export default defineComponent ({
             return
         }
 
-        this.animateIn()
+        this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
     },
     unmounted() {
         //

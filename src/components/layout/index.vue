@@ -1,11 +1,19 @@
 <template>
     <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
-        <div v-for="block,key in options.blocks" :key="key"
-            class="block"
-            :block-size="block.size" 
-            :id="`block-${block.id}`">
-            <TitleBlock :options="block" v-if="block.blockType === 'title'"/>
-            <YearBlock :options="block" v-if="block.blockType === 'year'"/>
+        <div v-if="newBlocks.length > 0" style="opacity: 0;">
+            <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded($event, block)"
+                class="block"
+                :size="block.size" 
+                :data="block.data">
+            </Block>
+        </div>
+        <div v-if="oldBlocks.length > 0">
+            <Block v-for="block,key in oldBlocks" :key="key"
+                class="block"
+                :style="`width: ${block.width}px; height: ${block.height}px; left: ${block.x}px; top: ${block.y}px; opacity: 0;`" 
+                :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
+                :size="block.size" 
+                :data="block.data" />   
         </div>
     </section>
 </template>
@@ -15,10 +23,12 @@ import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import Packer from "@/model/packer"
 import gsap from "gsap"
-import TitleBlock from "./blocks/title.vue"
-import YearBlock from "./blocks/year.vue"
+import Block, { BlockType } from "./blocks/index.vue"
+// import TitleBlock from "./blocks/title.vue"
+// import YearBlock from "./blocks/year.vue"
 
 interface LayoutOptions {
+    id: string
     layoutGap: number
     layoutSize: number
     blocks: Array<LayoutBlock>
@@ -40,8 +50,7 @@ interface BlockDimension {
 export default defineComponent ({
     name: "LayoutComponent", 
     components: {
-        TitleBlock,
-        YearBlock
+        Block,
     },
     props: {
         options: {
@@ -53,41 +62,135 @@ export default defineComponent ({
         return {
             resizeDelay: undefined as undefined | NodeJS.Timeout,
             gap: 40,
-            blocks: [] as BlockDimension[]
+            layoutWidth: 0 as number,
+            widthRatio: 0 as number,
+            oldBlocks: [] as BlockType[],
+            newBlocks: [] as BlockType[],
         }
     },
     computed: {
     },
     watch:{
-        "$route.path": {
+        "options.id": {
             async handler() {
                 if (typeof window === "undefined") {
                     return
                 }
-                // Remove old content
                 
-                setTimeout(() => {
-                    this.generateLayout(this.$el)
-                }, 0)
-                // Add new content
+                if (this.$el) {
+                    gsap.to(this.$el.querySelectorAll(".block"), {
+                        opacity: 0,
+                        duration: .4,
+                        stagger: {
+                            each: .08,
+                            from: "end"
+                        },
+                        onComplete: () => {
+                            this.oldBlocks.length = 0
+                            this.prepareLayoutUpdate()  
+                        }
+                    })
+                } else {
+                    this.prepareLayoutUpdate()
+                }
             }, 
             immediate: true
         }
     },
     mounted() {
         if (typeof window !== "undefined") {
-            window.addEventListener("resize", this.generateLayoutResize)
+            window.addEventListener("resize", this.prepareLayoutUpdate)
         }
     },
     unmounted() {
-        window.removeEventListener("resize", this.generateLayoutResize)
+        window.removeEventListener("resize", this.prepareLayoutUpdate)
     },
     methods: {
-        generateLayoutResize() { 
+        blockLoaded(ratio:number, block: BlockType) {
+            if (this.options.blocks.length !== this.oldBlocks.length) {
+                block.ratio = ratio
+                this.oldBlocks.push(block)
+            }
+
+            if (this.newBlocks.length === this.oldBlocks.length) {
+                this.newBlocks.length = 0
+                this.updateBlockSizes()
+            }
+        },
+        prepareLayoutUpdate() { 
             clearTimeout(this.resizeDelay)
             this.resizeDelay = setTimeout(() => {
-                this.generateLayout(this.$el)
-            }, 100)
+                
+                this.layoutWidth = this.$el.clientWidth
+                this.widthRatio = this.layoutWidth / this.options.layoutSize
+                this.widthRatio = Math.round((this.widthRatio) / 8) * 8
+                
+                
+                
+                if (this.newBlocks.length <= 0) {
+                    this.newBlocks = _.map(this.options.blocks, block => {
+                        return {
+                            size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
+                            data: _.omit(block, ["size"])
+                        }
+                    })
+                }
+                
+                // layout.setBlocks(this.options.blocks)
+                // // return
+                // const result = _.map(layout.getOutput(), block => {
+                //     if (!block || typeof block.id === "undefined") {
+                //         return
+                //     }
+                //     const blockId = Number(block.id)
+                //     return {
+                //         el: nodes[blockId],
+                //         top: block.y,
+                //         left: block.x
+                //     }
+                // }) as Array<BlockDimension>
+                // console.log("layout", layout, this.$el)
+
+            }, 10)
+        },
+        updateBlockSizes() {
+            
+            const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+            _.each(this.oldBlocks, block => {
+                block.width = block.size * this.widthRatio - this.gap
+                block.height = block.width / block.ratio 
+            })
+            layout.setBlocks(this.oldBlocks)
+            _.each(layout.getOutput(), (posBlock) => {
+                const oldBlock = this.oldBlocks[posBlock.id]
+                if (!oldBlock) {
+                    throw new Error("Mismatch in index")
+                }
+                oldBlock.width = posBlock.width
+                oldBlock.height = posBlock.height
+                oldBlock.y = posBlock.y
+                oldBlock.x = posBlock.x
+            })
+            
+            setTimeout(() => {
+                const blocks = this.$el.querySelectorAll(".block.__isFixed")
+                gsap.fromTo(blocks, {
+                    opacity: 0
+                },{
+                    opacity: 1,
+                    duration: .4,
+                    stagger: {
+                        each: .08,
+                        from: "start"
+                    },
+                    onComplete: () => {
+                        console.log("Blocks fully loaded 🤑")
+                        // this.oldBlocks.length = 0
+                    // this.prepareLayoutUpdate()  
+                    }
+                })
+            }, 0)
+
         },
         generateLayout(layout: Element) {
             if (!layout) {
@@ -112,7 +215,7 @@ export default defineComponent ({
             }
 
             // Set gap
-            const gap = layout.getAttribute("layout-gap") ? parseInt(layout.getAttribute("layout-gap") || "40") : 40
+            
             
             // Get all 
             const maxSize = Number(layout.getAttribute("layout-size"))
@@ -133,9 +236,9 @@ export default defineComponent ({
         
             Promise.all(imageLoadedPromises).then(() => {
                 this.calculateBlocks(nodes, {
-                    maxSize,
-                    gap: gap,
-                    parentWidth:  parseInt(layoutDimensions.width) - gap
+                    maxSize: this.options.layoutSize,
+                    gap: this.gap,
+                    parentWidth:  parseInt(layoutDimensions.width) - this.gap
                 })
             })
         },
@@ -177,9 +280,6 @@ export default defineComponent ({
                 opts.maxSize = 6
             }
             
-            if (typeof opts.gap === "undefined") {
-                opts.gap = 40
-            }
             
             const layout = new Packer(opts.parentWidth, 0, { autoResize: "height" })
             const layoutRatio = opts.parentWidth/opts.maxSize
@@ -198,9 +298,9 @@ export default defineComponent ({
                 newWidth = Math.floor(newWidth)
                 // newWidth = Math.round((newWidth) / 8) * 8
                 // newWidth -= opts.gap
-                block.style.width = `${newWidth - opts.gap}px`
+                block.style.width = `${newWidth - this.gap}px`
                 const updatedBlock = window.getComputedStyle(block)
-                const newHeight = parseInt(updatedBlock.height) + opts.gap
+                const newHeight = parseInt(updatedBlock.height) + this.gap
                 const newBlock = { width: newWidth, height: newHeight, id: index }
                 
                 console.log("calculateBlocks", "newWidth", newWidth)
@@ -222,33 +322,23 @@ export default defineComponent ({
                     el: nodes[blockId],
                     top: block.y,
                     left: block.x
-                    // width: bix.
-                    // height: number
                 }
             }) as Array<BlockDimension>
-            this.updateBlockPositions(result, { gap: opts.gap })
+            this.updateBlockPositions(result)
         },
-        updateBlockPositions(blocks: Array<BlockDimension>, opts?: {
-            gap?: number
-        }) {
-            if (!opts) {
-                let opts = {}
-            }
-            let gap = 40
+        updateBlockPositions(blocks: Array<BlockDimension>) {
             
-            if (opts && typeof opts.gap !== "undefined") {
-                gap = opts.gap
-            }
             _.each(blocks, block => {
-                if (!block) {
+                if (!block || !block.left || !block.top) {
+                    throw new Error(`Invalid block:\r\n ${JSON.stringify(block, null ,2)}` )
                     return
                 }
                 
                 
                 block.el.style.position = "absolute"
                 block.el.style.display = "block"
-                block.el.style.left = `${block.left + gap}px`
-                block.el.style.top = `${block.top + gap}px`
+                block.el.style.left = `${block.left + this.gap}px`
+                block.el.style.top = `${block.top + this.gap}px`
                 block.el.style.paddingBottom = ""
             })
             
@@ -256,7 +346,7 @@ export default defineComponent ({
                 const style = window.getComputedStyle(block.el)
                 return parseFloat(style.top) + parseFloat(style.height)
             }))[0]
-            lastBlock.el.style.paddingBottom = `${gap}px`
+            lastBlock.el.style.paddingBottom = `${this.gap}px`
         },
     }
 })
