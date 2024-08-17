@@ -1,21 +1,21 @@
 <template>
     <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
-        <div v-if="newBlocks.length > 0" style="opacity: 0;">
+        <div v-if="oldBlocks.length > 0">
+            <Block v-for="block,key in oldBlocks" :key="key"
+                class="block"
+                :id="`block-${block.id}`"
+                :style="`width: ${block.width}px; height: ${block.height}px; left: ${block.x}px; top: ${block.y}px;`" 
+                :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
+                :size="block.size" 
+                :data="block.data" />
+        </div>
+        <div v-if="newBlocks.length > 0">
             <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded($event, block)"
                 class="block"
                 :id="`block-${block.id}`"
                 :size="block.size" 
                 :data="block.data">
             </Block>
-        </div>
-        <div v-if="oldBlocks.length > 0">
-            <Block v-for="block,key in oldBlocks" :key="key"
-                class="block"
-                :id="`block-${block.id}`"
-                :style="`width: ${block.width}px; height: ${block.height}px; left: ${block.x}px; top: ${block.y}px; opacity: 0;`" 
-                :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
-                :size="block.size" 
-                :data="block.data" />
         </div>
     </section>
 </template>
@@ -81,13 +81,20 @@ export default defineComponent ({
     },
     mounted() {
         if (typeof window !== "undefined") {
-            window.addEventListener("resize", this.prepareLayoutUpdate)
+            window.addEventListener("resize", this.updateResize)
         }
     },
     unmounted() {
-        window.removeEventListener("resize", this.prepareLayoutUpdate)
+        window.removeEventListener("resize", this.updateResize)
     },
     methods: {
+        updateResize() {
+            this.layoutWidth = this.$el.clientWidth
+            this.widthRatio = this.layoutWidth / this.options.layoutSize
+            this.widthRatio = Math.round((this.widthRatio) / 8) * 8
+            
+            this.updateBlockSizes(this.oldBlocks)
+        },
         blockLoaded(ratio:number, block: BlockType) {
             if (this.options.blocks.length !== this.oldBlocks.length) {
                 block.ratio = ratio
@@ -96,7 +103,25 @@ export default defineComponent ({
 
             if (this.newBlocks.length === this.oldBlocks.length) {
                 this.newBlocks.length = 0
-                this.updateBlockSizes()
+
+                
+                this.updateBlockSizes(this.oldBlocks)
+                setTimeout(() => {
+                    const blocks = this.$el.querySelectorAll(".block.__isFixed")
+                    gsap.fromTo(blocks, {
+                        opacity: 0
+                    },{
+                        opacity: 1,
+                        duration: .4,
+                        stagger: {
+                            each: .08,
+                            from: "start"
+                        },
+                        onComplete: () => {
+                            console.log("Blocks fully loaded 🤑")
+                        }
+                    })
+                }, 0)
             }
         },
         prepareLayoutUpdate() { 
@@ -107,10 +132,7 @@ export default defineComponent ({
                 this.widthRatio = this.layoutWidth / this.options.layoutSize
                 this.widthRatio = Math.round((this.widthRatio) / 8) * 8
                 
-                
-                
                 if (this.newBlocks.length <= 0) {
-                    console.log("Blocks", this.options.blocks)
                     this.newBlocks = _.map(this.options.blocks, block => {
                         return {
                             size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
@@ -126,19 +148,20 @@ export default defineComponent ({
                 }
             }, 10)
         },
-        updateBlockSizes() {
-            
+        
+        updateBlockSizes(blocks: Array<BlockType>) {
             const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-            _.each(this.oldBlocks, block => {
+
+            _.each(blocks, block => {
                 if (block.ratio === undefined) {
                     throw new Error("Block ratio should not be undefined")
                 }
-
+                block.size = block.size > this.options.layoutSize ? this.options.layoutSize : block.size
                 block.width = block.size * this.widthRatio - this.gap
                 block.height = block.width / block.ratio
             })
-            
-            layout.setBlocks(this.oldBlocks)
+
+            layout.setBlocks(blocks)
             _.each(layout.getOutput(), (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")
@@ -146,9 +169,9 @@ export default defineComponent ({
                 let oldBlock = undefined
 
                 if (typeof blockId === "number") {
-                    oldBlock = this.oldBlocks[blockId] as BlockType | undefined
+                    oldBlock = blocks[blockId] as BlockType | undefined
                 } else if (typeof blockId === "string") {
-                    oldBlock = _.find(this.oldBlocks, { id: blockId }) as BlockType | undefined
+                    oldBlock = _.find(blocks, { id: blockId }) as BlockType | undefined
                 }
 
                 if (!oldBlock) {
@@ -159,26 +182,6 @@ export default defineComponent ({
                 oldBlock.y = posBlock.y
                 oldBlock.x = posBlock.x
             })
-            
-            setTimeout(() => {
-                const blocks = this.$el.querySelectorAll(".block.__isFixed")
-                gsap.fromTo(blocks, {
-                    opacity: 0
-                },{
-                    opacity: 1,
-                    duration: .4,
-                    stagger: {
-                        each: .08,
-                        from: "start"
-                    },
-                    onComplete: () => {
-                        console.log("Blocks fully loaded 🤑")
-                        // this.oldBlocks.length = 0
-                    // this.prepareLayoutUpdate()  
-                    }
-                })
-            }, 0)
-
         }
     }
 })
@@ -192,6 +195,9 @@ export default defineComponent ({
     width: 100%;
     height: 100%;
     position: relative;
+    .block {
+        opacity: 0;
+    }
 }
 
 </style>
