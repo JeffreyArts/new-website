@@ -223,6 +223,8 @@ export default defineComponent({
     display: flex;
     width: 100vw;
     height: 36px;
+    position: relative;
+    z-index: 1990;
 }
 
 .site-header-navigation {
@@ -287,6 +289,9 @@ export default defineComponent({
     margin-left: -12px;
     opacity: 0;
     
+    [v="1"] {
+        fill: var(--contrast-color) !important;
+    }
     [v="0"] {
         fill: transparent !important;
     }

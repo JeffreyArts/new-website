@@ -1,5 +1,5 @@
 import axios from "axios"
-
+import { LayoutBlock } from "@/components/layout/index.vue"
 export type PageType =  {
     createdAt: string
     id: string
@@ -9,7 +9,7 @@ export type PageType =  {
         size_m: number,
         size_l: number,
         size_xl: number,
-        blocks: object[]
+        blocks: LayoutBlock[]
     }
     metaDescription: string
     metaTags: string[]

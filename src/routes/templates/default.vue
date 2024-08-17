@@ -1,8 +1,14 @@
 <template>
+    <Layout v-if="page.layout" :options="{
+        layoutGap: 40,
+        layoutSize: layoutSize,
+        blocks: page.layout.blocks
+    }"/>
     <div class="home">
-    <h1>ASF</h1>
+    <h1>{{ breakpoint }}</h1>
         <section class="container">
-            {{ page }}
+            {{ page.layout }}
+            
         </section>
     </div>
 </template>
@@ -15,10 +21,12 @@ import Page, { PageType } from "@/services/payload/page"
 import gsap from "gsap"
 import { useHead }  from "@unhead/vue"
 import { useRoute } from "vue-router"
+import Layout from "@/components/layout/index.vue"
 
 export default defineComponent ({ 
     name: "defaultTemplate",
-    components: { 
+    components: {
+        Layout 
     },
     props: [],
     setup() {
@@ -52,30 +60,32 @@ export default defineComponent ({
     },
     data() {
         return {
-            page: {} as PageType
+            breakpoint: "",
+            layoutSize: 8,
+            page: {} as PageType,
         }
     },
     watch: {
         "$route.path": {
-            handler() {
+            async handler() {
                 // Remove old content
-                this.loadPage()
+                await this.loadPage()
+
+                this.updateLayoutSize()
                 // Add new content
             }, 
             immediate: true
         }
     },
     mounted() {
-        // Animation for Title block
-        gsap.fromTo("h1", {
-            fontWeight: 400,
-            fontStretch: 80,
-        },{
-            fontWeight: 800,
-            fontStretch: 100,
-            ease:"bounce.out",
-            duration: .8 
-        })
+        if (typeof window === "undefined") {
+            return
+        }
+
+        window.addEventListener("resize", this.updateLayoutSize)
+    },
+    unmounted() {
+        window.removeEventListener("resize", this.updateLayoutSize)
     },
     methods: {
         async loadPage() {
@@ -86,14 +96,38 @@ export default defineComponent ({
                     return
                 }
 
-                this.page = res.data.docs[0]
+                this.page = res.data.docs[0] as PageType
 
             } catch (error) {
                 console.error("Error loading page:", error)
                 this.$router.push("/404")
             }
+        },
+        updateLayoutSize() {
+            if (!this.page.layout) {
+                return
+            }
+            // console.log(this.page)
+            // Match these with Payload::pages.fields.layout for best DX
+            const breakPoints = {
+                xs: 320,
+                s: 640,
+                m: 960,
+                l: 1280,
+                xl: 1600,
+            }
+            let breakPoint = "xs"
+            for (const point in breakPoints) {
+                breakPoint = point
+                if (breakPoints[point] > window.innerWidth) {
+                    break
+                }
+            }
+            this.breakpoint = breakPoint
+            const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
+            this.layoutSize = this.page.layout[size]
+            console.log("updateLayoutSize: ",breakPoint, window.innerWidth)
         }
-        
     }
 })
 
