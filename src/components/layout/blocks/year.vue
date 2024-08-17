@@ -9,9 +9,11 @@ import { defineComponent, PropType } from "vue"
 import  * as jaoIcons  from "jao-icons"
 const { Icon } = jaoIcons
 
-export type yearBlock = {
+export type YearBlock = {
     size: number
+    id: string
     year: string
+    blockType: "year"
 }
 
 export default defineComponent ({
@@ -19,7 +21,7 @@ export default defineComponent ({
     components: {},
     props: {
         options: {
-            type: Object as PropType<yearBlock>,
+            type: Object as PropType<YearBlock>,
             required: true
         },
     },
@@ -56,8 +58,11 @@ export default defineComponent ({
                 size = "medium"
             }
             const svg = Icon(this.options.year, size)
-            const targetEL = this.$refs["year"]
+            const targetEL = this.$refs["year"] as HTMLElement
               
+            if (!svg) {
+                throw new Error(`Can not create icon for number ${this.options.year}`)
+            }
             if (!targetEL) {
                 return
             }

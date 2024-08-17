@@ -9,16 +9,18 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 
-export type titleBlock = {
+export type TitleBlock = {
     size: number
+    id: string
     text: string
+    blockType: "title"
 }
 
 export default defineComponent ({
     name: "titleBlock", 
     props: {
         options: {
-            type: Object as PropType<titleBlock>,
+            type: Object as PropType<TitleBlock>,
             required: true
         },
     },

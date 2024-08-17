@@ -1,5 +1,5 @@
 <template>
-    <div class="block" :block-size="size" :id="`block-${data.id}`">
+    <div class="block" :block-size="size">
         <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"/>
         <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"/>
     </div>
@@ -7,21 +7,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
-export type BlockData = object
 import TitleBlock from "./title.vue"
 import YearBlock from "./year.vue"
-
-export type BlockType = {
-    size: number
-    data : TitleBlock | YearBlock
-}
+import { BlockType } from "@/components/layout/layout-types"
 
 export default defineComponent ({
     name: "blockComponent", 
     components: { TitleBlock, YearBlock },
     props: {
         data: {
-            type: Object as PropType<BlockData>,
+            type: Object as PropType<BlockType["data"]>,
             required: true
         },
         size: {

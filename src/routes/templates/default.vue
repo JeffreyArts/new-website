@@ -5,13 +5,6 @@
         layoutSize: layoutSize,
         blocks: page.layout.blocks
     }"/>
-    <div class="home">
-    <h1>{{ breakpoint }}</h1>
-        <section class="container">
-            {{ page.layout }}
-            
-        </section>
-    </div>
 </template>
 
 
@@ -19,7 +12,6 @@
 import { defineComponent } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
-import gsap from "gsap"
 import { useHead }  from "@unhead/vue"
 import { useRoute } from "vue-router"
 import Layout from "@/components/layout/index.vue"
@@ -71,7 +63,9 @@ export default defineComponent ({
             async handler() {
                 // Remove old content
                 await this.loadPage()
-
+                if (typeof window === "undefined") {
+                    return
+                }
                 this.updateLayoutSize()
                 // Add new content
             }, 
@@ -92,12 +86,8 @@ export default defineComponent ({
         async loadPage() {
             try {
                 const res = await Page.getPageByPath(this.$route.path)
-                if (!res.data || res.data.docs.length !== 1) {
-                    this.$router.push("/404")
-                    return
-                }
-
-                this.page = res.data.docs[0] as PageType
+                
+                this.page = res as PageType
 
             } catch (error) {
                 console.error("Error loading page:", error)
@@ -117,10 +107,12 @@ export default defineComponent ({
                 l: 1280,
                 xl: 1600,
             }
-            let breakPoint = "xs"
+            
+            let breakPoint: keyof typeof breakPoints = "xs"
             for (const point in breakPoints) {
-                breakPoint = point
-                if (breakPoints[point] > window.innerWidth) {
+                breakPoint = point as keyof typeof breakPoints
+                
+                if (typeof breakPoints[breakPoint] === "number" && breakPoints[breakPoint] > window.innerWidth) {
                     break
                 }
             }

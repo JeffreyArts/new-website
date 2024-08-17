@@ -1,5 +1,7 @@
 import axios from "axios"
-import { LayoutBlock } from "@/components/layout/index.vue"
+import _ from "lodash"
+
+import { BlockType } from "@/components/layout/layout-types"
 export type PageType =  {
     createdAt: string
     id: string
@@ -9,7 +11,7 @@ export type PageType =  {
         size_m: number,
         size_l: number,
         size_xl: number,
-        blocks: LayoutBlock[]
+        blocks: Array<BlockType>
     }
     metaDescription: string
     metaTags: string[]
@@ -21,7 +23,40 @@ export type PageType =  {
 
 const payloadPage = {
     collectionName: "pages",
-    getPageByPath: (path: string) => axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${payloadPage.collectionName}?where[path][equals]=${path}`)
+    getPageByPath: (path: string) => new Promise(async (resolve, reject) => {
+        try {
+            const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${payloadPage.collectionName}?where[path][equals]=${path}`)
+            if (req.data?.docs.length != 1) {
+                throw new Error("Page not found")
+            }
+            
+            if (req.data.docs[0].layout?.blocks.length > 0){
+                req.data.docs[0].layout.blocks = _.map(req.data.docs[0].layout.blocks, block => {
+                    return {
+                        size: block.size,
+                        id: block.id,
+                        data: _.omit(block, ["size", "id"]),
+                    } as BlockType
+                })
+            }
+            
+            resolve(req.data.docs[0])
+
+        } catch(err) {
+            reject(err)
+        }
+    }),
+    convertBlockToBlocktype(block: { [key: string] : unknown }) {
+        if (!block.size && !block.id) {
+            throw new Error(`Invalid block ${JSON.stringify(block, null, 2)}`)
+        }
+        return {
+            size: block.size,
+            id: block.id,
+            data: _.omit(block, ["size", "id"])
+
+        } as BlockType
+    }
 }
 
 export default payloadPage
