@@ -152,11 +152,12 @@ export default defineComponent ({
         updateBlockSizes(blocks: Array<BlockType>) {
             const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
 
-            _.each(blocks, block => {
+            _.each(blocks, (block, index) => {
                 if (block.ratio === undefined) {
                     throw new Error("Block ratio should not be undefined")
                 }
-                block.size = block.size > this.options.layoutSize ? this.options.layoutSize : block.size
+                
+                block.size = this.options.blocks[index].size > this.options.layoutSize ? this.options.layoutSize : this.options.blocks[index].size
                 block.width = block.size * this.widthRatio - this.gap
                 block.height = block.width / block.ratio
             })
@@ -182,6 +183,10 @@ export default defineComponent ({
                 oldBlock.y = posBlock.y
                 oldBlock.x = posBlock.x
             })
+            
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("layoutChange"))
+            }
         }
     }
 })
