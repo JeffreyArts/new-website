@@ -6,11 +6,6 @@ import Error301 from "@/routes/error-301.vue"
 import generatedRoutes from "./generated-routes.json"
 
 const routes = [
-    // {
-    //     path: "/",
-    //     name: "Home",
-    //     component: Home,
-    // },
     {
         path: "/:pathMatch(.*)*",
         name: "404 | Not found",
