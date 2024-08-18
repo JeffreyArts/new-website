@@ -1,11 +1,11 @@
 <template>
-    <component :is="compiledTemplate"></component>
+    <!-- <component :is="compiledTemplate"></component> -->
+     <div v-html="serialize(data)"></div>
 </template>
   
 <script lang="ts">
-import { defineComponent, computed, PropType } from "vue"
-//@ts-expect-error
-import { compile } from "esmBundler"
+import { defineComponent, PropType } from "vue"
+// import { compile } from "esmBundler"
 import Icon from "jao-icons"
   
 export interface SlateNode {
@@ -59,22 +59,23 @@ const serialize = (node: SlateNode) => {
     }
 
     if (node.type === "link" && node.url) {
-        if (node.url[0] != "/") {
-            const s = new XMLSerializer()
-            const svg = Icon("medium/external-link")
-            if (svg) {
-                text = `<a href="${node.url}">${text}${s.serializeToString(svg)}</a>`
-            } else {
-                text = `<a href="${node.url}">${text}🔗</a>`
-            }
+        text = `<a href="${node.url}">${text}</a>`
+        // if (node.url[0] != "/") {
+        //     const s = new XMLSerializer()
+        //     const svg = Icon("medium/external-link")
+        //     if (svg) {
+        //         text = `<a href="${node.url}">${text}${s.serializeToString(svg)}</a>`
+        //     } else {
+        //         text = `<a href="${node.url}">${text}🔗</a>`
+        //     }
                     
-        } else {
-            text = `<RouterLink to="${node.url}">${text}</RouterLink>`
-        }
+        // } else {
+        //     text = `<RouterLink to="${node.url}">${text}</RouterLink>`
+        // }
     }
     return text
 }
-
+        
 export default defineComponent({
     props: {
         data: {
@@ -82,14 +83,17 @@ export default defineComponent({
             required: true
         }
     },
-    setup(props) {
+    setup() {
         // Compile the HTML string into a render function
-        const compiledTemplate = computed(() => compile(serialize(props.data)))
+        // const compiledTemplate = computed(() => compile(serialize(props.data)))
   
-        return {
-            compiledTemplate
-        }
+        // return {
+        //     compiledTemplate
+        // }
     },
+    methods: {
+        serialize
+    }
 })
 </script>
   
