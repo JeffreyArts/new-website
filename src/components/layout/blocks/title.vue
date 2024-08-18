@@ -52,11 +52,10 @@ export default defineComponent ({
             this.setLines()
         })
         this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
-        window.addEventListener("layoutChange", this.onResize)
+        window.addEventListener("layoutChange", this.setLines)
     },
     unmounted() {
-        window.removeEventListener("layoutChange", this.onResize)
-        //
+        window.removeEventListener("layoutChange", this.setLines)
     },
     methods: {
         onResize(){

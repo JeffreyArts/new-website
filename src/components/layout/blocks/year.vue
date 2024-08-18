@@ -75,8 +75,14 @@ export default defineComponent ({
             targetEL.appendChild(svg)
 
             setTimeout(() => {
-                const colorV1 = window.getComputedStyle( this.$el.querySelector("rect[v='1']")).fill
-                const colorV0 = window.getComputedStyle( this.$el.querySelector("rect[v='0']")).fill
+                const v0 = this.$el.querySelector("rect[v='0']")
+                const v1 = this.$el.querySelector("rect[v='1']")
+                if (!v0 || !v1) {
+                    return
+                }
+
+                const colorV1 = window.getComputedStyle( v1 ).fill
+                const colorV0 = window.getComputedStyle( v0).fill
                 const rects = this.$el.querySelectorAll("rect")
                 let res = _.map(rects, rect => {
                     const val = parseInt(rect.getAttribute("v"), 10)

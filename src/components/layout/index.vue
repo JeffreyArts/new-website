@@ -103,9 +103,15 @@ export default defineComponent ({
 
             if (this.newBlocks.length === this.oldBlocks.length) {
                 this.newBlocks.length = 0
-
                 
                 this.updateBlockSizes(this.oldBlocks)
+
+                if (typeof window !== "undefined") {
+                    setTimeout(() => {
+
+                        window.dispatchEvent(new CustomEvent("layoutChange"))
+                    })
+                }
                 setTimeout(() => {
                     const blocks = this.$el.querySelectorAll(".block.__isFixed")
                     gsap.fromTo(blocks, {

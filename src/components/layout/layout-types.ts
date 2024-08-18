@@ -2,6 +2,7 @@
 import { YearBlock } from "./blocks/year.vue"
 import { TitleBlock } from "./blocks/title.vue"
 import { NoteBlock } from "./blocks/note.vue"
+import { ImageBlock } from "./blocks/image.vue"
 
 export interface LayoutOptions {
     id: string
@@ -10,7 +11,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock 
+export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock
 export type BlockType = {
     size: number
     id: string
