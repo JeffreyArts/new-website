@@ -73,30 +73,37 @@ export default defineComponent ({
             }
             
             let originHeight = null
-            if (domElement.style["height"]) {
-                originHeight = domElement.style["height"]
+            if (domElement.style.height) {
+                originHeight = domElement.style.height
             }
 
             const defaultStyles = {
-                lineHeight: domElement.style["line-height"],
-                display: domElement.style["inline-block"],
-                padding: domElement.style["padding"],
-                height: domElement.style["height"],
-                wordWrap: domElement.style["word-break"]
+                lineHeight: domElement.style.lineHeight,
+                display: domElement.style.display,
+                padding: domElement.style.padding,
+                height: domElement.style.height,
+                wordWrap: domElement.style.wordWrap
             }
+            //  as {
+            //     lineHeight?: string 
+            //     display?: string 
+            //     padding?: string 
+            //     height?: string 
+            //     wordWrap?: string 
+            // }
 
 
-            domElement.style["line-height"] = 1
-            domElement.style["display"] = "inline-block"
-            domElement.style["padding"] = 0
-            domElement.style["height"] = "auto"
-            domElement.style["word-break"] = "break-word"
+            domElement.style.lineHeight = "1"
+            domElement.style.display = "inline-block"
+            domElement.style.padding = "0"
+            domElement.style.height = "auto"
+            domElement.style.wordWrap = "break-word"
 
             let height = 1
             let done = false
-            domElement.style["font-size"] = "1px"
+            domElement.style.fontSize = "1px"
             while (!done) {
-                domElement.style["font-size"] = height + "px"
+                domElement.style.fontSize = height + "px"
                 
                 done = Math.floor(domElement.clientHeight/height) > this.rows
                 
@@ -111,18 +118,18 @@ export default defineComponent ({
                 }
             }
 
-            domElement.style["font-size"] = height - 2 + "px"
+            domElement.style.fontSize = height - 2 + "px"
             
-            this.fontSize = parseInt(domElement.style["font-size"], 10)
+            this.fontSize = parseInt(domElement.style.fontSize, 10)
 
-            domElement.style["line-height"] = defaultStyles.lineHeight
-            domElement.style["height"] = defaultStyles.height
-            domElement.style["display"] = defaultStyles.display
-            domElement.style["padding"] = defaultStyles.padding
-            domElement.style["word-break"] = defaultStyles.wordWrap
+            domElement.style.lineHeight = defaultStyles.lineHeight
+            domElement.style.height = defaultStyles.height
+            domElement.style.display = defaultStyles.display
+            domElement.style.padding = defaultStyles.padding
+            domElement.style.wordWrap = defaultStyles.wordWrap
 
             if (originHeight != null) {
-                domElement.style["height"] = originHeight
+                domElement.style.height = originHeight
             }
         }
     }

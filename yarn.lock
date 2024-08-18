@@ -1541,7 +1541,7 @@ isexe@^2.0.0:
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
 "jao-icons@file:../jao-icons":
-  version "1.2.2"
+  version "1.2.4"
   resolved "file:../jao-icons"
   dependencies:
     typescript-eslint "^8.1.0"

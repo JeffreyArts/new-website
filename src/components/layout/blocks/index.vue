@@ -2,6 +2,7 @@
     <div class="block" :block-size="size">
         <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"/>
         <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"/>
+        <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"/>
     </div>
 </template>
 
@@ -9,11 +10,12 @@
 import { defineComponent, PropType } from "vue"
 import TitleBlock from "./title.vue"
 import YearBlock from "./year.vue"
+import NoteBlock from "./note.vue"
 import { BlockType } from "@/components/layout/layout-types"
 
 export default defineComponent ({
     name: "blockComponent", 
-    components: { TitleBlock, YearBlock },
+    components: { TitleBlock, YearBlock, NoteBlock },
     props: {
         data: {
             type: Object as PropType<BlockType["data"]>,

@@ -8,8 +8,8 @@
     "dev": "vite",
     "build": "node ./src/generateRoutes.js && vue-tsc && vite-ssg build",
     "generate-routes": "node ./src/generateRoutes.js",
-    "deploy": "NODE_ENV=staging bash deploy.sh",
-    "production": "NODE_ENV=production bash deploy.sh",
+    "deploy": "NODE_ENV=staging bash scripts/deploy.sh",
+    "production": "NODE_ENV=production bash scripts/deploy.sh",
     "preview": "vite preview"
   },
   "engines": {
@@ -21,7 +21,7 @@
     "dotenv": "^16.4.5",
     "events": "^3.3.0",
     "gsap": "^3.12.5",
-    "jao-icons": "^1.2.2",
+    "jao-icons": "^1.2.4",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "marked": "^14.0.0",

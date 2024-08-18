@@ -61,11 +61,186 @@ export default class Packer {
         const result = [] as Position[]
         const inputBlocks = [...this.blocks] as Position[]
         let done = false
+
+        const getOptions = (targetBlock: Position) => {
+            // Check right 
+            const optionsRight = _.without(_.map(inputBlocks, inputBlock => {
+                
+                // If it can't fit right to targetBlock escape immediately
+                if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
+                    return
+                }
+
+                const possibleOptions = _.without(_.map(result, resBlock => {
+                    if (resBlock.x <= targetBlock.x) {
+                        return
+                    }
+
+                    // Check if it is exceeding the height
+                    if ((this.autoResize != "height")
+                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
+                    ) {
+                        return
+                    }
+
+                    
+                    // Validate horizontal position
+                    if (targetBlock.y < resBlock.y + resBlock.height) {
+                        return
+                    }
+
+                    // Validate if inputBlock is within canvas
+                    if (resBlock.x + resBlock.width + inputBlock.width > this.layoutWidth) {
+                        return
+                    }
+                    if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
+                        return
+                    }
+                    
+                    if (targetBlock.y  + inputBlock.height  < resBlock.y + resBlock.height) {
+                        return
+                    }
+                    
+                    // // Prevent overlap with other items
+                    // const a = _.without(_.map(result, b => {
+                    //     return targetBlock.y + inputBlock.height < b.y + b.height
+                    // }), false)
+                
+                    // if (a.length > 0) {
+                    //     return
+                    // }
+
+
+                    return {
+                        y: resBlock.y + resBlock.height,
+                        x: resBlock.x + resBlock.width, 
+                        width: inputBlock.width,
+                        height: inputBlock.height,
+                        position: "right",
+                        sourceId: targetBlock.id,
+                        id: inputBlock.id
+                    }
+                }), undefined) as Position[]
+
+
+                if (possibleOptions.length > 0) {
+                    return _.sortBy(possibleOptions, "y")[0]
+                }
+
+                if (targetBlock.x + targetBlock.width + inputBlock.width < this.layoutWidth ){
+                    // return inputBlock
+                    return {
+                        x: targetBlock.x + targetBlock.width,
+                        y: targetBlock.y,
+                        width: inputBlock.width,
+                        height: inputBlock.height,
+                        position: "right",
+                        sourceId: targetBlock.id,
+                        id: inputBlock.id
+                    }
+                }
+            }), undefined) as Position[]
+
+
+            // Check left 
+            const optionsLeft = _.without(_.map(inputBlocks,inputBlock => {
+                const possibleOptions = _.without(_.map(result, resBlock => {
+                    if (resBlock.x  > targetBlock.x) {
+                        return
+                    }
+                    
+                    // Validate if inputBlock is within canvas
+                    if (targetBlock.x - resBlock.width < 0) {
+                        return
+                    }
+                    
+                    if (targetBlock.y  < resBlock.y + resBlock.height) {
+                        return
+                    }
+                    
+                    // Check if it is exceeding the height
+                    if ((this.autoResize != "height")
+                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
+                    ) {
+                        return
+                    }
+                    
+                    return {
+                        y: resBlock.y,
+                        x: resBlock.x ,
+                        width: inputBlock.width,
+                        height: inputBlock.height,
+                        position: "left",
+                        sourceId: targetBlock.id,
+                        id: inputBlock.id
+                    }
+                }), undefined) as Position[]
+
+                if (possibleOptions.length > 0) {
+                    return _.sortBy(possibleOptions, "y")[0]
+                }
+            }), undefined) as Position[]
+
+            // Check bottom 
+            const optionsBottom = _.without(_.map(inputBlocks, inputBlock => {
+                const possibleOptions = _.without(_.map(result, resBlock => {
+                    // Check if block fits within layout width
+                    if (inputBlock.width + resBlock.x > this.layoutWidth) {
+                        return
+                    }
+                    if (targetBlock.y >= resBlock.y + resBlock.height) {
+                        return
+                    }
+
+                    // Check if it is exceeding the height
+                    if ((this.autoResize != "height")
+                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
+                    ) {
+                        return
+                    }
+                    
+                    return {
+                        x: resBlock.x,
+                        y: resBlock.y + resBlock.height,
+                        width: inputBlock.width,
+                        height: inputBlock.height,
+                        position: "bottom",
+                        sourceId: resBlock.id,
+                        id: inputBlock.id,
+                    }
+                }), undefined) as Position[]
+
+                if (possibleOptions.length > 0) {
+                    return _.sortBy(possibleOptions, "y")[0]
+                }
+            }), undefined) as Position[]
+
+            return {
+                id: targetBlock.id,
+                optionsRight,
+                optionsLeft,
+                optionsBottom
+            }
+        }
+
+        const rectanglesOverlap = (r1:Position | undefined, r2:Position | undefined) => {
+            if (r1 === undefined || r2 === undefined) {
+                return undefined
+            }
+            return !(r2.x >= r1.x + r1.width ||
+                     r2.x + r2.width <= r1.x ||
+                     r2.y >= r1.y + r1.height ||
+                     r2.y + r2.height <= r1.y)
+        }
         
         while (!done) {
             if (result.length === 0) {
-                // const firstBlock = _.reverse(_.sortBy(inputBlocks, "width"))[0] // Get and remove the first block
                 const firstBlock = inputBlocks[0] // Get and remove the first block
+                if (!firstBlock.width) {
+                    // Skip when block doesn't have a width
+                    done = true
+                    continue
+                }
                 if (firstBlock) {
                     result.push({
                         width: firstBlock.width,
@@ -79,182 +254,11 @@ export default class Packer {
                 }
                 continue // Restart loop to process the next block
             }
-
-            const getOptions = (targetBlock: Position) => {
-                // Check right 
-                const optionsRight = _.without(_.map(inputBlocks, inputBlock => {
-                    
-                    // If it can't fit right to targetBlock escape immediately
-                    if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                        return
-                    }
-
-                    const possibleOptions = _.without(_.map(result, resBlock => {
-                        if (resBlock.x <= targetBlock.x) {
-                            return
-                        }
-
-                        // Check if it is exceeding the height
-                        if ((this.autoResize != "height")
-                            && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                        ) {
-                            return
-                        }
-
-                        
-                        // Validate horizontal position
-                        if (targetBlock.y < resBlock.y + resBlock.height) {
-                            return
-                        }
-
-                        // Validate if inputBlock is within canvas
-                        if (resBlock.x + resBlock.width + inputBlock.width > this.layoutWidth) {
-                            return
-                        }
-                        if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                            return
-                        }
-                        
-                        if (targetBlock.y  + inputBlock.height  < resBlock.y + resBlock.height) {
-                            return
-                        }
-                        
-                        // // Prevent overlap with other items
-                        // const a = _.without(_.map(result, b => {
-                        //     return targetBlock.y + inputBlock.height < b.y + b.height
-                        // }), false)
-                    
-                        // if (a.length > 0) {
-                        //     return
-                        // }
-
-
-                        return {
-                            y: resBlock.y + resBlock.height,
-                            x: resBlock.x + resBlock.width, 
-                            width: inputBlock.width,
-                            height: inputBlock.height,
-                            position: "right",
-                            sourceId: targetBlock.id,
-                            id: inputBlock.id
-                        }
-                    }), undefined) as Position[]
-    
-
-                    if (possibleOptions.length > 0) {
-                        return _.sortBy(possibleOptions, "y")[0]
-                    }
-
-                    if (targetBlock.x + targetBlock.width + inputBlock.width < this.layoutWidth ){
-                        // return inputBlock
-                        return {
-                            x: targetBlock.x + targetBlock.width,
-                            y: targetBlock.y,
-                            width: inputBlock.width,
-                            height: inputBlock.height,
-                            position: "right",
-                            sourceId: targetBlock.id,
-                            id: inputBlock.id
-                        }
-                    }
-                }), undefined) as Position[]
-
-
-                // Check left 
-                const optionsLeft = _.without(_.map(inputBlocks,inputBlock => {
-                    const possibleOptions = _.without(_.map(result, resBlock => {
-                        if (resBlock.x  > targetBlock.x) {
-                            return
-                        }
-                        
-                        // Validate if inputBlock is within canvas
-                        if (targetBlock.x - resBlock.width < 0) {
-                            return
-                        }
-                        
-                        if (targetBlock.y  < resBlock.y + resBlock.height) {
-                            return
-                        }
-                        
-                        // Check if it is exceeding the height
-                        if ((this.autoResize != "height")
-                            && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                        ) {
-                            return
-                        }
-                        
-                        return {
-                            y: resBlock.y,
-                            x: resBlock.x ,
-                            width: inputBlock.width,
-                            height: inputBlock.height,
-                            position: "left",
-                            sourceId: targetBlock.id,
-                            id: inputBlock.id
-                        }
-                    }), undefined) as Position[]
-
-                    if (possibleOptions.length > 0) {
-                        return _.sortBy(possibleOptions, "y")[0]
-                    }
-                }), undefined) as Position[]
-
-                // Check bottom 
-                const optionsBottom = _.without(_.map(inputBlocks, inputBlock => {
-                    const possibleOptions = _.without(_.map(result, resBlock => {
-                        // Check if block fits within layout width
-                        if (inputBlock.width + resBlock.x > this.layoutWidth) {
-                            return
-                        }
-                        if (targetBlock.y >= resBlock.y + resBlock.height) {
-                            return
-                        }
-
-                        // Check if it is exceeding the height
-                        if ((this.autoResize != "height")
-                            && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                        ) {
-                            return
-                        }
-                        
-                        return {
-                            x: resBlock.x,
-                            y: resBlock.y + resBlock.height,
-                            width: inputBlock.width,
-                            height: inputBlock.height,
-                            position: "bottom",
-                            sourceId: resBlock.id,
-                            id: inputBlock.id,
-                        }
-                    }), undefined) as Position[]
-
-                    if (possibleOptions.length > 0) {
-                        return _.sortBy(possibleOptions, "y")[0]
-                    }
-                }), undefined) as Position[]
-
-                return {
-                    id: targetBlock.id,
-                    optionsRight,
-                    optionsLeft,
-                    optionsBottom
-                }
-            }
-
+            
             const positionOrder = {
                 right: 1,
                 bottom: 2,
                 left: 3
-            }
-
-            function rectanglesOverlap(r1:Position | undefined, r2:Position | undefined) {
-                if (!r1 || !r2) {
-                    return undefined
-                }
-                return !(r2.x >= r1.x + r1.width ||
-                         r2.x + r2.width <= r1.x ||
-                         r2.y >= r1.y + r1.height ||
-                         r2.y + r2.height <= r1.y)
             }
               
             const options = _.map(result, tb => {
@@ -290,6 +294,12 @@ export default class Packer {
                 const lastBlock = inputBlocks[0]
                 
                 if (!lastBlock) {
+                    done = true
+                    continue
+                }
+
+                // Safety check to prevent infinite loops
+                if (lastBlock.width <= 0) {
                     done = true
                     continue
                 }

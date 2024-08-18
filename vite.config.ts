@@ -9,9 +9,9 @@ export default defineConfig({
         script: "async",
     },
     resolve: {
-        "alias": [{
-            "find": "@",
-            "replacement": path.resolve(__dirname, "src") 
-        }]
+        "alias": [
+            { find: "esmBundler", replacement: "vue/dist/vue.esm-bundler.js" },
+            { find: "@", replacement: path.resolve(__dirname, "src") }
+        ]
     },
 })

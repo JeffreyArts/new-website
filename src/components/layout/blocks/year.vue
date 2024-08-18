@@ -8,8 +8,7 @@
 import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import gsap from "gsap"
-import  * as jaoIcons  from "jao-icons"
-const { Icon } = jaoIcons
+import  Icon  from "jao-icons"
 
 export type YearBlock = {
     size: number
@@ -48,13 +47,9 @@ export default defineComponent ({
         }
         this.updateSVG()
         window.addEventListener("layoutChange", this.updateSVG)
-        window.addEventListener("layoutChange", this.onResize)
     },
     unmounted() {
-        window.removeEventListener("layoutChange", this.onResize)
         window.removeEventListener("layoutChange", this.updateSVG)
-        //
-        //
     },
     methods: {
         updateSVG(){

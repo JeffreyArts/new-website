@@ -29,3 +29,9 @@ declare module "vue" {
         $text: TextFunction; // Use the defined type for `$text`
     }
 }
+
+declare module "@vue/runtime-core" {
+    interface ComponentCustomProperties {
+        $i18n: I18n["global"];
+    }
+}

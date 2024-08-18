@@ -14,7 +14,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "esmBundler": ["node_modules/vue/dist/vue.esm-bundler.js"],
     },
   },
   "include": [ "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
