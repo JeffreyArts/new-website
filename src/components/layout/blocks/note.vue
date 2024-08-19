@@ -36,8 +36,7 @@ export default defineComponent ({
             // console.log("text loaded", this.$el.clientWidth, this.$el.clientHeight, this.$el.innerHTML)
             setTimeout(()=> {
                 // Needs rework 
-                // this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
-                this.$emit("blockLoaded", 1)
+                this.$emit("blockLoaded")
             })
         }
     }

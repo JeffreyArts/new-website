@@ -109,7 +109,7 @@ export default defineComponent ({
                         }
                     })
                 })
-                this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+                this.$emit("blockLoaded")
             })
         }
     }

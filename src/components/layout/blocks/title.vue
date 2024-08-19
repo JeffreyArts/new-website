@@ -50,7 +50,7 @@ export default defineComponent ({
         this.rows = this.options.rows
         
         setTimeout(() => {
-            this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+            this.$emit("blockLoaded")
         })
     }
 })

@@ -2,15 +2,20 @@
     <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
         <div v-if="oldBlocks.length > 0">
             <Block v-for="block,key in oldBlocks" :key="key"
-                :id="`block-${block.id}`"
-                :style="`width: ${block.width}px; height: ${block.height}px; left: ${block.x}px; top: ${block.y}px;`" 
+                :id="`oldblock-${block.id}`"
+                :style="{
+                    width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
+                    height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
+                    top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
+                    left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
+                }"
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
                 :size="block.size" 
                 :data="block.data" />
-        </div>
-        <div v-if="newBlocks.length > 0">
-            <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded($event, block)"
-                :id="`block-${block.id}`"
+            </div>
+            <div v-if="newBlocks.length > 0">
+                <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded(block)"
+                :id="`newblock-${block.id}`"
                 :size="block.size" 
                 :data="block.data">
             </Block>
@@ -93,16 +98,15 @@ export default defineComponent ({
             
             this.updateBlockSizes(this.oldBlocks)
         },
-        blockLoaded(ratio:number, block: BlockType) {
+        async blockLoaded(block: BlockType) {
             if (this.options.blocks.length !== this.oldBlocks.length) {
-                block.ratio = ratio
                 this.oldBlocks.push(block)
             }
 
             if (this.newBlocks.length === this.oldBlocks.length) {
                 this.newBlocks.length = 0
                 
-                this.updateBlockSizes(this.oldBlocks)
+                await this.updateBlockSizes(this.oldBlocks)
 
                 if (typeof window !== "undefined") {
                     setTimeout(() => {
@@ -141,7 +145,6 @@ export default defineComponent ({
                         return {
                             size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
                             id: block.id,
-                            ratio: block.ratio,
                             y: block.y,
                             x: block.x,
                             width: block.width,
@@ -153,23 +156,32 @@ export default defineComponent ({
             }, 10)
         },
         
-        updateBlockSizes(blocks: Array<BlockType>) {
+        async updateBlockSizes(blocks: Array<BlockType>) {
+
             const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-
-            _.each(blocks, (block, index) => {
-                if (block.ratio === undefined) {
-                    throw new Error("Block ratio should not be undefined")
-                }
-                const originalBlock = _.find(this.options.blocks, { id: block.id })
-                
-                if (!originalBlock) {
-                    throw new Error("Missing original reference")
-                }
-
-                block.size = originalBlock.size > this.options.layoutSize ? this.options.layoutSize : originalBlock.size
-                block.width = block.size * this.widthRatio - this.gap
-                block.height = block.width / block.ratio
+            const blockWidthResized = [] as Array<Promise<void>>
+            
+            _.each(blocks, (block) => {
+                blockWidthResized.push(new Promise((resolve): void => {
+                    const originalBlock = _.find(this.options.blocks, { id: block.id })
+                    if (!originalBlock) {
+                        throw new Error("Missing original reference")
+                    }
+                    
+                    block.size = originalBlock.size > this.options.layoutSize ? this.options.layoutSize : originalBlock.size
+                    block.width = block.size * this.widthRatio - this.gap
+                    block.height = "auto"
+                    
+                    setTimeout(() => {
+                        const oldBlock = this.$el.querySelector(`#oldblock-${block.id}`)
+                        block.height = parseInt(window.getComputedStyle(oldBlock).height)
+                        resolve()
+                            
+                    }, 0)
+                })) 
             })
+            
+            await Promise.all(blockWidthResized)
             
             layout.setBlocks(blocks)
             _.each(layout.getOutput(), (posBlock) => {

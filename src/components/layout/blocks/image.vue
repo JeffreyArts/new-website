@@ -70,7 +70,7 @@ export default defineComponent ({
         
         const img = this.$refs["image"] as HTMLImageElement
         if (!img) {
-            this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+            this.$emit("blockLoaded")
         }
         
         new Promise<void>((resolve) => {
@@ -84,9 +84,9 @@ export default defineComponent ({
                 })
             }
         }).then(() => {
-            this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+            this.$emit("blockLoaded")
         }).catch(() => {
-            this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+            this.$emit("blockLoaded")
         })
     },
     methods: {

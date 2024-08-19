@@ -46,8 +46,8 @@ export default defineComponent ({
     //
     },
     methods: {
-        blockLoaded(ratio:number) {
-            this.$emit("blockLoaded", ratio)
+        blockLoaded() {
+            this.$emit("blockLoaded")
         }
     }
 })
