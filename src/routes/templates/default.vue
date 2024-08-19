@@ -13,8 +13,30 @@ import { defineComponent } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
-import { useRoute } from "vue-router"
+import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import Layout from "@/components/layout/index.vue"
+
+const setMeta = (route: RouteLocationNormalizedLoaded) => {
+    const meta = [] as Array<{
+        name: string,
+        content: string
+    }>
+
+    if (typeof route.meta?.description === "string" && route.meta.description.length > 0) {
+        meta.push({
+            name: "description",
+            content: route.meta.description
+        })
+    }
+
+    if (typeof route.meta?.keywords === "string" && route.meta.keywords.length > 0) {
+        meta.push({
+            name: "keywords",
+            content: route.meta.keywords
+        })
+    }
+    return meta
+} 
 
 export default defineComponent ({ 
     name: "defaultTemplate",
@@ -26,28 +48,11 @@ export default defineComponent ({
         const Payload = payloadStore()
         const route = useRoute()
         const title = route.name as string
-        const meta = [] as Array<{
-            name: string,
-            content: string
-        }>
-
-        if (typeof route.meta?.description === "string" && route.meta.description.length > 0) {
-            meta.push({
-                name: "description",
-                content: route.meta.description
-            })
-        }
-
-        if (typeof route.meta?.keywords === "string" && route.meta.keywords.length > 0) {
-            meta.push({
-                name: "keywords",
-                content: route.meta.keywords
-            })
-        }
+        
 
         useHead({
             title,
-            meta
+            meta: setMeta(route)
         })
         return { Payload }
     },
@@ -66,6 +71,11 @@ export default defineComponent ({
                 if (typeof window === "undefined") {
                     return
                 }
+
+                useHead({
+                    title: this.$route.name,
+                    meta: setMeta(this.$route)
+                })
                 // Add new content
                 this.updateLayoutSize()
             }, 
