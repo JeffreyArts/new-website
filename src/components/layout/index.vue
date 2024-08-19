@@ -94,7 +94,6 @@ export default defineComponent ({
         updateResize() {
             this.layoutWidth = this.$el.clientWidth
             this.widthRatio = this.layoutWidth / this.options.layoutSize
-            this.widthRatio = Math.round((this.widthRatio) / 8) * 8
             
             this.updateBlockSizes(this.oldBlocks)
         },
@@ -138,7 +137,6 @@ export default defineComponent ({
                 
                 this.layoutWidth = this.$el.clientWidth
                 this.widthRatio = this.layoutWidth / this.options.layoutSize
-                this.widthRatio = Math.round((this.widthRatio) / 8) * 8
                 
                 if (this.newBlocks.length <= 0) {
                     this.newBlocks = _.map(this.options.blocks, block => {
@@ -169,7 +167,7 @@ export default defineComponent ({
                     }
                     
                     block.size = originalBlock.size > this.options.layoutSize ? this.options.layoutSize : originalBlock.size
-                    block.width = block.size * this.widthRatio - this.gap
+                    block.width = block.size * this.widthRatio
                     block.height = "auto"
                     
                     setTimeout(() => {
