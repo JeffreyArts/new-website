@@ -5,21 +5,30 @@
         <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"/>
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
+        <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import BannerBlock from "./banner.vue"
+import GlitchBlock from "./glitch.vue"
+import ImageBlock from "./image.vue"
+import NoteBlock from "./note.vue"
 import TitleBlock from "./title.vue"
 import YearBlock from "./year.vue"
-import NoteBlock from "./note.vue"
-import ImageBlock from "./image.vue"
-import BannerBlock from "./banner.vue"
 import { BlockType } from "@/components/layout/layout-types"
 
 export default defineComponent ({
     name: "blockComponent", 
-    components: { TitleBlock, YearBlock, NoteBlock, ImageBlock, BannerBlock },
+    components: { 
+        BannerBlock,
+        GlitchBlock,
+        ImageBlock,
+        NoteBlock,
+        TitleBlock,
+        YearBlock,
+    },
     props: {
         data: {
             type: Object as PropType<BlockType["data"]>,
