@@ -71,18 +71,11 @@ $ yarn production # Using .env.production
 
 For more information about this deployment script, I'd like to refer you to [this page](https://github.com/JeffreyArts/server/wiki/Vite-website-setup). This page will go into more depth, and also provides you with a basis for how you could set-up the server environment on a remote (VPS) server.
 
-## Adding routes
+## Development
 
-To ease the process of making new routes, this project has a script for adding routes. 
-```
-$ npm run add-route
+### Blank page after adding new block
 
-or 
-
-$ yarn add-route
-```
-
-This script will prompt you for the name of the new route and will make a copy `routes/_template.vue` into the routes directory and adding the route to the `routes/index.ts`  file.
+If you end up with a blank page after adding a new block, it is most likely because you incorrectly emit the `blockLoaded` event. The layout component requires all blocks to be (fully?) loaded before displaying them correctly in the grid. This is mandatory because block heights are often dynamically set based on their content.
 
 ## Multilingual
 Via [Vue-i18n](https://github.com/intlify/vue-i18n-next) there is support for developing a multilingual webapplication. There is a custom layer on top of this that adds 2 additional features on top of this plugin.
