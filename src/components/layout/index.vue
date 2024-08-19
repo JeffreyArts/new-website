@@ -180,8 +180,11 @@ export default defineComponent ({
             })
             
             await Promise.all(blockWidthResized)
-            
-            layout.setBlocks(blocks)
+            const convertedBlocks = blocks.map(block => ({
+                ...block,
+                height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
+            }))
+            layout.setBlocks(convertedBlocks)
             _.each(layout.getOutput(), (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")

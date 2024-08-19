@@ -11,10 +11,10 @@ import gsap from "gsap"
 import  Icon  from "jao-icons"
 
 export type YearBlock = {
+    blockType: "year"
     size: number
     id: string
     year: string
-    blockType: "year"
 }
 
 export default defineComponent ({

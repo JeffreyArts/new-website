@@ -15,6 +15,7 @@ import { defineComponent, PropType } from "vue"
 import gsap from "gsap"
 
 export type ImageBlock = {
+    blockType: "image"
     size: number
     id: string
     link: string
@@ -28,7 +29,6 @@ export type ImageBlock = {
             }
         }
     }
-    blockType: "image"
 }
 
 export default defineComponent ({

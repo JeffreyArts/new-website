@@ -10,12 +10,12 @@
 import { defineComponent, PropType } from "vue"
 import dynamicFontSize from "./../../dynamic-font-size.vue"
 export type TitleBlock = {
+    blockType: "title"
     size: number
     id: string
     rows: number
     maxSize: number
     text: string
-    blockType: "title"
 }
 
 export default defineComponent ({

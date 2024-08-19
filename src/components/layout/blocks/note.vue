@@ -9,10 +9,10 @@ import { defineComponent, PropType } from "vue"
 import SlateText, { SlateNode } from "@/components/slate-text.vue"
 
 export type NoteBlock = {
+    blockType: "note"
     size: number
     id: string
     text: SlateNode
-    blockType: "note"
 }
 
 export default defineComponent ({

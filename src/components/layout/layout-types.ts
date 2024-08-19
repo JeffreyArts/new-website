@@ -13,6 +13,7 @@ export interface LayoutOptions {
 }
 
 export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | BannerBlock
+
 export type BlockType = {
     size: number
     id: string
@@ -20,6 +21,6 @@ export type BlockType = {
     x?:number
     y?:number
     width?:number
-    height?:number
+    height?:number | string
     data: BlockTypeData
 }

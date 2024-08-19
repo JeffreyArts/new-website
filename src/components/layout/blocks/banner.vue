@@ -21,6 +21,7 @@ import dynamicFontSize from "./../../dynamic-font-size.vue"
 import gsap from "gsap"
 
 export type BannerBlock = {
+    blockType: "banner"
     size: number
     id: string
     link: string
@@ -40,7 +41,6 @@ export type BannerBlock = {
             }
         }
     }
-    blockType: "image"
 }
 
 export default defineComponent ({
