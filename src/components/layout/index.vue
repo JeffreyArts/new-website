@@ -162,28 +162,34 @@ export default defineComponent ({
                 if (block.ratio === undefined) {
                     throw new Error("Block ratio should not be undefined")
                 }
+                const originalBlock = _.find(this.options.blocks, { id: block.id })
                 
-                block.size = this.options.blocks[index].size > this.options.layoutSize ? this.options.layoutSize : this.options.blocks[index].size
+                if (!originalBlock) {
+                    throw new Error("Missing original reference")
+                }
+
+                block.size = originalBlock.size > this.options.layoutSize ? this.options.layoutSize : originalBlock.size
                 block.width = block.size * this.widthRatio - this.gap
                 block.height = block.width / block.ratio
             })
-
+            
             layout.setBlocks(blocks)
             _.each(layout.getOutput(), (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")
 
+                
                 let oldBlock = undefined
-
                 if (typeof blockId === "number") {
                     oldBlock = blocks[blockId] as BlockType | undefined
                 } else if (typeof blockId === "string") {
                     oldBlock = _.find(blocks, { id: blockId }) as BlockType | undefined
                 }
-
+                
                 if (!oldBlock) {
                     throw new Error("Mismatch in index")
                 }
+                
                 oldBlock.width = posBlock.width
                 oldBlock.height = posBlock.height
                 oldBlock.y = posBlock.y

@@ -66,8 +66,8 @@ export default defineComponent ({
                 if (typeof window === "undefined") {
                     return
                 }
-                this.updateLayoutSize()
                 // Add new content
+                this.updateLayoutSize()
             }, 
             immediate: true
         }

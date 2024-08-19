@@ -105,7 +105,6 @@ export default defineComponent ({
                 gsap.killTweensOf(this.hoverEvent)
             }
 
-
             this.hoverEvent = gsap.to(img, {
                 scale: 1.16,
                 boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.4)`,
@@ -145,10 +144,9 @@ export default defineComponent ({
 @import "./../../../assets/scss/variables.scss";
 .image-block {
     margin: 0;
-    // aspect-ratio: 1/1;
     
     img {
-        max-width: 100%;
+        width: 100%;
         object-fit: cover;
     }
 }
