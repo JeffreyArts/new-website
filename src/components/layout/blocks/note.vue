@@ -1,6 +1,6 @@
 <template>
     <div class="note-block">
-        <SlateText :data="options.text" />
+        <SlateText class="note-block-text" @loaded="textLoaded" :data="options.text" />
     </div>
 </template>
 
@@ -30,9 +30,17 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
-
-        this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
     },
+    methods: {
+        textLoaded() {
+            // console.log("text loaded", this.$el.clientWidth, this.$el.clientHeight, this.$el.innerHTML)
+            setTimeout(()=> {
+                // Needs rework 
+                // this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
+                this.$emit("blockLoaded", 1)
+            })
+        }
+    }
 })
 
 </script>
@@ -43,6 +51,8 @@ export default defineComponent ({
     background-color: #ffffe8;
     padding: 16px 20px;
     line-height: 1.28;
+    display: flex;
+    width: 100%;
 
     a {
         color: var(--blue);
@@ -68,11 +78,17 @@ export default defineComponent ({
             }
         }
     }
-
 }
+
+.note-block-text {
+    display: inline-block;
+    width: 100%;
+}
+
 
 .note-block {
     font-family: $accentFont;
+
     h1, h2, h3, h4, h5, h6 {
         font-family: $defaultFont;
         margin: 0 0 8px;

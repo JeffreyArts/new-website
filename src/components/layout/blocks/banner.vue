@@ -1,27 +1,39 @@
 <template>
     <figure class="banner-block" :title="options.description">
-        <a :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
+        <a class="banner-block-image-container" :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
-
-        <span v-if="!options.link">
+        <span class="banner-block-image-container" v-if="!options.link">
             <img :src="src" :alt="options.description" ref="image"/>
         </span>
+
+        <div class="banner-block-title">
+            <dynamicFontSize :maxSize="maxFontSize" rows="1">
+                {{ options.title }}
+            </dynamicFontSize>
+        </div>
     </figure>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import dynamicFontSize from "./../../dynamic-font-size.vue"
 import gsap from "gsap"
 
 export type BannerBlock = {
     size: number
     id: string
     link: string
+    title: string
     description: string
-    source: {
+    image: {
         sizes: {
             banner: {
+                width: number
+                height: number
+                url: string
+            },
+            banner_sm: {
                 width: number
                 height: number
                 url: string
@@ -33,8 +45,7 @@ export type BannerBlock = {
 
 export default defineComponent ({
     name: "bannerBlock",
-    components: {
-    }, 
+    components: { dynamicFontSize }, 
     props: {
         options: {
             type: Object as PropType<BannerBlock>,
@@ -43,18 +54,26 @@ export default defineComponent ({
     },
     data: function() {
         return {
-            hoverEvent: undefined as undefined | gsap.core.Tween
+            hoverEvent: undefined as undefined | gsap.core.Tween,
+            maxFontSize: 24
         }
     },
     computed: {
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            if (!this.options.source) {
+            if (!this.options.image) {
                 // add placeholder image
+                return ""
             }
-            // src += this.options.source.sizes.thumbnail.url
+
+            if (this.$el?.innerWidth > 640) {
+                src += this.options.image.sizes.banner.url
+            } else {
+                src += this.options.image.sizes.banner_sm.url
+            }
+
             return src
-        }
+        },
     },
     mounted() {
         if (typeof window === "undefined") {
@@ -62,7 +81,6 @@ export default defineComponent ({
         }
         
         const img = this.$refs["image"] as HTMLImageElement
-        this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
         if (!img) {
             this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
         }
@@ -82,8 +100,18 @@ export default defineComponent ({
         }).catch(() => {
             this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
         })
+
+        window.addEventListener("layoutChange", this.updateFontSize)
+    },
+    unmounted() {
+        window.removeEventListener("layoutChange", this.updateFontSize)
     },
     methods: {
+        updateFontSize(){
+            if (this.$el) {
+                this.maxFontSize = this.$el.clientHeight - 20
+            }
+        },
         onMouseEnterEvent(e:Event) {
             const target = e.target as HTMLElement
             if (!target) {
@@ -137,13 +165,53 @@ export default defineComponent ({
 <style lang="scss">
 @import "./../../../assets/scss/variables.scss";
 .banner-block {
-    aspect-ratio: 1/4;
+    aspect-ratio: 4/1;
+    position: relative;
     margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    a:hover,
+    a:focus {
+        img {
+            filter: blur(32px);
+        }
+
+        + .banner-block-title {
+            scale: 1.08;
+        }
+    }
     
     img {
         width: 100%;
         object-fit: cover;
+        transition: $transitionDefault;
     }
+}
+.banner-block-image-container {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: #000;
+    img {
+        opacity: 0.8;
+    }
+}
+
+.banner-block-title {
+    pointer-events: none;
+    font-family: $accentFont;
+    color: #fff;
+    text-shadow: 0 0 2px rgba(0,0,0,.32);
+    text-align: center;
+    inset: 0;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    padding-left: 20%;
+    padding-right: 20%;
+    align-items: center;
+    transition: $transitionDefault;
 }
 
 </style>

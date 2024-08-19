@@ -2,7 +2,6 @@
     <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
         <div v-if="oldBlocks.length > 0">
             <Block v-for="block,key in oldBlocks" :key="key"
-                class="block"
                 :id="`block-${block.id}`"
                 :style="`width: ${block.width}px; height: ${block.height}px; left: ${block.x}px; top: ${block.y}px;`" 
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
@@ -11,7 +10,6 @@
         </div>
         <div v-if="newBlocks.length > 0">
             <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded($event, block)"
-                class="block"
                 :id="`block-${block.id}`"
                 :size="block.size" 
                 :data="block.data">

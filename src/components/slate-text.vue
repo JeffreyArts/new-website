@@ -1,12 +1,12 @@
 <template>
     <!-- <component :is="compiledTemplate"></component> -->
-     <div v-html="serialize(data)"></div>
+     <div v-html="serializeData(data)"></div>
 </template>
   
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 // import { compile } from "esmBundler"
-import Icon from "jao-icons"
+// import Icon from "jao-icons"
   
 export interface SlateNode {
     children?: Array<SlateNode>
@@ -91,8 +91,25 @@ export default defineComponent({
         //     compiledTemplate
         // }
     },
+    data() {
+        return {
+            loaded: false
+        }
+    },
     methods: {
-        serialize
+        serializeData(node: SlateNode) {
+            const res = serialize(node)
+        
+            if (!this.loaded) {
+                this.loaded = true
+
+                // Timeout to give time for dom to be updated
+                setTimeout(() => {
+                    this.$emit("loaded")
+                })
+            }
+            return res
+        }
     }
 })
 </script>
