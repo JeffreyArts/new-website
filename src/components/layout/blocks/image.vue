@@ -1,6 +1,6 @@
 <template>
     <figure class="image-block" :style="`aspect-ratio:${ratio};`" :title="options.description">
-        <a :href="options.link" v-if="options.link">
+        <a :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
 
@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import gsap from "gsap"
 
 export type ImageBlock = {
     size: number
@@ -37,8 +38,13 @@ export default defineComponent ({
     props: {
         options: {
             type: Object as PropType<ImageBlock>,
-            required: true
+            required: true,
         },
+    },
+    data: function() {
+        return {
+            hoverEvent: undefined as undefined | gsap.core.Tween
+        }
     },
     computed: {
         ratio() {
@@ -55,14 +61,13 @@ export default defineComponent ({
             }
             src += this.options.source.sizes.thumbnail.url
             return src
-            return `${this.options.source.sizes.thumbnail.url }`
         }
     },
     mounted() {
         if (typeof window === "undefined") {
             return
         }
-        console.log(this.options)
+        
         const img = this.$refs["image"] as HTMLImageElement
         if (!img) {
             this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
@@ -84,6 +89,53 @@ export default defineComponent ({
             this.$emit("blockLoaded", this.$el.clientWidth / this.$el.clientHeight)
         })
     },
+    methods: {
+        onMouseEnterEvent(e:Event) {
+            const target = e.target as HTMLElement
+            if (!target) {
+                return
+            }
+            
+            const img = target.querySelector("img") 
+            if (!img) {
+                return
+            }
+
+            if (this.hoverEvent) {
+                gsap.killTweensOf(this.hoverEvent)
+            }
+
+
+            this.hoverEvent = gsap.to(img, {
+                scale: 1.16,
+                boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.4)`,
+                duration: .8,
+                ease: "bounce.out"
+            })
+        },
+        onMouseLeaveEvent(e:Event) {
+            const target = e.target as HTMLElement
+            if (!target) {
+                return
+            }
+            
+            const img = target.querySelector("img") 
+            if (!img) {
+                return
+            }
+
+            if (this.hoverEvent) {
+                gsap.killTweensOf(this.hoverEvent)
+            }
+
+            this.hoverEvent = gsap.to(img, {
+                scale: 1,
+                boxShadow: "0 0 0px rgba(0,0,0,0)",
+                duration: .48,
+                ease: "bounce.out"
+            })
+        }
+    }
 })
 
 
