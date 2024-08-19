@@ -31,9 +31,10 @@ const payloadPage = {
             }
             
             if (req.data.docs[0].layout?.blocks.length > 0){
-                req.data.docs[0].layout.blocks = _.map(req.data.docs[0].layout.blocks, block => {
+                req.data.docs[0].layout.blocks = _.map(req.data.docs[0].layout.blocks, (block, index) => {
                     return {
                         size: block.size,
+                        position: parseInt(index) + 1,
                         id: block.id,
                         data: _.omit(block, ["size", "id"]),
                     } as BlockType

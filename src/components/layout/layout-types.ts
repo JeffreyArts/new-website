@@ -16,6 +16,7 @@ export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | B
 
 export type BlockType = {
     size: number
+    position: number
     id: string
     ratio?:number
     x?:number

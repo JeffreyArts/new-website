@@ -141,13 +141,8 @@ export default defineComponent ({
                 if (this.newBlocks.length <= 0) {
                     this.newBlocks = _.map(this.options.blocks, block => {
                         return {
+                            ...block,
                             size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
-                            id: block.id,
-                            y: block.y,
-                            x: block.x,
-                            width: block.width,
-                            height: block.height,
-                            data: block.data
                         }
                     }) as Array<BlockType>
                 }
@@ -180,11 +175,21 @@ export default defineComponent ({
             })
             
             await Promise.all(blockWidthResized)
-            const convertedBlocks = blocks.map(block => ({
-                ...block,
-                height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
-            }))
+
+            // Convert height to number to match setBlocks
+            // Re-position blocks according their default order to unshuffle setBlocks result
+            const convertedBlocks = _.orderBy(blocks.map(block => {
+                if (typeof block.height !== "number") {
+                    console.warn("Invalid value for block.height", block.height)
+                }
+                return {
+                    ...block,
+                    height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
+                }
+            }), "position")
+
             layout.setBlocks(convertedBlocks)
+
             _.each(layout.getOutput(), (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")

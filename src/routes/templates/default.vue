@@ -50,11 +50,14 @@ export default defineComponent ({
         const title = route.name as string
         
 
-        useHead({
-            title,
-            meta: setMeta(route)
-        })
-        return { Payload }
+       
+        return { 
+            Payload,
+            head:  useHead({
+                title,
+                meta: setMeta(route)
+            }) 
+        }
     },
     data() {
         return {
@@ -72,10 +75,13 @@ export default defineComponent ({
                     return
                 }
 
-                useHead({
-                    title: this.$route.name,
-                    meta: setMeta(this.$route)
-                })
+                if (this.head) {
+                    this.head.patch({
+                        title: this.$route.name,
+                        meta: setMeta(this.$route)
+                    })
+                }
+                
                 // Add new content
                 this.updateLayoutSize()
             }, 
@@ -96,7 +102,6 @@ export default defineComponent ({
         async loadPage() {
             try {
                 const res = await Page.getPageByPath(this.$route.path)
-                
                 this.page = res as PageType
 
             } catch (error) {
