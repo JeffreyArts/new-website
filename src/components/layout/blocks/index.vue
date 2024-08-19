@@ -55,6 +55,8 @@ export default defineComponent ({
 <style lang="scss">
 
 .block {
+    padding: 20px;
+    
     &.__isFixed {
         position: absolute;
     } 
