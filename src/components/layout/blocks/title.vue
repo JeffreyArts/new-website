@@ -1,7 +1,7 @@
 <template>
         <div class="title-block">
             <h1 :title="options.text" ref="title">
-                <dynamicFontSize :rows="options.rows" :maxSize="options.maxSize">{{options.text}}</dynamicFontSize>
+                <dynamicFontSize :maxRows="options.rows" :maxSize="options.maxSize">{{options.text}}</dynamicFontSize>
             </h1>
         </div>
 </template>
@@ -29,26 +29,10 @@ export default defineComponent ({
     },
     data() {
         return {
-            rows: 1,
             fontSize: 24,
         }
     },
-    computed: {
-    },
-    watch:{
-        "options.text": {
-            handler() {
-                
-            },
-            immediate: true
-        }
-    },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
-        }
-        this.rows = this.options.rows
-        
+    mounted() {        
         setTimeout(() => {
             this.$emit("blockLoaded")
         })
