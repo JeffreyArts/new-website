@@ -85,6 +85,7 @@ export default defineComponent ({
     background-color: #dfdfdf;
     background-image: linear-gradient(0deg, rgba(0,0,0,.08), transparent);
     width: 100%;
+    color: #111;
     display: flex;
     align-items: center;
     border-radius: 8px 8px 0 0;
@@ -106,7 +107,7 @@ export default defineComponent ({
     }
 
     a { 
-        color: var(--contrast-color);
+        color: #111;
         opacity: .64;
         transition: $transitionDefault;
 
@@ -116,7 +117,7 @@ export default defineComponent ({
         }
 
         &:visited {
-            color: var(--contrast-color);
+            color: #111;
         }
     }
 }
@@ -126,8 +127,8 @@ export default defineComponent ({
     background-image: linear-gradient(180deg, rgba(0,0,0,.16), transparent 8px);
     display: block;
     width: 100%;
-    background-color: var(--contrast-color);
-    color: var(--bg-color);
+    background-color: #111;
+    color:  #eee;
     padding: 0;
     border-radius: 0 0 4px 4px;
     overflow: auto;
