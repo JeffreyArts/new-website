@@ -252,6 +252,11 @@ export default defineComponent({
             .site-header-navigation-dropdown-item {
                 opacity: 1;
                 pointer-events: all;
+
+                &:hover,
+                &:focus {
+                    text-shadow: -2px -2px 8px var(--bg-color), 2px -2px 8px var(--bg-color), 2px 2px 8px var(--bg-color), -2px 2px 8px var(--bg-color);
+                }
             }
         }
     }
@@ -273,7 +278,6 @@ export default defineComponent({
     opacity: 0;
     pointer-events: none;
     transition: $transitionDefault;
-    transition-delay: .2s;
     align-items: center;
 
     &:hover {
