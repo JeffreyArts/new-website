@@ -1,5 +1,5 @@
 <template>
-    <figure class="image-block" :style="`aspect-ratio:${ratio};`" :title="options.description">
+    <figure class="image-block" :title="options.description">
         <a :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
@@ -20,9 +20,25 @@ export type ImageBlock = {
     id: string
     link: string
     description: string
-    source: {
+    image: {
+        width: number
+        height: number
+        filename: string
+        mimeType: string
+        title: string
+        description: string
         sizes: {
-            thumbnail: {
+            image_sm: {
+                width: number
+                height: number
+                url: string
+            }
+            image_md: {
+                width: number
+                height: number
+                url: string
+            }
+            image_lg: {
                 width: number
                 height: number
                 url: string
@@ -43,23 +59,25 @@ export default defineComponent ({
     },
     data: function() {
         return {
-            hoverEvent: undefined as undefined | gsap.core.Tween
+            hoverEvent: undefined as undefined | gsap.core.Tween,
+            imageSize: "image_sm" as "image_sm" | "image_md" | "image_lg" | "original"
         }
     },
     computed: {
         ratio() {
-            if (this.options.source?.sizes?.thumbnail) {
-                return this.options.source.sizes.thumbnail.width / this.options.source.sizes.thumbnail.width
+            if (this.options.image?.sizes?.image_sm) {
+                return this.options.image.sizes.image_sm.width / this.options.image.sizes.image_sm.width
                 // add placeholder image
             }
             return  "undefined"
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            if (!this.options.source) {
-                // add placeholder image
+            if (this.imageSize === "original") {
+                src += `/media/${this.options.image.filename}`
+            } else {
+                src += this.options.image.sizes[this.imageSize].url
             }
-            src += this.options.source.sizes.thumbnail.url
             return src
         }
     },
@@ -88,8 +106,33 @@ export default defineComponent ({
         }).catch(() => {
             this.$emit("blockLoaded")
         })
+
+        window.addEventListener("layoutChange", this.updateLayoutChange)
+    },
+    unmounted() {
+        window.removeEventListener("layoutChange", this.updateLayoutChange)
     },
     methods: {
+        updateLayoutChange(e:Event) {
+            const width = this.$el.clientWidth
+            if (width > this.options.image.width) {
+                return this.imageSize = "original"
+            }
+            
+            if (width <= 320) {
+                return this.imageSize = "image_sm"
+            }
+
+            if (width <= 800) {
+                return this.imageSize = "image_md"
+            }
+
+            if (width <= 1200) {
+                return this.imageSize = "image_lg"
+            }
+
+            return this.imageSize = "original"
+        },
         onMouseEnterEvent(e:Event) {
             const target = e.target as HTMLElement
             if (!target) {

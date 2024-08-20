@@ -28,13 +28,24 @@ export type BannerBlock = {
     title: string
     description: string
     image: {
+        width: number
+        height: number
+        filename: string
+        mimeType: string
+        title: string
+        description: string
         sizes: {
-            banner: {
+            banner_sm: {
                 width: number
                 height: number
                 url: string
-            },
-            banner_sm: {
+            }
+            banner_md: {
+                width: number
+                height: number
+                url: string
+            }
+            banner_lg: {
                 width: number
                 height: number
                 url: string
@@ -55,25 +66,16 @@ export default defineComponent ({
     data: function() {
         return {
             hoverEvent: undefined as undefined | gsap.core.Tween,
-            maxFontSize: 24
+            maxFontSize: 24,
+            imageSize: "banner_sm" as "banner_sm" | "banner_md" | "banner_lg"
         }
     },
     computed: {
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            if (!this.options.image) {
-                // add placeholder image
-                return ""
-            }
-
-            if (this.$el?.innerWidth > 640) {
-                src += this.options.image.sizes.banner.url
-            } else {
-                src += this.options.image.sizes.banner_sm.url
-            }
-
+            src += this.options.image.sizes[this.imageSize].url
             return src
-        },
+        }
     },
     mounted() {
         if (typeof window === "undefined") {
@@ -101,15 +103,29 @@ export default defineComponent ({
             this.$emit("blockLoaded")
         })
 
-        window.addEventListener("layoutChange", this.updateFontSize)
+        window.addEventListener("layoutChange", this.updateLayoutChange)
     },
     unmounted() {
-        window.removeEventListener("layoutChange", this.updateFontSize)
+        window.removeEventListener("layoutChange", this.updateLayoutChange)
     },
     methods: {
-        updateFontSize(){
+        updateLayoutChange(e:Event) {
+
+            // Update font-size
             if (this.$el) {
                 this.maxFontSize = this.$el.clientHeight - 20
+            }
+            const width = this.$el.clientWidth
+            if (width <= 320) {
+                return this.imageSize = "banner_sm"
+            }
+
+            if (width <= 800) {
+                return this.imageSize = "banner_md"
+            }
+
+            if (width > 800) {
+                return this.imageSize = "banner_lg"
             }
         },
         onMouseEnterEvent(e:Event) {
@@ -185,6 +201,7 @@ export default defineComponent ({
     img {
         width: 100%;
         object-fit: cover;
+        opacity: 0.8;
         transition: $transitionDefault;
     }
 }
@@ -193,9 +210,6 @@ export default defineComponent ({
     height: 100%;
     display: block;
     background-color: #000;
-    img {
-        opacity: 0.8;
-    }
 }
 
 .banner-block-title {
