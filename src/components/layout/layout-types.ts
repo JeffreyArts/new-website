@@ -1,6 +1,7 @@
 
 import { YearBlock } from "./blocks/year.vue"
 import { TitleBlock } from "./blocks/title.vue"
+import { CodeBlock } from "./blocks/code.vue"
 import { NoteBlock } from "./blocks/note.vue"
 import { ImageBlock } from "./blocks/image.vue"
 import { BannerBlock } from "./blocks/banner.vue"
@@ -13,7 +14,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | BannerBlock | GlitchBlock
+export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | BannerBlock | GlitchBlock | CodeBlock
 
 export type BlockType = {
     size: number

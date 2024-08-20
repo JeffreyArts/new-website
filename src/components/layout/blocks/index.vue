@@ -6,12 +6,14 @@
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
         <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
+        <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"/>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import BannerBlock from "./banner.vue"
+import CodeBlock from "./code.vue"
 import GlitchBlock from "./glitch.vue"
 import ImageBlock from "./image.vue"
 import NoteBlock from "./note.vue"
@@ -23,6 +25,7 @@ export default defineComponent ({
     name: "blockComponent", 
     components: { 
         BannerBlock,
+        CodeBlock,
         GlitchBlock,
         ImageBlock,
         NoteBlock,
