@@ -23,8 +23,9 @@ if (typeof window !== "undefined") {
     
     gsap.to("html", {
         "--bg-size": 8,
-        // "--primary-bg-color":"#fafafa", 
-        // "--contrast-color": "#222",
+        // "--bg-color":"#222", 
+        // "--primary-bg-color":"#000", 
+        // "--contrast-color": "#fafafa",
         duration:.8
     })
 }
