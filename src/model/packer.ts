@@ -62,94 +62,44 @@ export default class Packer {
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
 
+        const fitRight = (target: Position, inputBlocks: Block[]) => {
+            return _.without(_.map(inputBlocks, inputBlock => {
+                const newBlock = {
+                    y: target.y,
+                    x: target.x + target.width, 
+                    width: inputBlock.width,
+                    height: inputBlock.height,
+                    position: "right",
+                    sourceId: target.id,
+                    id: inputBlock.id
+                } as Position
+                
+                if (newBlock.x < target.x + target.width) {
+                    return
+                }
+                
+                // Check if it is exceeding the height
+                if ((this.autoResize != "height")
+                    && newBlock.y + newBlock.height > this.layoutHeight
+                ) {
+                    return
+                }
+            
+                if (rectanglesOverlap(newBlock,target )) {
+                    newBlock.y = target.y + target.height
+                }
+                // Validate if inputBlock is within canvas
+                if (newBlock.x + newBlock.width > this.layoutWidth) {
+                    return
+                }
+                
+                return newBlock
+            }), undefined) as Position[]
+        }
         
 
-        const getOptions = (targetBlock: Position, resultBlocks: Position[]) => {
-            // console.log("───",this.layoutWidth,"─────────────────────────")  
-            // console.log("targetBlock", targetBlock.id) 
-            // console.log("inputBlocks", JSON.stringify(inputBlocks, null,) 
-            // Check right 
-            const optionsRight = _.without(_.map(inputBlocks, inputBlock => {
-                
-                // console.log("targetBlock", targetBlock.id, inputBlock) 
-                // If it can't fit right to targetBlock escape immediately
-                // if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                //     return
-                // }
-
-                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
-                    const newBlock = {
-                        y: targetBlock.y,
-                        x: targetBlock.x + targetBlock.width, 
-                        width: inputBlock.width,
-                        height: inputBlock.height,
-                        position: "right",
-                        sourceId: targetBlock.id,
-                        id: inputBlock.id
-                    } as Position
-                    // console.log(`newBlock1
-                    //     1. ${newBlock.x < resBlock.x + resBlock.width}
-                    //     2. ${newBlock.y + newBlock.height > this.layoutHeight}
-                    //     3. ${rectanglesOverlap(newBlock,resBlock )}
-                    //     4. ${newBlock.x + newBlock.width > this.layoutWidth}
-                    //     `)          
-                    if (newBlock.x < resBlock.x + resBlock.width) {
-                        return
-                    }
-                    
-                    // Check if it is exceeding the height
-                    if ((this.autoResize != "height")
-                        && newBlock.y + newBlock.height > this.layoutHeight
-                    ) {
-                        return
-                    }
-                
-                    if (rectanglesOverlap(newBlock,resBlock )) {
-                        newBlock.y = resBlock.y + resBlock.height
-                    }
-                    // Validate horizontal position
-                    // if (targetBlock.y < resBlock.y + resBlock.height) {
-                    //     return
-                    // }
-                    
-                    // Validate if inputBlock is within canvas
-                    if (newBlock.x + newBlock.width > this.layoutWidth) {
-                        return
-                    }
-                    
-                    // if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                    //     return
-                    // }
-                        
-                    // if (targetBlock.y  + inputBlock.height  < resBlock.y + resBlock.height) {
-                    //     return
-                    // }
-                            
-                    // Prevent overlap with other items
-                            
-                            
-                    
-                    return newBlock
-                }), undefined) as Position[]
-
-
-                if (possibleOptions.length > 0) {
-                    return _.sortBy(possibleOptions, "y")[0]
-                }
-
-                if (targetBlock.x + targetBlock.width + inputBlock.width < this.layoutWidth ){
-                    // return inputBlock
-                    return {
-                        x: targetBlock.x + targetBlock.width,
-                        y: targetBlock.y,
-                        width: inputBlock.width,
-                        height: inputBlock.height,
-                        position: "right",
-                        sourceId: targetBlock.id,
-                        id: inputBlock.id
-                    }
-                }
-            }), undefined) as Position[]
+        const getOptions = (targetBlock: Position, resultBlocks: Position[], inputBlocks: Block[]) => {
+            const optionsRight = fitRight(targetBlock, inputBlocks)
 
 
             // Check left 
@@ -239,9 +189,9 @@ export default class Packer {
                 bottom: 2,
                 left: 3
             }
-
-            const options = _.map(resultBlocks, resultBlock => {
-                const data = getOptions(resultBlock, resultBlocks)
+            // console.log(resultBlocks)
+            const options = _.map(resultBlocks, resBlock => {
+                const data = getOptions(resBlock, resultBlocks, inputBlocks)
                 const temp  =  _.chain([...data.optionsBottom, ...data.optionsLeft, ...data.optionsRight] as Array<Position | undefined>)
                     .orderBy(
                         ["y", item => positionOrder[item?.position || "right"]],
