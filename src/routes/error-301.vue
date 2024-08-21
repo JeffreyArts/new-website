@@ -35,8 +35,12 @@ export default defineComponent ({
         })
         if (typeof window !== "undefined" && typeof route.meta.redirect === "string") {
             const baseURL = `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ""}/`
+
+            if (!route.meta?.redirect.includes(window.location.hostname)) {
+                window.location.replace( `${route.meta.redirect}` )
+            }
             router.replace(route.meta.redirect.replace(baseURL,"")).catch(() => {
-                window.location.href = route.meta.redirect + ""
+                window.location.replace( `${route.meta.redirect}` )
             })
         }
     },
