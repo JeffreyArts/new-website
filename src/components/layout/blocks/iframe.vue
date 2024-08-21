@@ -15,21 +15,21 @@
             </span>
             
         </header>
-        <section class="iframe-block-content" :style="{
-            scale: options.autoScaling ? scale : 1,
-            height: frame.height,
-            width: frame.width}"
-            :type="frame.size"
-            ref="iframeBlock">
-            <iframe :src="options.url" frameborder="0" ></iframe>
-            
-            <!-- Kost iets teveel moeite denk ik, ivm met logica van this.frame.width -->
-            <!--
-            <span @click="setFullscreen" target="_blank">
-                <jaoIcon name="fullscreen" size="medium" />
-            </span>
-            -->
+
+        <section class="iframe-block-content-wrapper" :style="{aspectRatio: options.autoScaling ? `${frame.width} / ${frame.height}` : ''}">
+            <div class="iframe-block-content" :style="{
+                scale: options.autoScaling ? scale : 1,
+                height: `${frame.height}px`,
+                width: `${frame.width}px`}"
+                :type="frame.size"
+                ref="iframeBlock">
+                <iframe :src="options.url" frameborder="0" allow="fullscreen" allowfullscreen ref="iframe"/>
+            </div>
         </section>
+
+        <span @click="setFullscreen" class="iframe-block-fullscreen-button">
+            <jaoIcon name="fullscreen" size="medium" />
+        </span>
     </div>
 </template>
 
@@ -63,10 +63,9 @@ export default defineComponent ({
         return {
             scale: 1,
             title: "",
-            isFullscreen: false,
             frame: {
-                width: "100px",
-                height: "100px",
+                width: 0,
+                height: 0,
                 size: "dynamic" as "dynamic" | "phone" | "tablet" | "desktop"
             },
         }
@@ -76,12 +75,12 @@ export default defineComponent ({
             return
         }
         this.setTitle()
-        this.onLayoutChange()
-        setTimeout(()=> {
+        
+        const iframe = this.$refs["iframe"] as HTMLIFrameElement
+        
+        iframe.addEventListener("load", () => {
             this.$emit("blockLoaded")
         })
-
-
         window.addEventListener("layoutChange", this.onLayoutChange)
     },
     unmounted() {
@@ -96,7 +95,8 @@ export default defineComponent ({
             }
         },
         setFullscreen() {
-
+            const iframe = this.$refs["iframe"] as HTMLIFrameElement
+            iframe.requestFullscreen()
         },
         onLayoutChange(){
             if (!this.options.autoScaling) {
@@ -104,14 +104,14 @@ export default defineComponent ({
                     const width = parseInt(this.options.landscapeRatio.split("/")[0])
                     const height = parseInt(this.options.landscapeRatio.split("/")[1])
                     const ratio =  height / width
-                    this.frame.width = `${this.$el.clientWidth}px`
-                    this.frame.height = `${this.$el.clientWidth * ratio}px`
+                    this.frame.width = this.$el.clientWidth
+                    this.frame.height = this.$el.clientWidth * ratio
                 } else if (window.innerHeight/window.innerWidth > 1) { // Landscape
                     const width = parseInt(this.options.portraitRatio.split("/")[0])
                     const height = parseInt(this.options.portraitRatio.split("/")[1])
                     const ratio =  height / width
-                    this.frame.width = `${this.$el.clientWidth}px`
-                    this.frame.height = `${this.$el.clientWidth * ratio}px`
+                    this.frame.width = this.$el.clientWidth
+                    this.frame.height = this.$el.clientWidth * ratio
                 } else {
                     // shouldn't occur, but better safe than sorry
                     this.frame.width = this.$el.clientWidth
@@ -120,21 +120,19 @@ export default defineComponent ({
             } else {
 
                 if (this.$el.clientWidth < 512) {
-                    this.frame.width = "375px"
-                    this.frame.height = "812px"
+                    this.frame.width = 375
+                    this.frame.height = 812
                     this.frame.size = "phone"
-                    this.scale = this.$el.clientWidth / 375
                 } else if (this.$el.clientWidth < 768) {
                     this.frame.size = "tablet"
-                    this.frame.width = "1024px"
-                    this.frame.height = "768px"
-                    this.scale = this.$el.clientWidth / 1024
+                    this.frame.width = 1024
+                    this.frame.height = 768
                 } else {
                     this.frame.size = "desktop"
-                    this.frame.width = "1440px"
-                    this.frame.height = "810px"
-                    this.scale = this.$el.clientWidth / 1440
+                    this.frame.width = 1440
+                    this.frame.height = 810
                 }
+                this.scale = this.$el.clientWidth / this.frame.width
 
             }
         }
@@ -146,6 +144,9 @@ export default defineComponent ({
 <style lang="scss">
 @import "./../../../assets/scss/variables.scss";
 
+.iframe-block {
+    position: relative;
+}
 
 .iframe-block-header {
     position: relative;
@@ -213,6 +214,11 @@ export default defineComponent ({
     }
 }
 
+.iframe-block-content-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
 .iframe-block-content {
     background-image: linear-gradient(180deg, rgba(0,0,0,.16), transparent 8px);
     display: block;
@@ -236,20 +242,21 @@ export default defineComponent ({
         width: 100%;
         height: 100%;
     }
-    a {
-        display: inline-block;
-        transition: $transitionDefault;
-        padding: 8px 4px 4px 8px;
-        position: absolute;
-        bottom: 0;
-        right: 0;
+}
 
-        &:hover,
-        &:focus {
-            background: rgba(255,255,255,.8);
-            svg {
-                height: 52px;
-            }
+.iframe-block-fullscreen-button {
+    display: inline-block;
+    transition: $transitionDefault;
+    padding: 8px 4px 4px 8px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    &:hover,
+    &:focus {
+        background: rgba(255,255,255,.8);
+        svg {
+            height: 52px;
         }
     }
     svg {
