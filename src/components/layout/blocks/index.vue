@@ -3,6 +3,7 @@
         <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"/>
         <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"/>
         <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"/>
+        <IframeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'iframe'"/>
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
         <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
@@ -15,6 +16,7 @@ import { defineComponent, PropType } from "vue"
 import BannerBlock from "./banner.vue"
 import CodeBlock from "./code.vue"
 import GlitchBlock from "./glitch.vue"
+import IframeBlock from "./iframe.vue"
 import ImageBlock from "./image.vue"
 import NoteBlock from "./note.vue"
 import TitleBlock from "./title.vue"
@@ -27,6 +29,7 @@ export default defineComponent ({
         BannerBlock,
         CodeBlock,
         GlitchBlock,
+        IframeBlock,
         ImageBlock,
         NoteBlock,
         TitleBlock,

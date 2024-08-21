@@ -6,6 +6,7 @@ import { NoteBlock } from "./blocks/note.vue"
 import { ImageBlock } from "./blocks/image.vue"
 import { BannerBlock } from "./blocks/banner.vue"
 import { GlitchBlock } from "./blocks/glitch.vue"
+import { IframeBlock } from "./blocks/iframe.vue"
 
 export interface LayoutOptions {
     id: string
@@ -14,7 +15,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | BannerBlock | GlitchBlock | CodeBlock
+export type BlockTypeData = TitleBlock | YearBlock  | NoteBlock | ImageBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock
 
 export type BlockType = {
     size: number

@@ -73,9 +73,19 @@ For more information about this deployment script, I'd like to refer you to [thi
 
 ## Development
 
+### Adding new blocks
+When you add a new block, you'll need to do a few things.
+
+1. Create a component in `/src/components/layout/blocks/` (use other blocks as base template)
+2. Add blockType type in `/src/components/layout/layout-types.ts`
+3. Add block to `/src/components/layout/index.ts` so it'll actually be imported
+
+
 ### Blank page after adding new block
 
 If you end up with a blank page after adding a new block, it is most likely because you incorrectly emit the `blockLoaded` event. The layout component requires all blocks to be (fully?) loaded before displaying them correctly in the grid. This is mandatory because block heights are often dynamically set based on their content.
+
+
 
 ## Multilingual
 Via [Vue-i18n](https://github.com/intlify/vue-i18n-next) there is support for developing a multilingual webapplication. There is a custom layer on top of this that adds 2 additional features on top of this plugin.
