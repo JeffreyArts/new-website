@@ -186,7 +186,7 @@ export default defineComponent ({
                 return _.pick({
                     ...block,
                     height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
-                }, ["width", "height", "id"])
+                }, ["width", "height", "id", "position"])
             }), "position")
 
             layout.setBlocks(convertedBlocks)

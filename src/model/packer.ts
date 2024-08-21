@@ -2,7 +2,7 @@ import _ from "lodash"
 
 type Block = {
     width: number;
-    height?: number;
+    height: number;
     id: string | number;
 }
 
@@ -58,15 +58,15 @@ export default class Packer {
     }
 
     private updateLayout() {
-        const resultBlocks = [] as Position[]
+        const resultPositions = [] as Position[]
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
 
         const fitRight = (target: Position, inputBlocks: Block[]) => {
             return _.without(_.map(inputBlocks, inputBlock => {
                 const newBlock = {
-                    y: target.y,
                     x: target.x + target.width, 
+                    y: target.y,
                     width: inputBlock.width,
                     height: inputBlock.height,
                     position: "right",
@@ -74,22 +74,70 @@ export default class Packer {
                     id: inputBlock.id
                 } as Position
                 
-                if (newBlock.x < target.x + target.width) {
+                // Validate if inputBlock is within canvas
+                if (newBlock.x + newBlock.width > this.layoutWidth) {
                     return
                 }
-                
+
                 // Check if it is exceeding the height
-                if ((this.autoResize != "height")
-                    && newBlock.y + newBlock.height > this.layoutHeight
+                if ((this.autoResize != "height") && newBlock.y + newBlock.height > this.layoutHeight
                 ) {
                     return
                 }
             
-                if (rectanglesOverlap(newBlock,target )) {
-                    newBlock.y = target.y + target.height
-                }
+                
+                return newBlock
+            }), undefined) as Position[]
+        }
+        
+        const fitBottom = (target: Position, inputBlocks: Block[]) => {
+            // Check bottom 
+            return _.without(_.map(inputBlocks, inputBlock => {
+                const newBlock =  {
+                    x: target.x ,
+                    y: target.y + target.height,
+                    width: inputBlock.width,
+                    height: inputBlock.height,
+                    position: "bottom",
+                    sourceId: target.id,
+                    id: inputBlock.id
+                } as Position
+
                 // Validate if inputBlock is within canvas
                 if (newBlock.x + newBlock.width > this.layoutWidth) {
+                    return
+                }
+                
+                // Check if it is exceeding the height
+                if ((this.autoResize != "height") && newBlock.y + newBlock.height > this.layoutHeight
+                ) {
+                    return
+                }
+                    
+                return newBlock
+            }), undefined) as Position[]
+        }
+        
+        const fitLeft = (target: Position, inputBlocks: Block[]) => {
+            return _.without(_.map(inputBlocks, inputBlock => {
+                const newBlock =  {
+                    x: target.x ,
+                    y: target.y,
+                    width: inputBlock.width,
+                    height: inputBlock.height,
+                    position: "left",
+                    sourceId: target.id,
+                    id: inputBlock.id
+                } as Position
+
+                // Validate if inputBlock is within canvas
+                if ((target.x - inputBlock.width < 0 || newBlock.x + newBlock.width > this.layoutWidth)) {
+                    return
+                }
+
+                // Check if it is exceeding the height
+                if ((this.autoResize != "height") && newBlock.y + newBlock.height > this.layoutHeight
+                ) {
                     return
                 }
                 
@@ -98,120 +146,52 @@ export default class Packer {
         }
         
 
-        const getOptions = (targetBlock: Position, resultBlocks: Position[], inputBlocks: Block[]) => {
+        const getOptions = (targetBlock: Position, resultPositions: Position[], inputBlocks: Block[]) => {
             const optionsRight = fitRight(targetBlock, inputBlocks)
+            const optionsLeft = fitLeft(targetBlock, inputBlocks)
+            const optionsBottom = fitBottom(targetBlock, inputBlocks)
 
-
-            // Check left 
-            const optionsLeft = _.without(_.map(inputBlocks,inputBlock => {
-                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
-                    if (resBlock.x  > targetBlock.x) {
-                        return
-                    }
-                    
-                    // Validate if inputBlock is within canvas
-                    if (targetBlock.x - resBlock.width < 0) {
-                        return
-                    }
-                    
-                    if (targetBlock.y  < resBlock.y + resBlock.height) {
-                        return
-                    }
-                    
-                    // Check if it is exceeding the height
-                    if ((this.autoResize != "height")
-                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                    ) {
-                        return
-                    }
-                    
-                    return {
-                        y: resBlock.y,
-                        x: resBlock.x ,
-                        width: inputBlock.width,
-                        height: inputBlock.height,
-                        position: "left",
-                        sourceId: targetBlock.id,
-                        id: inputBlock.id
-                    }
-                }), undefined) as Position[]
-
-                if (possibleOptions.length > 0) {
-                    return _.sortBy(possibleOptions, "y")[0]
-                }
-            }), undefined) as Position[]
-
-            // Check bottom 
-            const optionsBottom = _.without(_.map(inputBlocks, inputBlock => {
-                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
-                    // Check if block fits within layout width
-                    if (inputBlock.width + resBlock.x > this.layoutWidth) {
-                        return
-                    }
-                    if (targetBlock.y >= resBlock.y + resBlock.height) {
-                        return
-                    }
-
-                    // Check if it is exceeding the height
-                    if ((this.autoResize != "height")
-                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                    ) {
-                        return
-                    }
-                    
-                    return {
-                        x: resBlock.x,
-                        y: resBlock.y + resBlock.height,
-                        width: inputBlock.width,
-                        height: inputBlock.height,
-                        position: "bottom",
-                        sourceId: resBlock.id,
-                        id: inputBlock.id,
-                    }
-                }), undefined) as Position[]
-
-                if (possibleOptions.length > 0) {
-                    return _.sortBy(possibleOptions, "y")[0]
-                }
-            }), undefined) as Position[]
-
-            return {
-                id: targetBlock.id,
-                optionsRight,
-                optionsLeft,
-                optionsBottom
-            }
+            return [
+                ...optionsRight,
+                ...optionsLeft,
+                ...optionsBottom
+            ]   
         }
 
-        const getNextBlock = (resultBlocks: Position[]) => {
+        const getNextBlock = (resultPositions: Position[]) => {
             const positionOrder = {
                 right: 1,
                 bottom: 2,
                 left: 3
             }
-            // console.log(resultBlocks)
-            const options = _.map(resultBlocks, resBlock => {
-                const data = getOptions(resBlock, resultBlocks, inputBlocks)
-                const temp  =  _.chain([...data.optionsBottom, ...data.optionsLeft, ...data.optionsRight] as Array<Position | undefined>)
+            
+            const options = _.filter(_.map(resultPositions, resBlock => {
+                const data = getOptions(resBlock, resultPositions, inputBlocks) as Array<Position | undefined>
+                const temp  =  _.chain(data)
                     .orderBy(
                         ["y", item => positionOrder[item?.position || "right"]],
-                        ["asc", "desc"]
-                    )
-                    .without(undefined)
-                    .filter(dataRect =>
-                        !_.some(resultBlocks, resultRect => rectanglesOverlap(dataRect, resultRect))
+                        ["asc", "asc"]
                     )
                     .without(undefined)
                     .value()
-                    
-                return temp
-            })
-            
 
+                return _.map(temp, tempPos => {
+                    const sortedResPos = _.sortBy(resultPositions, "y", "asc")
+                    _.each(sortedResPos, pos => {
+                        if (rectanglesOverlap(tempPos, pos)) {
+                            if (tempPos) {
+                                tempPos.y = pos.y + pos.height
+                            }
+                        }
+                    })
+                    return tempPos
+                })
+            }), res => res.length > 0)
+            
             const nextBlocks = _.chain(_.flatten(options))
                 .orderBy(
                     ["y", item => positionOrder[item?.position || "right"]],
-                    ["asc", "desc"]
+                    ["asc", "asc"]
                 )
                 .without(undefined)
                 .take(1)
@@ -234,7 +214,7 @@ export default class Packer {
         }
         
         while (!done) {
-            if (resultBlocks.length === 0) {
+            if (resultPositions.length === 0) {
                 const firstBlock = inputBlocks[0] // Get and remove the first block
                 if (!firstBlock.width) {
                     // Skip when block doesn't have a width
@@ -242,7 +222,7 @@ export default class Packer {
                     continue
                 }
                 if (firstBlock) {
-                    resultBlocks.push({
+                    resultPositions.push({
                         width: firstBlock.width,
                         height: firstBlock.height,
                         x: 0,
@@ -255,9 +235,10 @@ export default class Packer {
                 continue // Restart loop to process the next block
             }
             
-            let nextBlock = getNextBlock(resultBlocks)
+            let nextBlock = getNextBlock(resultPositions)
+
             if (!nextBlock) {
-                const lowestBlock = _.reverse(_.sortBy(resultBlocks, block => block.y + block.height))[0]
+                const lowestBlock = _.reverse(_.sortBy(resultPositions, block => block.y + block.height))[0]
                 const lastBlock = inputBlocks[0]
                 
                 if (!lastBlock) {
@@ -287,7 +268,7 @@ export default class Packer {
                 continue
             }
             
-            resultBlocks.push({
+            resultPositions.push({
                 x: nextBlock.x,
                 y: nextBlock.y,
                 width: nextBlock.width,
@@ -298,8 +279,8 @@ export default class Packer {
             continue
         }
         
-        this.output = resultBlocks
-        return resultBlocks
+        this.output = resultPositions
+        return resultPositions
     }
 }
 
