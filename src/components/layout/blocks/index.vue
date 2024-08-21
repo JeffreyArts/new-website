@@ -7,6 +7,7 @@
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
         <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
+        <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"/>
         <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"/>
     </div>
 </template>
@@ -20,6 +21,7 @@ import IframeBlock from "./iframe.vue"
 import ImageBlock from "./image.vue"
 import NoteBlock from "./note.vue"
 import TitleBlock from "./title.vue"
+import YoutubeBlock from "./youtube.vue"
 import YearBlock from "./year.vue"
 import { BlockType } from "@/components/layout/layout-types"
 
@@ -31,6 +33,7 @@ export default defineComponent ({
         GlitchBlock,
         IframeBlock,
         ImageBlock,
+        YoutubeBlock,
         NoteBlock,
         TitleBlock,
         YearBlock,
