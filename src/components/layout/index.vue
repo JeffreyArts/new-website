@@ -182,10 +182,11 @@ export default defineComponent ({
                 if (typeof block.height !== "number") {
                     console.warn("Invalid value for block.height", block.height)
                 }
-                return {
+
+                return _.pick({
                     ...block,
                     height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
-                }
+                }, ["width", "height", "id"])
             }), "position")
 
             layout.setBlocks(convertedBlocks)

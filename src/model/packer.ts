@@ -1,7 +1,7 @@
 import _ from "lodash"
 
 type Block = {
-    width?: number;
+    width: number;
     height?: number;
     id: string | number;
 }
@@ -59,67 +59,77 @@ export default class Packer {
 
     private updateLayout() {
         const resultBlocks = [] as Position[]
-        const inputBlocks = [...this.blocks] as Position[]
+        const inputBlocks = [...this.blocks] as Block[]
         let done = false
 
+        
+
         const getOptions = (targetBlock: Position, resultBlocks: Position[]) => {
+            // console.log("───",this.layoutWidth,"─────────────────────────")  
+            // console.log("targetBlock", targetBlock.id) 
+            // console.log("inputBlocks", JSON.stringify(inputBlocks, null,) 
             // Check right 
             const optionsRight = _.without(_.map(inputBlocks, inputBlock => {
                 
+                // console.log("targetBlock", targetBlock.id, inputBlock) 
                 // If it can't fit right to targetBlock escape immediately
-                if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                    return
-                }
+                // if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
+                //     return
+                // }
 
                 const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
-                    if (resBlock.x <= targetBlock.x) {
-                        return
-                    }
-
-                    // Check if it is exceeding the height
-                    if ((this.autoResize != "height")
-                        && resBlock.y + resBlock.height + targetBlock.height > this.layoutHeight
-                    ) {
-                        return
-                    }
-
-                    
-                    // Validate horizontal position
-                    if (targetBlock.y < resBlock.y + resBlock.height) {
-                        return
-                    }
-
-                    // Validate if inputBlock is within canvas
-                    if (resBlock.x + resBlock.width + inputBlock.width > this.layoutWidth) {
-                        return
-                    }
-                    if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
-                        return
-                    }
-                    
-                    if (targetBlock.y  + inputBlock.height  < resBlock.y + resBlock.height) {
-                        return
-                    }
-                    
-                    // // Prevent overlap with other items
-                    // const a = _.without(_.map(result, b => {
-                    //     return targetBlock.y + inputBlock.height < b.y + b.height
-                    // }), false)
-                
-                    // if (a.length > 0) {
-                    //     return
-                    // }
-
-
-                    return {
-                        y: resBlock.y + resBlock.height,
-                        x: resBlock.x + resBlock.width, 
+                    const newBlock = {
+                        y: targetBlock.y,
+                        x: targetBlock.x + targetBlock.width, 
                         width: inputBlock.width,
                         height: inputBlock.height,
                         position: "right",
                         sourceId: targetBlock.id,
                         id: inputBlock.id
+                    } as Position
+                    // console.log(`newBlock1
+                    //     1. ${newBlock.x < resBlock.x + resBlock.width}
+                    //     2. ${newBlock.y + newBlock.height > this.layoutHeight}
+                    //     3. ${rectanglesOverlap(newBlock,resBlock )}
+                    //     4. ${newBlock.x + newBlock.width > this.layoutWidth}
+                    //     `)          
+                    if (newBlock.x < resBlock.x + resBlock.width) {
+                        return
                     }
+                    
+                    // Check if it is exceeding the height
+                    if ((this.autoResize != "height")
+                        && newBlock.y + newBlock.height > this.layoutHeight
+                    ) {
+                        return
+                    }
+                
+                    if (rectanglesOverlap(newBlock,resBlock )) {
+                        newBlock.y = resBlock.y + resBlock.height
+                    }
+                    // Validate horizontal position
+                    // if (targetBlock.y < resBlock.y + resBlock.height) {
+                    //     return
+                    // }
+                    
+                    // Validate if inputBlock is within canvas
+                    if (newBlock.x + newBlock.width > this.layoutWidth) {
+                        return
+                    }
+                    
+                    // if (targetBlock.x + targetBlock.width + inputBlock.width > this.layoutWidth) {
+                    //     return
+                    // }
+                        
+                    // if (targetBlock.y  + inputBlock.height  < resBlock.y + resBlock.height) {
+                    //     return
+                    // }
+                            
+                    // Prevent overlap with other items
+                            
+                            
+                    
+                    return newBlock
                 }), undefined) as Position[]
 
 
