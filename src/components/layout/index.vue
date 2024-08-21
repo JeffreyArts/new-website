@@ -93,7 +93,7 @@ export default defineComponent ({
     methods: {
         updateResize() {
             this.layoutWidth = this.$el.clientWidth
-            this.widthRatio = (this.layoutWidth - this.gap) / this.options.layoutSize
+            this.widthRatio = (this.layoutWidth) / this.options.layoutSize
             
             this.updateBlockSizes(this.oldBlocks)
         },
