@@ -58,11 +58,11 @@ export default class Packer {
     }
 
     private updateLayout() {
-        const result = [] as Position[]
+        const resultBlocks = [] as Position[]
         const inputBlocks = [...this.blocks] as Position[]
         let done = false
 
-        const getOptions = (targetBlock: Position) => {
+        const getOptions = (targetBlock: Position, resultBlocks: Position[]) => {
             // Check right 
             const optionsRight = _.without(_.map(inputBlocks, inputBlock => {
                 
@@ -71,7 +71,7 @@ export default class Packer {
                     return
                 }
 
-                const possibleOptions = _.without(_.map(result, resBlock => {
+                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
                     if (resBlock.x <= targetBlock.x) {
                         return
                     }
@@ -144,7 +144,7 @@ export default class Packer {
 
             // Check left 
             const optionsLeft = _.without(_.map(inputBlocks,inputBlock => {
-                const possibleOptions = _.without(_.map(result, resBlock => {
+                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
                     if (resBlock.x  > targetBlock.x) {
                         return
                     }
@@ -183,7 +183,7 @@ export default class Packer {
 
             // Check bottom 
             const optionsBottom = _.without(_.map(inputBlocks, inputBlock => {
-                const possibleOptions = _.without(_.map(result, resBlock => {
+                const possibleOptions = _.without(_.map(resultBlocks, resBlock => {
                     // Check if block fits within layout width
                     if (inputBlock.width + resBlock.x > this.layoutWidth) {
                         return
@@ -223,6 +223,46 @@ export default class Packer {
             }
         }
 
+        const getNextBlock = (resultBlocks: Position[]) => {
+            const positionOrder = {
+                right: 1,
+                bottom: 2,
+                left: 3
+            }
+
+            const options = _.map(resultBlocks, resultBlock => {
+                const data = getOptions(resultBlock, resultBlocks)
+                const temp  =  _.chain([...data.optionsBottom, ...data.optionsLeft, ...data.optionsRight] as Array<Position | undefined>)
+                    .orderBy(
+                        ["y", item => positionOrder[item?.position || "right"]],
+                        ["asc", "desc"]
+                    )
+                    .without(undefined)
+                    .filter(dataRect =>
+                        !_.some(resultBlocks, resultRect => rectanglesOverlap(dataRect, resultRect))
+                    )
+                    .without(undefined)
+                    .value()
+                    
+                return temp
+            })
+            
+
+            const nextBlocks = _.chain(_.flatten(options))
+                .orderBy(
+                    ["y", item => positionOrder[item?.position || "right"]],
+                    ["asc", "desc"]
+                )
+                .without(undefined)
+                .take(1)
+                .value() as  Array<Position>
+
+            if (nextBlocks.length === 1)  {
+                return nextBlocks[0]
+            } 
+            return undefined
+        }
+        
         const rectanglesOverlap = (r1:Position | undefined, r2:Position | undefined) => {
             if (r1 === undefined || r2 === undefined) {
                 return undefined
@@ -234,7 +274,7 @@ export default class Packer {
         }
         
         while (!done) {
-            if (result.length === 0) {
+            if (resultBlocks.length === 0) {
                 const firstBlock = inputBlocks[0] // Get and remove the first block
                 if (!firstBlock.width) {
                     // Skip when block doesn't have a width
@@ -242,7 +282,7 @@ export default class Packer {
                     continue
                 }
                 if (firstBlock) {
-                    result.push({
+                    resultBlocks.push({
                         width: firstBlock.width,
                         height: firstBlock.height,
                         x: 0,
@@ -255,42 +295,9 @@ export default class Packer {
                 continue // Restart loop to process the next block
             }
             
-            const positionOrder = {
-                right: 1,
-                bottom: 2,
-                left: 3
-            }
-              
-            const options = _.map(result, tb => {
-                const data = getOptions(tb)
-                const temp  =  _.chain([...data.optionsBottom, ...data.optionsLeft, ...data.optionsRight] as Array<Position | undefined>)
-                    .orderBy(
-                        ["y", item => positionOrder[item?.position || "right"]],
-                        ["asc", "desc"]
-                    )
-                    .without(undefined)
-                    .filter(dataRect =>
-                        !_.some(result, resultRect => rectanglesOverlap(dataRect, resultRect))
-                    )
-                    .without(undefined)
-                    .value()
-                    
-                return temp
-                
-            })
-
-            const nextBlockOptions = _.chain(_.flatten(options))
-                .orderBy(
-                    ["y", item => positionOrder[item?.position || "right"]],
-                    ["asc", "desc"]
-                )
-                .without(undefined)
-                .take(1)
-                .value() as  Array<Position>
-                
-            let nextBlock = nextBlockOptions[0]
+            let nextBlock = getNextBlock(resultBlocks)
             if (!nextBlock) {
-                const lowestBlock = _.reverse(_.sortBy(result, block => block.y + block.height))[0]
+                const lowestBlock = _.reverse(_.sortBy(resultBlocks, block => block.y + block.height))[0]
                 const lastBlock = inputBlocks[0]
                 
                 if (!lastBlock) {
@@ -320,7 +327,7 @@ export default class Packer {
                 continue
             }
             
-            result.push({
+            resultBlocks.push({
                 x: nextBlock.x,
                 y: nextBlock.y,
                 width: nextBlock.width,
@@ -331,8 +338,8 @@ export default class Packer {
             continue
         }
         
-        this.output = result
-        return result
+        this.output = resultBlocks
+        return resultBlocks
     }
 }
 

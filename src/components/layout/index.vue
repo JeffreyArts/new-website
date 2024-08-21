@@ -109,8 +109,8 @@ export default defineComponent ({
 
                 if (typeof window !== "undefined") {
                     setTimeout(() => {
-
                         window.dispatchEvent(new CustomEvent("layoutChange"))
+                        this.updateResize()
                     })
                 }
                 setTimeout(() => {
