@@ -223,8 +223,10 @@ export default defineComponent({
     display: flex;
     width: 100vw;
     height: 36px;
-    position: relative;
+    position: absolute;
     z-index: 1990;
+    mix-blend-mode: difference;
+    filter: invert(100%);
 }
 
 .site-header-navigation {

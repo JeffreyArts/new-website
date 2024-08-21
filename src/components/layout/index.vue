@@ -6,7 +6,7 @@
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
                     height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
-                    top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
+                    top:  typeof block.y === 'number' ? `${block.y + 72}px` : block.y,
                     left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
                 }"
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
@@ -228,8 +228,9 @@ export default defineComponent ({
     display: block;
     width: 100%;
     height: 100%;
-    position: relative;
+    position: absolute;
     overflow-x: hidden;
+
     .block {
         opacity: 0;
     }
