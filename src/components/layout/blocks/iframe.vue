@@ -37,7 +37,7 @@
 import { defineComponent, PropType } from "vue"
 import jaoIcon from "./../../jao-icon.vue"
 
-export type iframeBlock = {
+export type IframeBlock = {
     blockType: "iframe"
     size: number
     id: string
@@ -55,7 +55,7 @@ export default defineComponent ({
     }, 
     props: {
         options: {
-            type: Object as PropType<iframeBlock>,
+            type: Object as PropType<IframeBlock>,
             required: true
         },
     },

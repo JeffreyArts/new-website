@@ -12,7 +12,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 
-export type youtubeBlock = {
+export type YoutubeBlock = {
     blockType: "youtube"
     size: number
     id: string
@@ -25,7 +25,7 @@ export default defineComponent ({
     name: "youtubeBlock",
     props: {
         options: {
-            type: Object as PropType<youtubeBlock>,
+            type: Object as PropType<YoutubeBlock>,
             required: true
         },
     },
