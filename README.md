@@ -78,7 +78,7 @@ When you add a new block, you'll need to do a few things.
 
 1. Create a component in `/src/components/layout/blocks/` (use other blocks as base template)
 2. Add blockType type in `/src/components/layout/layout-types.ts`
-3. Add block to `/src/components/layout/index.ts` so it'll actually be imported
+3. Add block to `/src/components/layout/blocks/index.vue` so it'll actually be imported
 
 
 ### Blank page after adding new block
