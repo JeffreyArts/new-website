@@ -6,7 +6,7 @@
  <template>
     <span class="glitch" @mouseenter="mouseOverGlitch" @mouseleave="mouseLeaveGlitch">
         <span ref="glitchLayer0" v-html="glitchedInput" />
-        <span ref="glitchLayer1" v-html="glitchedInput" />
+        <span ref="glitchLayer1" v-html="glitchedInput" :style="{color: options?.accentColor ? options.accentColor : 'var(--accent-color)'}"/>
         <span ref="glitchLayer2" v-html="glitchedInput" />
     </span>
 </template>
@@ -24,6 +24,7 @@ export interface GlitchOptions {
     glitchOffset?: number       // default: 16 (pixels)
     repeat?: number             // default: 0
     opacityDuration?: number    // default: 128
+    accentColor?: string        // default: var(--accent-color)
 }
 
 export default {
@@ -278,9 +279,6 @@ export default {
             z-index: -1;
         }
         
-        &:nth-child(2) {
-            color: var(--accent-color);
-        }
         &:nth-child(3) {
             color: #ddd;
         }
