@@ -47,6 +47,7 @@ export default defineComponent ({
         return {
             resizeDelay: undefined as undefined | NodeJS.Timeout,
             gap: 40,
+            animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
             oldBlocks: [] as BlockType[],
@@ -61,9 +62,8 @@ export default defineComponent ({
                 if (typeof window === "undefined") {
                     return
                 }
-                
                 if (this.$el) {
-                    gsap.to(this.$el.querySelectorAll(".block"), {
+                    this.animations.push(gsap.to(this.$el.querySelectorAll(".block"), {
                         opacity: 0,
                         duration: .4,
                         stagger: {
@@ -74,11 +74,43 @@ export default defineComponent ({
                             this.oldBlocks.length = 0
                             this.prepareLayoutUpdate()  
                         }
-                    })
+                    }))
                 } else {
                     this.prepareLayoutUpdate()
                 }
             }, 
+            immediate: true
+        },
+        "options.blocks": {
+            handler() {
+                // Only watch fot block changes when on the live-preview page
+                if (!this.$route.path.includes("live-preview")) {
+                    return
+                }
+                
+                if (this.animations) {
+                    this.animations.forEach(tween => {
+                        gsap.killTweensOf(tween)
+                    })
+                }
+                this.options.blocks.forEach(optionBlock => {
+                    const oldBlock = _.find(this.oldBlocks, { id: optionBlock.id })
+                    if (oldBlock) {
+                        oldBlock.position = optionBlock.position
+                        oldBlock.size = optionBlock.size
+                        oldBlock.data = optionBlock.data
+                    }
+                })
+
+                if (this.$el) {
+                    this.prepareLayoutUpdate()
+                    this.updateResize()
+                    return
+                }
+
+                this.prepareLayoutUpdate()
+            },
+            deep:true,
             immediate: true
         }
     },
@@ -167,7 +199,14 @@ export default defineComponent ({
                     
                     setTimeout(() => {
                         const oldBlock = this.$el.querySelector(`#oldblock-${block.id}`)
-                        block.height = parseInt(window.getComputedStyle(oldBlock).height)
+                        if (!oldBlock) {
+                            return
+                        }
+                        const blockStyle = window.getComputedStyle(oldBlock)
+                        
+                        if (blockStyle) {
+                            block.height = parseInt(blockStyle.height)
+                        }
                         resolve()
                             
                     }, 0)

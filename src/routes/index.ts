@@ -3,6 +3,7 @@ import defaultTemplate from "@/routes/templates/default.vue"
 import ResetPassword from "@/routes/auth/password-reset.vue"
 import Error404 from "@/routes/error-404.vue"
 import Error301 from "@/routes/error-301.vue"
+import LivePreview from "@/routes/live-preview.vue"
 import generatedRoutes from "./generated-routes.json"
 
 const routes = [
@@ -10,6 +11,11 @@ const routes = [
         path: "/:pathMatch(.*)*",
         name: "404 | Not found",
         component: Error404,
+    },
+    {
+        path: "/live-preview",
+        name: "Live preview",
+        component: LivePreview,
     },
     {
         path: "/reset-password",
