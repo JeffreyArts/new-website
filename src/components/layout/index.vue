@@ -62,7 +62,6 @@ export default defineComponent ({
                 if (typeof window === "undefined") {
                     return
                 }
-                
                 if (this.$el) {
                     this.animations.push(gsap.to(this.$el.querySelectorAll(".block"), {
                         opacity: 0,
@@ -84,7 +83,11 @@ export default defineComponent ({
         },
         "options.blocks": {
             handler() {
-                // console.log("Blocks update")
+                // Only watch fot block changes when on the live-preview page
+                if (!this.$route.path.includes("live-preview")) {
+                    return
+                }
+                
                 if (this.animations) {
                     this.animations.forEach(tween => {
                         gsap.killTweensOf(tween)
@@ -92,12 +95,19 @@ export default defineComponent ({
                 }
                 this.options.blocks.forEach(optionBlock => {
                     const oldBlock = _.find(this.oldBlocks, { id: optionBlock.id })
-                    console.log("oldBlock", oldBlock)
                     if (oldBlock) {
+                        oldBlock.position = optionBlock.position
                         oldBlock.size = optionBlock.size
                         oldBlock.data = optionBlock.data
                     }
                 })
+
+                if (this.$el) {
+                    this.prepareLayoutUpdate()
+                    this.updateResize()
+                    return
+                }
+
                 this.prepareLayoutUpdate()
             },
             deep:true,

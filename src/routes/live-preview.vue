@@ -5,8 +5,6 @@
         layoutSize: layoutSize,
         blocks: page.layout.blocks 
     }"/>
-    <!-- <pre v-if="page">{{ page }}
-    </pre> -->
 </template>
 
 
@@ -73,6 +71,7 @@ export default defineComponent ({
         return {
             breakpoint: "",
             layoutSize: 8,
+            oldData: "",
             page: {} as PageType,
         }
     },
@@ -109,27 +108,15 @@ export default defineComponent ({
         // this.loadPage()
                         
         // window.addEventListener("postMessage", this.onPostMessage)
-        // window.addEventListener("resize", this.updateLayoutSize)
+        window.addEventListener("resize", this.updateLayoutSize)
     },
     unmounted() {
         // window.removeEventListener("postMessage", this.onPostMessage)
-        // window.removeEventListener("resize", this.updateLayoutSize)
+        window.removeEventListener("resize", this.updateLayoutSize)
     },
     methods: {
         loadPage(data) {
             try {
-                console.log("data", data)
-                // // Step 1: Decode the base64 string back to a Buffer/Uint8Array
-                // const decodedBuffer = atob(this.$route.query.data)  // atob() decodes a base64-encoded string
-
-                // // Step 2: Convert the Buffer back to a string
-                // // In the browser, you can create a string from the decoded buffer using TextDecoder or String.fromCharCode
-                // const decodedString = new TextDecoder().decode(
-                //     new Uint8Array([...decodedBuffer].map(char => char.charCodeAt(0)))
-                // )
-
-                // // Step 3: Parse the JSON string back to an object
-                // const req =  JSON.parse(decodedString)
 
                 data.layout.blocks = _.map(data.layout.blocks, (block, index) => {
                     return {
@@ -140,28 +127,28 @@ export default defineComponent ({
                     } as BlockType
                 })
 
-                this.page = data
+                                
+                const oldData = btoa(JSON.stringify(data))
+                if (oldData != this.oldData) {
 
-                if (this.head) {
-                    this.head.patch({
-                        title: this.$route.name,
-                        meta: setMeta(this.$route)
-                    })
+                    this.page = data
+
+                    if (this.head) {
+                        this.head.patch({
+                            title: this.$route.name,
+                            meta: setMeta(this.$route)
+                        })
+                    }
+                    this.updateLayoutSize()
                 }
-                this.updateLayoutSize()
-                // this.page =  JSON.parse(Buffer.from(this.$route.query.data, "base64").toString())
+                this.oldData = oldData
+                console.log(this.oldData)
                 
             } catch (error) {
                 console.error("Error loading page:", error)
                 this.$router.push("/404")
             }
         },
-        // // mapBlocks(   ) {
-            
-        // // }
-        // onPostMessage(e: Event, data) {
-        //     console.log(e, data)
-        // },
         updateLayoutSize() {
             if (!this.page.layout) {
                 return
@@ -197,7 +184,6 @@ export default defineComponent ({
 @import "@/assets/scss/variables.scss";
 @supports (font-variation-settings: "wdth" 115) {
   h1 {
-    // color: #f09;
     display: inline-block;
     width: 200px;
     text-align: center;
