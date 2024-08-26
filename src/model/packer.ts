@@ -1,6 +1,6 @@
 import _ from "lodash"
 
-type Block = {
+export type Block = {
     width: number;
     height: number;
     id: string | number;

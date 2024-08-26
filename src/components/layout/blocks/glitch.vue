@@ -65,7 +65,7 @@ export default defineComponent ({
                     this.glitchOptions.delay = val.delay * 1000
                 }
                 if (val.values) {
-                    this.glitchValues = val.values.map(d => d.text)
+                    this.glitchValues = val.values.map((d: { text: string }) => d.text)
                 }
             },
             deep: true,

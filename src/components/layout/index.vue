@@ -28,14 +28,14 @@ import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import Packer from "@/model/packer"
 import gsap from "gsap"
-import Block from "./blocks/index.vue"
+import BlockComponent from "./blocks/index.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
 
 
 export default defineComponent ({
     name: "LayoutComponent", 
     components: {
-        Block,
+        Block: BlockComponent,
     },
     props: {
         options: {
@@ -222,10 +222,12 @@ export default defineComponent ({
                     console.warn("Invalid value for block.height", block.height)
                 }
 
-                return _.pick({
-                    ...block,
-                    height: typeof block.height === "string" ? parseFloat(block.height) : block.height,
-                }, ["width", "height", "id", "position"])
+                return {
+                    id: block.id,
+                    position: block.position,
+                    width: block.width || 0,
+                    height: parseFloat(block.height + "")
+                } 
             }), "position")
 
             layout.setBlocks(convertedBlocks)

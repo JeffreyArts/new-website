@@ -33,7 +33,7 @@ export type CodeBlock = {
     id: string
     title: string
     link: string
-    language: string
+    language: "html" | "typescript" | "javascript" | "arduino" | "bash" | "php"
     code: string
 }
 

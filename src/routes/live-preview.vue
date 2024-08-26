@@ -115,9 +115,11 @@ export default defineComponent ({
         window.removeEventListener("resize", this.updateLayoutSize)
     },
     methods: {
-        loadPage(data) {
+        loadPage(data: any) {
             try {
-
+                if (!data.layout) {
+                    return
+                }
                 data.layout.blocks = _.map(data.layout.blocks, (block, index) => {
                     return {
                         size: block.size,
