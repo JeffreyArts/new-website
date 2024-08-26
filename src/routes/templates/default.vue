@@ -3,7 +3,7 @@
         layoutGap: 40,
         id: page.id,
         layoutSize: layoutSize,
-        blocks: page.layout.blocks
+        blocks: page.blocks
     }"/>
 </template>
 

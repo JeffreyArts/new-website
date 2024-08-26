@@ -3,7 +3,7 @@
         layoutGap: 40,
         id: page.id,
         layoutSize: layoutSize,
-        blocks: page.layout.blocks 
+        blocks: page.blocks 
     }"/>
 </template>
 
@@ -117,10 +117,10 @@ export default defineComponent ({
     methods: {
         loadPage(data: any) {
             try {
-                if (!data.layout) {
+                if (!data.blocks) {
                     return
                 }
-                data.layout.blocks = _.map(data.layout.blocks, (block, index) => {
+                data.blocks = _.map(data.blocks, (block, index) => {
                     return {
                         size: block.size,
                         position: parseInt(index) + 1,

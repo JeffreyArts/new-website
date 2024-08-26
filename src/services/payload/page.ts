@@ -11,8 +11,8 @@ export type PageType =  {
         size_m: number,
         size_l: number,
         size_xl: number,
-        blocks: Array<BlockType>
     }
+    blocks: Array<BlockType>
     metaDescription: string
     metaTags: string[]
     pageTitle: string
@@ -30,8 +30,8 @@ const payloadPage = {
                 throw new Error("Page not found")
             }
             
-            if (req.data.docs[0].layout?.blocks.length > 0){
-                req.data.docs[0].layout.blocks = _.map(req.data.docs[0].layout.blocks, (block, index) => {
+            if (req.data.docs[0].blocks.length > 0){
+                req.data.docs[0].blocks = _.map(req.data.docs[0].blocks, (block, index) => {
                     return {
                         size: block.size,
                         position: parseInt(index) + 1,
