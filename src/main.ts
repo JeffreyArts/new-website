@@ -18,11 +18,13 @@ import hljs from "highlight.js/lib/core"
 import arduino from "highlight.js/lib/languages/arduino"
 import bash from "highlight.js/lib/languages/bash"
 import javascript from "highlight.js/lib/languages/javascript"
+import xml from "highlight.js/lib/languages/xml"
 import php from "highlight.js/lib/languages/php"
 import typescript from "highlight.js/lib/languages/typescript"
 
 hljs.registerLanguage("arduino", arduino)
 hljs.registerLanguage("bash", bash)
+hljs.registerLanguage("html", xml)
 hljs.registerLanguage("javascript", javascript)
 hljs.registerLanguage("php", php)
 hljs.registerLanguage("typescript", typescript)
