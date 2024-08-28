@@ -4,7 +4,9 @@ import ResetPassword from "@/routes/auth/password-reset.vue"
 import Error404 from "@/routes/error-404.vue"
 import Error301 from "@/routes/error-301.vue"
 import LivePreview from "@/routes/live-preview.vue"
-import generatedRoutes from "./generated-routes.json"
+import pageRoutes from "./pages.json"
+import projectRoutes from "./projects.json"
+import pieceRoutes from "./pieces.json"
 
 const routes = [
     {
@@ -24,36 +26,48 @@ const routes = [
     }
 ]
 
-if (generatedRoutes) {
-    generatedRoutes.forEach(route => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let component = undefined as any
-        if (route.template === "default") {
-            component = defaultTemplate
-        }
+const addRoutes = (route:  {
+    path: string,
+    name:  string
+    meta: {
+        description?: string,
+        keywords?: string
+        redirect?: string
+    },
+    template: string
+}) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let component = undefined as any
+    if (route.template === "default") {
+        component = defaultTemplate
+    }
 
-        if (route.meta.redirect) {
-            component = Error301
-        }
+    if (route.meta.redirect) {
+        component = Error301
+    }
 
-        if (!component) {
-            console.error(`Invalid template (${route.template}) for route ${route.path}`)
-            return
-        }
+    if (!component) {
+        console.error(`Invalid template (${route.template}) for route ${route.path}`)
+        return
+    }
 
-        const meta = route.meta as {
-            description: string
-            keywords: string
-        }
-        routes.push({
-            path: route.path,
-            name: route.name,
-            meta: meta,
-            component,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
-    })
+    const meta = route.meta as {
+        description: string
+        keywords: string
+    }
+
+    routes.push({
+        path: route.path,
+        name: route.name,
+        meta: meta,
+        component,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
 }
+
+if (pageRoutes) { pageRoutes.forEach(addRoutes) }
+if (projectRoutes) { projectRoutes.forEach(addRoutes) }
+if (pieceRoutes) { pieceRoutes.forEach(addRoutes) }
 
 
 const routerOptions = {

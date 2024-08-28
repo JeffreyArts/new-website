@@ -24,8 +24,21 @@ export type PageType =  {
 const payloadPage = {
     collectionName: "pages",
     getPageByPath: (path: string) => new Promise(async (resolve, reject) => {
+
+        let collection = payloadPage.collectionName
+        
+        if (path.startsWith("/project/")) {
+            collection = "projects"
+            path = path.replace("/project", "")
+        }
+        
+        if (path.startsWith("/piece/")) {
+            collection = "pieces"
+            path = path.replace("/piece", "")
+        }
+        
         try {
-            const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${payloadPage.collectionName}?where[path][equals]=${path}`)
+            const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}?where[path][equals]=${path}`)
             if (req.data?.docs.length != 1) {
                 throw new Error("Page not found")
             }
