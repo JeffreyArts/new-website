@@ -42,7 +42,7 @@ type NavItem = {
 
 }
 export default defineComponent({
-    name: "languageSelector",
+    name: "siteHeader",
     components: {
         jaoIcon
     },
