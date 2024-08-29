@@ -150,7 +150,7 @@ export default defineComponent ({
             }
 
             if (!this.icon) {
-                throw new Error("Invalid icon")
+                throw new Error(`Invalid icon ${this.size}/${this.name}`)
             }
             
             this.originalGrid = []

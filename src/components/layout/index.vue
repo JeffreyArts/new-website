@@ -1,12 +1,14 @@
 <template>
     <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
+        <Breadcrumbs />
+
         <div v-if="oldBlocks.length > 0">
             <Block v-for="block,key in oldBlocks" :key="key"
                 :id="`oldblock-${block.id}`"
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
                     height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
-                    top:  typeof block.y === 'number' ? `${block.y + 72}px` : block.y,
+                    top:  typeof block.y === 'number' ? `${block.y + 72 + 32}px` : block.y,
                     left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
                 }"
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
@@ -29,6 +31,7 @@ import _ from "lodash"
 import Packer from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
+import Breadcrumbs from "./../breadcrumbs.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
 
 
@@ -36,6 +39,7 @@ export default defineComponent ({
     name: "LayoutComponent", 
     components: {
         Block: BlockComponent,
+        Breadcrumbs
     },
     props: {
         options: {
@@ -274,6 +278,10 @@ export default defineComponent ({
 
     .block {
         opacity: 0;
+    }
+    .site-breadcrumbs {
+        margin-top: 80px;
+        margin-left: 16px;
     }
 }
 
