@@ -51,6 +51,7 @@ export default defineComponent({
     methods: {
         changeIcon() {
             if (this.$route.path.startsWith("/")) { this.icon = "home"}
+            if (this.$route.path.startsWith("/archive")) { this.icon = "archive"}
             if (this.$route.path.startsWith("/project")) { this.icon = "hammer"}
             if (this.$route.path.startsWith("/tool")) { this.icon = "wrench"}
             if (this.$route.path.startsWith("/about")) { this.icon = "user"}
