@@ -142,12 +142,4 @@ export default defineComponent ({
 
 <style lang="scss">
 @import "@/assets/scss/variables.scss";
-@supports (font-variation-settings: "wdth" 115) {
-  h1 {
-    // color: #f09;
-    display: inline-block;
-    width: 200px;
-    text-align: center;
-  }
-}
 </style>

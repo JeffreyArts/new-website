@@ -8,7 +8,7 @@
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
                     height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
-                    top:  typeof block.y === 'number' ? `${block.y + 72 + 32}px` : block.y,
+                    top:  typeof block.y === 'number' ? `${block.y + offsetTop}px` : block.y,
                     left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
                 }"
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
@@ -51,6 +51,7 @@ export default defineComponent ({
         return {
             resizeDelay: undefined as undefined | NodeJS.Timeout,
             gap: 40,
+            offsetTop: 60,
             animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
@@ -130,6 +131,12 @@ export default defineComponent ({
         updateResize() {
             this.layoutWidth = this.$el.clientWidth
             this.widthRatio = (this.layoutWidth) / this.options.layoutSize
+            if (this.layoutWidth > 640)  {
+                this.offsetTop = 80   
+            }
+            if (this.layoutWidth > 800)  {
+                this.offsetTop = 104
+            }
             
             this.updateBlockSizes(this.oldBlocks)
         },
@@ -280,9 +287,26 @@ export default defineComponent ({
         opacity: 0;
     }
     .site-breadcrumbs {
-        margin-top: 80px;
-        margin-left: 16px;
+        margin-top: 40px;
+        margin-left: 8px;
     }
 }
+
+@media screen and (min-width: 640px) {
+    .layout {
+        .site-breadcrumbs {
+            margin-left: 16px;
+            margin-top: 60px;
+        }
+    }
+}
+@media screen and (min-width: 800px) {
+    .layout {
+        .site-breadcrumbs {
+            margin-top: 80px;
+        }
+    }
+}
+
 
 </style>
