@@ -2,7 +2,7 @@
     <div class="projects-container">
         <Breadcrumbs />
         <div class="projects">
-            <router-link class="projects-main" v-if="projects[0]" :to="projects[0].path">
+            <section class="projects-main" v-if="projects[0]" @click="goToProject(projects[0].path, $event)" :to="projects[0].path">
                 <dynamic-image class="projects-main-image" :src="src(projects[0].thumbnail.sizes.image_lg.url)" :options="{duration: 2,tileSize: 64}"/>
                 <YearBlock :options="{
                     blockType: 'year',
@@ -10,16 +10,16 @@
                     id: 'string',
                     year: projects[0].year
                 }" />
-                <section class="projects-main-text">
+                <header class="projects-main-text">
                     <h1 class="projects-main-title">{{ projects[0].title }}</h1>
                     <SlateText  class="projects-main-description" :data="projects[0].description" />
-                </section>
+                </header>
 
                 <button class="projects-main-button">View project</button>
-            </router-link>
+            </section>
 
             <aside class="projects-sidebar" v-if="projects[1]">
-                <section class="projects-thumbnail" @click="changePosition(1)">
+                <section class="projects-thumbnail" @click="onThumbnailClick(1)">
                     <dynamic-image class="projects-thumb-image" :src="src(projects[1].thumbnail.sizes.image_md.url)" :options="{tileSize: 32, duration: 1}" />
                     <footer class="projects-thumbnail-footer">
                         <h2 class="projects-thumbnail-title">
@@ -29,7 +29,7 @@
                 </section>
                 
 
-                <section class="projects-thumbnail" @click="changePosition(2)">
+                <section class="projects-thumbnail" @click="onThumbnailClick(2)">
                     <dynamic-image class="projects-thumb-image" :src="src(projects[2].thumbnail.sizes.image_md.url)" :options="{tileSize: 32, duration: 1}" />
                     <footer class="projects-thumbnail-footer">
                         <h2 class="projects-thumbnail-title">
@@ -39,7 +39,7 @@
                 </section>
 
 
-                <section class="projects-thumbnail" @click="changePosition(3)">
+                <section class="projects-thumbnail" @click="onThumbnailClick(3)">
                     <dynamic-image class="projects-thumb-image" :src="src(projects[3].thumbnail.sizes.image_md.url)" :options="{tileSize: 32, duration: 1}" />
                     <footer class="projects-thumbnail-footer">
                         <h2 class="projects-thumbnail-title">
@@ -60,6 +60,8 @@ import { defineComponent } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import Breadcrumbs from "./../components/breadcrumbs.vue"
+import _ from "lodash"
+import gsap from "gsap"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import DynamicImage from "./../components/dynamic-image.vue"
@@ -199,7 +201,33 @@ export default defineComponent ({
             try {
                 // const res = await Page.getPageByPath()
                 this.projects = await Page.getProjectsPage() as Array<ProjectType>
-                
+                setTimeout(() => {
+
+                    gsap.fromTo(".projects-main", {
+                        opacity: 0,
+                        x: -40,
+                    }, {
+                        duration: 0.96,
+                        x: 0,
+                        opacity: 1,
+                        ease: "power4.inOut"
+                    })
+
+        
+                    const domElements = this.$el.querySelectorAll(".projects-thumbnail")
+                    _.each(domElements, (el, index) => {
+                        gsap.fromTo(el, {
+                            opacity: 0,
+                            x: 40 + parseInt(index, 10) * 16,
+                        }, {
+                            opacity: 1,
+                            x: 0,
+                            duration: 1.28,
+                            delay: .4,
+                            ease: "power4.out",
+                        })
+                    })
+                })
             } catch (error) {
                 console.error("Error loading page:", error)
                 // this.$router.push("/404")
@@ -235,11 +263,54 @@ export default defineComponent ({
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
             this.layoutSize = this.page.layout[size]
         },
-        changePosition(index:number) {
+        onThumbnailClick(index:number) {
             const newMain = this.projects[index]
             const oldMain = this.projects[0]
             this.projects[index] = oldMain
             this.projects[0] = newMain
+
+            if (window.innerWidth < 640) {
+                this.goToProject(newMain.path)
+            }
+        },
+        goToProject(path: string, event?:Event) {
+            if (event) {
+                event.preventDefault()
+            }
+
+            if (path) {
+                gsap.set(".projects-thumbnail", {
+                    backgroundColor: "transparent"
+                })
+                gsap.set(".projects-container", {
+                    overflowX: "hidden"
+                })
+                gsap.to(".projects-main", {
+                    duration: .8,
+                    opacity: 0,
+                    ease: "power4.inOut"
+                })
+
+                const domElements = this.$el.querySelectorAll(".projects-thumbnail")
+                _.each(domElements, (el, index) => {
+
+                    gsap.to(el, {
+                        opacity: 0,
+                        x: 40 + parseInt(index, 10) * 16,
+                        duration: 1.28,
+                        ease: "power4.out",
+                        stagger: {
+                            each: .05,
+                            from: "start",
+                        },
+                        onComplete: () => {
+                            setTimeout(() => {
+                                this.$router.push(path)
+                            }, 64)
+                        }
+                    })
+                })
+            }
         }
     }
 })
@@ -265,6 +336,7 @@ export default defineComponent ({
     position: relative;
     width: 100%;
     margin-bottom: 40px;
+    opacity: 0; // Set by GSAP
 
     &:after {
         content: "";
@@ -384,6 +456,7 @@ export default defineComponent ({
     aspect-ratio: 16/9;    
     width: 100%;
     position: relative;
+    opacity: 0; // Set by GSAP
     
     &:nth-child(1) {
         background-color: #09f;
