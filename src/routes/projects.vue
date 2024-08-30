@@ -249,7 +249,7 @@ export default defineComponent ({
 <style lang="scss">
 @import "@/assets/scss/variables.scss";
 .projects-container {
-    padding: 80px 16px;
+    padding: 40px 16px;
     width: 100vw;
 }
 
@@ -451,7 +451,17 @@ export default defineComponent ({
     }
 }
 
+@media screen and (min-width: 640px) {
+    .projects-container {
+        padding: 60px 16px;
+    }
+}
+
 @media screen and (min-width: 800px) {
+    .projects-container {
+        padding: 80px 16px;
+    }
+
     .projects {
         flex-flow: row;
     }
