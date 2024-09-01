@@ -93,7 +93,10 @@ export default defineComponent({
                 return {
                     id: `${key}`,
                     link: path,
-                    name: name.split("").map(c => `<span class="char">${c}</span>`),
+                    name: name.split("").map(c => {
+                        if (c === " ") { c = "&nbsp;" }
+                        return `<span class="char">${c}</span>`
+                    }),
                 }
             })
         }
