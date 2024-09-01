@@ -2,10 +2,14 @@ import axios from "axios"
 import _ from "lodash"
 
 import { BlockType } from "@/components/layout/layout-types"
+import { ProjectType } from "@/routes/projects.vue"
 export type PageType =  {
-    createdAt: string
     id: string
-    layout: { 
+    createdAt: string
+    updatedAt: string
+    title: string
+    path: string
+    layout?: { 
         size_xs: number,
         size_s: number,
         size_m: number,
@@ -16,9 +20,8 @@ export type PageType =  {
     metaDescription: string
     metaTags: string[]
     pageTitle: string
-    path: string
-    title: string
-    updatedAt: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    custom?: any
 }
 
 const payloadPage = {
@@ -55,6 +58,43 @@ const payloadPage = {
             }
             
             resolve(req.data.docs[0])
+
+        } catch(err) {
+            reject(err)
+        }
+    }),
+    getProjectsPage: () => new Promise(async (resolve, reject) => {
+
+        const collection = "project-positions"
+        
+        try {
+            const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}?sort=position&depth=2`)
+            if (req.data?.docs.length < 1) {
+                throw new Error("Can not retrieve projects")
+            }
+            
+            const projects = _.map(req.data.docs, doc => {
+                const project = doc.project
+                
+                // Convert year to string
+                if (Number(project.year.from) === Number(project.year.to)) {
+                    project.year = project.year.from.toString()
+                } else if (isNaN(Number(project.year.to))) {
+                    project.year = `${project.year.from} - present`
+                } else {
+                    project.year = `${project.year.from} - ${project.year.to}`
+                }
+
+                // Prefix path
+                if (!project.path.startsWith("/project")) {
+                    project.path = "/project" + project.path
+                }
+
+                return _.pick(project, ["id", "title", "year", "thumbnail", "path", "description"])
+            }) as Array<ProjectType>
+            
+
+            resolve(projects)
 
         } catch(err) {
             reject(err)
