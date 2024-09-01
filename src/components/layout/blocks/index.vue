@@ -5,6 +5,7 @@
         <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"/>
         <IframeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'iframe'"/>
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
+        <LineBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'line'"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
         <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
         <NewsletterBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'newsletter'"/>
@@ -20,6 +21,7 @@ import CodeBlock from "./code.vue"
 import GlitchBlock from "./glitch.vue"
 import IframeBlock from "./iframe.vue"
 import ImageBlock from "./image.vue"
+import LineBlock from "./line.vue"
 import NoteBlock from "./note.vue"
 import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
@@ -35,6 +37,7 @@ export default defineComponent ({
         GlitchBlock,
         IframeBlock,
         ImageBlock,
+        LineBlock,
         NewsletterBlock,
         NoteBlock,
         TitleBlock,
