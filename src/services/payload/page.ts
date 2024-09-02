@@ -77,7 +77,7 @@ const payloadPage = {
                 const project = doc.project
                 
                 // Convert year to string
-                if (Number(project.year.from) === Number(project.year.to)) {
+                if (parseInt(project.year.from) === parseInt(project.year.to)) {
                     project.year = project.year.from.toString()
                 } else if (isNaN(Number(project.year.to))) {
                     project.year = `${project.year.from} - present`

@@ -86,7 +86,7 @@ export default defineComponent({
         },
         updatePath() {
             const arr = this.$route.path.slice(1).split("/")
-            this.path = arr.map((path,key) => {
+            this.path = arr.map((path: string, key:number) => {
                 let name = startCase(path).toLowerCase()
                 name = name.charAt(0).toUpperCase() + name.slice(1)
 
