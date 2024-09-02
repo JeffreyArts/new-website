@@ -6,7 +6,7 @@
   "scripts": {
     "add-route": "bash ./scripts/add-route.sh",
     "dev": "vite",
-    "build": "node ./src/generateRoutes.js && vue-tsc && vite-ssg build",
+    "build": "node ./src/generateRoutes.js && vue-tsc && vite build",
     "generate-routes": "node ./src/generateRoutes.js",
     "deploy": "NODE_ENV=staging bash scripts/deploy.sh",
     "production": "NODE_ENV=production bash scripts/deploy.sh",
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@payloadcms/live-preview": "^0.2.2",
+    "@unhead/vue": "^1.10.2",
     "axios": "^1.7.4",
     "dayjs": "^1.11.12",
     "dotenv": "^16.4.5",
@@ -53,7 +54,6 @@
     "globals": "^15.9.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
-    "vite-ssg": "^0.23.8",
     "vite-svg-loader": "^5.1.0",
     "vue-tsc": "^2.0.29"
   }

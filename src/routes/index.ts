@@ -9,6 +9,8 @@ import pageRoutes from "./pages.json"
 import projectRoutes from "./projects.json"
 import pieceRoutes from "./pieces.json"
 
+import { createWebHistory, createRouter } from "vue-router"
+
 const routes = [
     {
         path: "/:pathMatch(.*)*",
@@ -76,10 +78,6 @@ if (projectRoutes) { projectRoutes.forEach(addRoutes) }
 if (pieceRoutes) { pieceRoutes.forEach(addRoutes) }
 
 
-const routerOptions = {
-    routes,
-}
-
 ////////////////////////////////////////////////////////////////////////
 // IMPORTANT NOTICE
 // The code above will be updated via the `yarn add-route` command
@@ -89,5 +87,10 @@ const routerOptions = {
 // - Jeffrey Arts, August 2024
 ////////////////////////////////////////////////////////////////////////
 
-export { routerOptions }
-export default routerOptions
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+})
+
+export default router

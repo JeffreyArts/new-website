@@ -49,9 +49,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
+import { useRoute } from "vue-router"
 import payloadStore from "@/stores/payload"
 import gsap from "gsap"
 import Glitch from "./../components/glitch.vue"
+import { useHead }  from "@unhead/vue"
 
 export default defineComponent ({ 
     name: "errorPage404",
@@ -61,8 +63,16 @@ export default defineComponent ({
     props: [],
     setup() {
         const Payload = payloadStore()
+        const route = useRoute()
+        const title = route.name as string
 
-        return { Payload }
+       
+        return { 
+            Payload,
+            head:  useHead({
+                title: `${title} - Not found`,
+            }) 
+        }
     },
     data() {
         return {

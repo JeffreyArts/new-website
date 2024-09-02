@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { ViteSSG } from "vite-ssg"
 import App from "./App.vue"
-import { routerOptions } from "@/routes"
+import { createApp } from "vue"
+import router from "./routes"
 import { createPinia } from "pinia"
 import { VueHeadMixin } from "@unhead/vue"
 
@@ -30,33 +28,30 @@ hljs.registerLanguage("php", php)
 hljs.registerLanguage("typescript", typescript)
 
 import "./assets/scss/index.scss"
+// import App from "./App.vue"
 
-export const createApp = ViteSSG(
-    App,
-    routerOptions ,
-    // function to have custom setups
-    ({ app, router, routes, isClient, initialState }) => {
+const pinia = createPinia()
         
-        const pinia = createPinia()
-        
-        const i18n = createI18n({
-            legacy: false,
-            warnHtmlMessage: import.meta.env.DEV,
-            fallbackLocale: "en",
-            messages,
-        })
-        
-        
-        app.use(i18n)
-        app.use(pinia)
-        app.mixin(VueHeadMixin)
+pinia.use(({ store }) => {
+    if (store.$id === "locale") {
+        store.$i18n = i18n.global
+    }
+})
 
-        app.config.globalProperties.$text  = $text
-        
-        pinia.use(({ store }) => {
-            if (store.$id === "locale") {
-                store.$i18n = i18n.global
-            }
-        })
-    },
-)
+const i18n = createI18n({
+    legacy: false,
+    warnHtmlMessage: import.meta.env.DEV,
+    fallbackLocale: "en",
+    messages,
+})
+
+
+
+const app = createApp(App)
+app.config.globalProperties.$text  = $text
+
+app.use(router)
+    .use(i18n)
+    .use(pinia)
+    .mixin(VueHeadMixin)
+    .mount("#app")
