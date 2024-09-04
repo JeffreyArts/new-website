@@ -1,8 +1,9 @@
-import _ from "lodash"
+import _, { ListIterator, Many,PartialShallow,PropertyName, } from "lodash"
 
 export type Block = {
     width: number;
     height: number;
+    position: number;
     id: string | number;
 }
 
@@ -12,24 +13,65 @@ type Position = {
     width: number;
     height: number;
     sourceId?: string | number;
-    position?: "right" | "left" | "bottom"
+    position?: number
+    parentPosition?: "right" | "left" | "bottom"
     id?: string | number;
 }
 
+type Order = Array<string>
 
 export default class Packer {
     private layoutWidth: number
     private layoutHeight: number
     private blocks: Block[]
     private output: Position[]
+    private order: Order
     private autoResize?: "width" | "height"
     
-    constructor(layoutWidth: number, layoutHeight: number, options?: { autoResize?: "width" | "height" }) {
+    constructor(layoutWidth: number, layoutHeight: number, options?: { 
+        autoResize?: "width" | "height",
+        order?: Order
+    }) {
         this.layoutWidth = layoutWidth
         this.layoutHeight = layoutHeight
         this.blocks = []
         this.output = []
-        this.autoResize = options?.autoResize
+        this.order = ["position", "parentPosition", "y", "x"]
+
+        if (options) {
+            this.autoResize = options?.autoResize
+            this.setOrder(options.order)
+        } 
+    }
+
+    public setOrder(order?: Order | undefined) {
+        const defaultOrder = ["position", "y", "parentPosition","x"]
+        
+        if (!order) {
+            this.order = defaultOrder
+            return
+        }
+
+        // Validate input value
+        const possibleValues = ["position", "y", "parentPosition","x"]
+
+        order.forEach(value => {
+            if (!possibleValues.includes(value)) {
+                console.warn(`${value} is not a valid order value`)
+            }
+        })
+
+        // if (order.length != 3) {
+        //     this.order = order
+        //     defaultOrder.forEach(value => {
+        //         if (!this.order.includes(value)) {
+        //             this.order.push(value)
+        //         }
+        //     })
+        //     return
+        // }
+
+        this.order = order
     }
 
     public setDimensions(width: number, height: number) {
@@ -43,6 +85,7 @@ export default class Packer {
             if (!block.id) {
                 block.id = index
             }
+            block.position = index
             return block
         })
         this.updateLayout()
@@ -62,6 +105,18 @@ export default class Packer {
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
 
+
+        const positionOrder = {
+            right: 1,
+            bottom: 2,
+            left: 3
+        }
+
+        const orderByOptions = {
+            property: [] as Array<PropertyName | ListIterator<Position | undefined, unknown> | PartialShallow<Position | undefined>>,
+            order: [] as Array<"asc" | "desc">
+        }
+
         const fitRight = (target: Position, inputBlocks: Block[]) => {
             return _.without(_.map(inputBlocks, inputBlock => {
                 const newBlock = {
@@ -69,7 +124,8 @@ export default class Packer {
                     y: target.y,
                     width: inputBlock.width,
                     height: inputBlock.height,
-                    position: "right",
+                    position: inputBlock.position,
+                    parentPosition: "right",
                     sourceId: target.id,
                     id: inputBlock.id
                 } as Position
@@ -98,7 +154,8 @@ export default class Packer {
                     y: target.y + target.height,
                     width: inputBlock.width,
                     height: inputBlock.height,
-                    position: "bottom",
+                    parentPosition: "bottom",
+                    position: inputBlock.position,
                     sourceId: target.id,
                     id: inputBlock.id
                 } as Position
@@ -125,7 +182,8 @@ export default class Packer {
                     y: target.y,
                     width: inputBlock.width,
                     height: inputBlock.height,
-                    position: "left",
+                    position: inputBlock.position,
+                    parentPosition: "left",
                     sourceId: target.id,
                     id: inputBlock.id
                 } as Position
@@ -158,18 +216,24 @@ export default class Packer {
             ]   
         }
 
-        const getNextBlock = (resultPositions: Position[]) => {
-            const positionOrder = {
-                right: 1,
-                bottom: 2,
-                left: 3
+
+        this.order.forEach(opt => {
+            if (opt === "parentPosition") {
+                orderByOptions.property.push((item:Position | undefined) => positionOrder[item?.parentPosition || "right"])
+                orderByOptions.order.push("asc")
+                return
             }
-            
+
+            orderByOptions.property.push(opt)
+            orderByOptions.order.push("asc")
+        })
+
+        const getNextBlock = (resultPositions: Position[]) => {
             const options = _.filter(_.map(resultPositions, resBlock => {
                 const data = getOptions(resBlock, resultPositions, inputBlocks) as Array<Position | undefined>
                 const temp  =  _.chain(data)
                     .orderBy(
-                        ["y", item => positionOrder[item?.position || "right"]],
+                        ["y", item => positionOrder[item?.parentPosition || "right"]],
                         ["asc", "asc"]
                     )
                     .without(undefined)
@@ -188,10 +252,12 @@ export default class Packer {
                 })
             }), res => res.length > 0)
             
+            
+
             const nextBlocks = _.chain(_.flatten(options))
                 .orderBy(
-                    ["y", item => positionOrder[item?.position || "right"]],
-                    ["asc", "asc"]
+                    orderByOptions.property,
+                    orderByOptions.order
                 )
                 .without(undefined)
                 .take(1)
@@ -225,6 +291,7 @@ export default class Packer {
                     resultPositions.push({
                         width: firstBlock.width,
                         height: firstBlock.height,
+                        position: firstBlock.position,
                         x: 0,
                         y: 0,
                         id: firstBlock.id
