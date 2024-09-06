@@ -33,8 +33,9 @@ const payloadPage = {
         if (path.startsWith("/project/")) {
             collection = "projects"
         }
-        
-        if (path.startsWith("/piece/")) {
+
+        const validatePiece = /^\/project\/[a-z0-9-]+\/[a-z0-9-]+$/i;
+        if (path.startsWith("/piece/") || validatePiece.test(path)) {
             collection = "pieces"
         }
         
