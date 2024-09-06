@@ -417,6 +417,8 @@ export default defineComponent ({
     height: 40px;
     font-family: $accentFont;
     font-size: 24px;
+    cursor: pointer;
+    z-index: 1;
 }
 
 .projects-main .year-block {

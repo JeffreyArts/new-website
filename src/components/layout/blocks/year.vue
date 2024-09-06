@@ -123,7 +123,6 @@ export default defineComponent ({
     display: flex;
     justify-content: left;
     align-items: end;
-    aspect-ratio: 16/9;
 
     svg {
         height: 80px;
