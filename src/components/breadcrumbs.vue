@@ -2,7 +2,7 @@
     <nav class="site-breadcrumbs">
         <jaoIcon :name="icon" size="large" :transit-effect="{duration: 1, delay:.002, effect: 'shuffle'}" class="site-breadcrumbs-icon"/>
         <span class="site-breadcrumbs-route" v-for="(p,k) in path" :key="k">
-            <router-link :to="p.link"><span  v-html="p.name.join('')" /></router-link>
+            <router-link :to="p.link"><span v-html="p.name.join('')" /></router-link>
             <jaoIcon name="chevron-right" size="small"  class="site-breadcrumbs-chevron" v-if="k != path.length-1"/>
         </span>
     </nav>
@@ -86,13 +86,14 @@ export default defineComponent({
         },
         updatePath() {
             const arr = this.$route.path.slice(1).split("/")
+            let link = ""
             this.path = arr.map((path: string, key:number) => {
                 let name = startCase(path).toLowerCase()
                 name = name.charAt(0).toUpperCase() + name.slice(1)
-
+                link += `/${path}`
                 return {
                     id: `${key}`,
-                    link: path,
+                    link: link === '/project' ? '/projects' : link,
                     name: name.split("").map(c => {
                         if (c === " ") { c = "&nbsp;" }
                         return `<span class="char">${c}</span>`
