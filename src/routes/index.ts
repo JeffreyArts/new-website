@@ -14,6 +14,11 @@ import { createWebHistory, createRouter } from "vue-router"
 const routes = [
     {
         path: "/:pathMatch(.*)*",
+        // name: "404 | Not found",
+        component: defaultTemplate,
+    },
+    {
+        path: "/404",
         name: "404 | Not found",
         component: Error404,
     },

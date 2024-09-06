@@ -32,12 +32,10 @@ const payloadPage = {
         
         if (path.startsWith("/project/")) {
             collection = "projects"
-            path = path.replace("/project", "")
         }
         
         if (path.startsWith("/piece/")) {
             collection = "pieces"
-            path = path.replace("/piece", "")
         }
         
         try {

@@ -43,14 +43,6 @@ const generateRoutes = async (url, filename) => {
                 }
                 meta.redirect = `${data.redirect}`
             }
-        
-            if (filename == "projects") {
-                data.path = `/project${data.path}`
-            }
-
-            if (filename == "pieces") {
-                data.path = `/piece${data.path}`
-            }
 
             result.push({
                 path: data.path,
