@@ -1,11 +1,11 @@
 <template>
     <figure class="image-block" :title="options.description">
-        <a :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
+        <a :href="link" v-if="link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
 
-        <span v-if="!options.link">
-            <img :src="src" :alt="options.description" ref="image"/>
+        <span v-if="!link">
+            <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent"/>
         </span>
     </figure>
 </template>
@@ -60,7 +60,28 @@ export default defineComponent ({
     data: function() {
         return {
             hoverEvent: undefined as undefined | gsap.core.Tween,
-            imageSize: "image_sm" as "image_sm" | "image_md" | "image_lg" | "original"
+            imageSize: "image_sm" as "image_sm" | "image_md" | "image_lg" | "original",
+            link: "",
+            patternHover: false,
+            bgCache: "" as string
+        }
+    },
+    watch: {
+        "options.link": {
+            handler() {
+                if (!this.options.link) {
+                    return
+                }
+
+                if (this.options.link.startsWith("http") || this.options.link.startsWith("/")) {
+                    this.link = this.options.link
+                }
+
+                if (this.options.link == "<pattern>") { 
+                    this.patternHover = true
+                }
+            },
+            immediate: true
         }
     },
     computed: {
@@ -134,11 +155,25 @@ export default defineComponent ({
             return this.imageSize = "original"
         },
         onMouseEnterEvent(e:Event) {
+
             const target = e.target as HTMLElement
             if (!target) {
                 return
             }
+
+            if (this.link) {
+                this.mouseEnterZoom(target)
+            }
             
+            if (this.patternHover) {
+                this.addBackgroundPattern()
+            }
+        },
+        addBackgroundPattern() {
+            this.bgCache = getComputedStyle(document.body).backgroundImage 
+            document.body.style.backgroundImage = `url(${this.src})`
+        },
+        mouseEnterZoom(target: HTMLElement) {
             const img = target.querySelector("img") 
             if (!img) {
                 return
@@ -157,10 +192,21 @@ export default defineComponent ({
             })
         },
         onMouseLeaveEvent(e:Event) {
+
             const target = e.target as HTMLElement
             if (!target) {
                 return
             }
+
+            if (this.link) {
+                this.mouseLeaveZoom(target)
+            }
+            
+            if (this.patternHover) {
+                this.removeBackgroundPattern()
+            }
+        },
+        mouseLeaveZoom(target: HTMLElement) {
             
             const img = target.querySelector("img") 
             if (!img) {
@@ -177,7 +223,11 @@ export default defineComponent ({
                 duration: .8,
                 ease: "power3.out"
             })
-        }
+        },
+        removeBackgroundPattern() {
+            document.body.style.backgroundImage = this.bgCache
+            this.bgCache = ""
+        },
     }
 })
 
