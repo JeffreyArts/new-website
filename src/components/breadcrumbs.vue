@@ -90,7 +90,12 @@ export default defineComponent({
             this.path = arr.map((path: string, key:number) => {
                 let name = startCase(path).toLowerCase()
                 name = name.charAt(0).toUpperCase() + name.slice(1)
+                if (name === "piece" && key === 0) {
+                    name = "archive"
+                    link = link.replace("/piece","/archive")
+                }
                 link += `/${path}`
+                
                 return {
                     id: `${key}`,
                     link: link === '/project' ? '/projects' : link,

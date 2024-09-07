@@ -10,6 +10,7 @@ html,
 body {    
     min-height: 100vh;
     display: flex;
+    accent-color: var(--accent-color);
 }
 html {
     background-color: var(--primary-bg-color);

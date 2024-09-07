@@ -10,7 +10,7 @@ export default defineComponent ({
     name: "highlightJs", 
     props: {
         language: {
-            type: String  as PropType<"typescript" | "javascript" | "arduino" | "bash" | "html" | "php">,
+            type: String  as PropType<"typescript" | "javascript" | "arduino" | "bash" | "css" | "html" | "php">,
             required: true
         },
         code: {

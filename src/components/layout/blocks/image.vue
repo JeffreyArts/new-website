@@ -149,9 +149,10 @@ export default defineComponent ({
             }
 
             this.hoverEvent = gsap.to(img, {
-                scale: 1.16,
-                boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.4)`,
-                duration: .8,
+                scale: (img.clientWidth + 40) / img.clientWidth,
+                boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.16)`,
+                duration: .64,
+                zIndex: 1,
                 ease: "bounce.out"
             })
         },
@@ -173,8 +174,8 @@ export default defineComponent ({
             this.hoverEvent = gsap.to(img, {
                 scale: 1,
                 boxShadow: "0 0 0px rgba(0,0,0,0)",
-                duration: .48,
-                ease: "bounce.out"
+                duration: .8,
+                ease: "power3.out"
             })
         }
     }
