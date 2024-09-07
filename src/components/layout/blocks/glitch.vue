@@ -1,5 +1,5 @@
 <template>
-        <h4 class="glitch-block">
+        <h4 class="glitch-block" :style="fontSize ? `font-size: ${fontSize}vw` : ''">
             <Glitch :inputs="glitchValues" :options="glitchOptions"/>
         </h4>
 </template>
@@ -14,6 +14,7 @@ export type GlitchBlock = {
     hover: undefined | boolean
     repeat: undefined | boolean
     duration: number
+    fontSize?: number
     delay: number
     values: Array<{
         id: string
@@ -34,6 +35,7 @@ export default defineComponent ({
     data() {
         return {
             glitchValues: [] as string[],
+            fontSize: 0,
             glitchOptions: {
                 hover: false,
                 repeat: 0,
@@ -67,6 +69,9 @@ export default defineComponent ({
                 if (val.values) {
                     this.glitchValues = val.values.map((d: { text: string }) => d.text)
                 }
+                if (val.fontSize) {
+                    this.fontSize = val.fontSize
+                }
             },
             deep: true,
             immediate: true
@@ -95,6 +100,7 @@ export default defineComponent ({
     word-wrap: break-word;
     padding: 0px 20%;
     font-size: 32px;
+    line-height: 1;
     font-family: $accentFont;
 }
 
