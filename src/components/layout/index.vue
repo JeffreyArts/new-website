@@ -1,9 +1,10 @@
 <template>
-    <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
-        <Breadcrumbs />
-
-        <div v-if="oldBlocks.length > 0">
-            <Block v-for="block,key in oldBlocks" :key="key"
+    <div class="layout-wrapper">
+        <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
+            <Breadcrumbs />
+            
+            <div v-if="oldBlocks.length > 0">
+                <Block v-for="block,key in oldBlocks" :key="key"
                 :id="`oldblock-${block.id}`"
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
@@ -23,6 +24,13 @@
             </Block>
         </div>
     </section>
+    <Filter :options="{
+        name: 'Archive',
+        filterRange: {
+            year: 'all'
+        }
+        }"/>
+    </div>
 </template>
 
 <script lang="ts">
@@ -32,6 +40,7 @@ import Packer from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
 import Breadcrumbs from "./../breadcrumbs.vue"
+import Filter from "./../filter.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
 
 
@@ -39,7 +48,8 @@ export default defineComponent ({
     name: "LayoutComponent", 
     components: {
         Block: BlockComponent,
-        Breadcrumbs
+        Breadcrumbs,
+        Filter
     },
     props: {
         options: {
@@ -276,11 +286,17 @@ export default defineComponent ({
 
 <style lang="scss">
 @import './../../assets/scss/variables.scss';
+.layout-wrapper {
+    display: block;
+    width: 100vw;
+    min-height: 100vh;
+}
+
 .layout {
     display: block;
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: relative;
     overflow-x: hidden;
 
     .block {
