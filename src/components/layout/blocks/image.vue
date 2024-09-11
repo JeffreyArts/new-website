@@ -63,7 +63,8 @@ export default defineComponent ({
             imageSize: "image_sm" as "image_sm" | "image_md" | "image_lg" | "original",
             link: "",
             patternHover: false,
-            bgCache: "" as string
+            bgImageCache: "" as string,
+            bgSizeCache: "" as string
         }
     },
     watch: {
@@ -170,8 +171,10 @@ export default defineComponent ({
             }
         },
         addBackgroundPattern() {
-            this.bgCache = getComputedStyle(document.body).backgroundImage 
+            this.bgImageCache = getComputedStyle(document.body).backgroundImage 
+            this.bgSizeCache = getComputedStyle(document.body).backgroundSize 
             document.body.style.backgroundImage = `url(${this.src})`
+            document.body.style.backgroundSize = "auto"
         },
         mouseEnterZoom(target: HTMLElement) {
             const img = target.querySelector("img") 
@@ -225,8 +228,10 @@ export default defineComponent ({
             })
         },
         removeBackgroundPattern() {
-            document.body.style.backgroundImage = this.bgCache
-            this.bgCache = ""
+            document.body.style.backgroundSize = this.bgSizeCache
+            document.body.style.backgroundImage = this.bgImageCache
+            this.bgSizeCache = ""
+            this.bgImageCache = ""
         },
     }
 })
