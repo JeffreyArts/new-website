@@ -55,6 +55,10 @@ export default defineComponent ({
             type: String,
             required: false
         },
+        activeColor: {
+            type: String,
+            required: false
+        },
         name: {
             type: String,
             required: true
@@ -113,7 +117,7 @@ export default defineComponent ({
                 
                 if (this.custom && this.custom.length > 0) {
                     this.originalGrid = []
-                    const activeColor = window.getComputedStyle(this.$el).color
+                    const activeColor =  this.activeColor ? this.activeColor : window.getComputedStyle(this.$el).color
                     const inactiveColor = this.inactiveColor ? this.inactiveColor : "rgba(153,153,153,.16)"
                     _.each(this.custom, (val) => {
                         const data = {
@@ -154,7 +158,7 @@ export default defineComponent ({
             }
             
             this.originalGrid = []
-            const activeColor = window.getComputedStyle(this.$el).color
+            const activeColor =  this.activeColor ? this.activeColor : window.getComputedStyle(this.$el).color
             const inactiveColor = this.inactiveColor ? this.inactiveColor : "rgba(153,153,153,.16)"
             
             if (this.icon.length <= 0 && this.custom) {
