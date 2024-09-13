@@ -104,7 +104,9 @@ export default class Packer {
         const resultPositions = [] as Position[]
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
-
+        if (inputBlocks.length <= 0) {
+            return
+        }
 
         const positionOrder = {
             right: 1,

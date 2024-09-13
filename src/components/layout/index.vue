@@ -1,7 +1,6 @@
 <template>
     <div class="layout-wrapper">
         <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
-            <Breadcrumbs />
             
             <div v-if="oldBlocks.length > 0">
                 <Block v-for="block,key in oldBlocks" :key="key"
@@ -9,7 +8,7 @@
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
                     height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
-                    top:  typeof block.y === 'number' ? `${block.y + offsetTop}px` : block.y,
+                    top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
                     left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
                 }"
                 :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
@@ -24,12 +23,6 @@
             </Block>
         </div>
     </section>
-    <Filter :options="{
-        name: 'Archive',
-        filterRange: {
-            year: 'all'
-        }
-        }"/>
     </div>
 </template>
 
@@ -39,8 +32,6 @@ import _ from "lodash"
 import Packer from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
-import Breadcrumbs from "./../breadcrumbs.vue"
-import Filter from "./../filter.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
 
 
@@ -48,8 +39,6 @@ export default defineComponent ({
     name: "LayoutComponent", 
     components: {
         Block: BlockComponent,
-        Breadcrumbs,
-        Filter
     },
     props: {
         options: {
@@ -61,7 +50,6 @@ export default defineComponent ({
         return {
             resizeDelay: undefined as undefined | NodeJS.Timeout,
             gap: 40,
-            offsetTop: 60,
             animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
@@ -141,12 +129,6 @@ export default defineComponent ({
         updateResize() {
             this.layoutWidth = this.$el.clientWidth
             this.widthRatio = (this.layoutWidth) / this.options.layoutSize
-            if (this.layoutWidth > 640)  {
-                this.offsetTop = 80   
-            }
-            if (this.layoutWidth > 800)  {
-                this.offsetTop = 104
-            }
             
             this.updateBlockSizes(this.oldBlocks)
             this.updateLayoutHeight()
@@ -293,7 +275,7 @@ export default defineComponent ({
             }
 
             blocks.forEach(block => {
-                if (block.offsetTop, block.clientHeight > lastBlock.y) {
+                if (block.offsetTop + block.clientHeight > lastBlock.y) {
                     lastBlock =  {
                         block,
                         y: block.offsetTop + block.clientHeight
@@ -312,7 +294,6 @@ export default defineComponent ({
 .layout-wrapper {
     display: block;
     width: 100vw;
-    min-height: 100vh;
 }
 
 .layout {
@@ -324,26 +305,6 @@ export default defineComponent ({
 
     .block {
         opacity: 0;
-    }
-    .site-breadcrumbs {
-        margin-top: 40px;
-        margin-left: 8px;
-    }
-}
-
-@media screen and (min-width: 640px) {
-    .layout {
-        .site-breadcrumbs {
-            margin-left: 16px;
-            margin-top: 60px;
-        }
-    }
-}
-@media screen and (min-width: 800px) {
-    .layout {
-        .site-breadcrumbs {
-            margin-top: 80px;
-        }
     }
 }
 

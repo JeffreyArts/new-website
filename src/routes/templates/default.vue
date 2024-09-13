@@ -1,10 +1,22 @@
 <template>
-    <Layout v-if="page.layout" :options="{
-        layoutGap: 40,
-        id: page.id,
-        layoutSize: layoutSize,
-        blocks: page.blocks
-    }"/>
+    <section class="default-template">
+
+        <Breadcrumbs />
+        
+        <Layout v-if="page.layout" :options="{
+            layoutGap: 40,
+            id: page.id,
+            layoutSize: layoutSize,
+            blocks: page.blocks
+        }"/>
+
+        <Filter :options="{
+            name: 'Archive',
+            filterRange: {
+                year: 'all'
+            }
+        }"/>
+    </section>
 </template>
 
 
@@ -14,6 +26,8 @@ import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
+import Breadcrumbs from "@/components/breadcrumbs.vue"
+import Filter from "@/components/filter.vue"
 import Layout from "@/components/layout/index.vue"
 
 const setMeta = (route: RouteLocationNormalizedLoaded) => {
@@ -41,7 +55,9 @@ const setMeta = (route: RouteLocationNormalizedLoaded) => {
 export default defineComponent ({ 
     name: "defaultTemplate",
     components: {
-        Layout 
+        Breadcrumbs,
+        Layout,
+        Filter
     },
     props: [],
     setup() {
@@ -140,6 +156,26 @@ export default defineComponent ({
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "@/assets/scss/variables.scss";
+
+
+
+.site-breadcrumbs {
+    margin-top: 40px;
+    margin-left: 8px;
+}
+    
+@media screen and (min-width: 640px) {
+    .site-breadcrumbs {
+        margin-left: 16px;
+        margin-top: 60px;
+    }
+}
+
+@media screen and (min-width: 800px) {
+    .site-breadcrumbs {
+        margin-top: 80px;
+    }
+}
 </style>
