@@ -4,63 +4,40 @@
             <jaoIcon :name="filterIcon" size="large" :transit-effect="{duration: 1, delay:0.02, effect: 'shuffle'}" class="site-filter-icon"/>
             <h4 class="site-filter-name">{{ filterName }}</h4>
         </div>
+        
         <div class="site-filter-right">
-            <label 
-                style="order: 0"
+            <checkBox style="order: 2"
                 v-if="filterOptions.onlyFavorites"
                 class="site-filter-section"
-                :class="filterVal.onlyFavorites ? '__isSelected' : ''">
-                <span class="site-filter-label">
-                    Only favorites
-                </span>
-                <span class="site-filter-checkbox">
-                    <jaoIcon
-                        size="medium"
-                        :active-color="filterVal.onlyFavorites ? '#222' : '#555'"
-                        :name="filterVal.onlyFavorites ? 'checkbox-cross' : 'checkbox'"
-                        :transit-effect="{ duration: .1, delay:.002, effect: 'left-to-right'}" 
-                        />
-                    <input type="checkbox" v-model="filterVal.onlyFavorites">
-                </span>
-            </label>
+                name="Only favorites"
+                v-model="filterVal.onlyFavorites"
+                :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
 
             
-            <label style="order: 2"
+            <checkBox style="order: 2"
                 v-if="filterOptions.groupSeries"
                 class="site-filter-section"
-                :class="filterVal.groupSeries ? '__isSelected' : ''">
-                <span class="site-filter-label">
-                    Group series
-                </span>
-                <span class="site-filter-checkbox">
-                    <jaoIcon
-                        size="medium"
-                        :active-color="filterVal.groupSeries ? '#222' : '#555'"
-                        :name="filterVal.groupSeries ? 'checkbox-cross' : 'checkbox'"
-                        :transit-effect="{ duration: .1, delay:.002, effect: 'left-to-right'}" 
-                        />
-                    <input type="checkbox" v-model="filterVal.groupSeries">
-                </span>
-            </label>
-            
+                name="Group series"
+                v-model="filterVal.groupSeries"
+                :class="[filterVal.groupSeries ? '__isSelected' : '']" />
+                
             <selectBox style="order: 2"
                 v-if="filterOptions.year"
                 class="site-filter-section"
                 name="Year"
                 :options="filterOptions.year"
                 :class="[filterVal.yearOpen ? '__isOpen' : '']" />
-            
         </div>
+            
     </header>
 </template>
 
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
-import { startCase } from "lodash"
 import jaoIcon from "./jao-icon.vue"
-import gsap from "gsap"
 import selectBox from "./form/selectbox.vue"
+import checkBox from "./form/checkbox.vue"
 
 type FilterOptions = {
     name: string,
@@ -86,7 +63,8 @@ export default defineComponent({
     name: "filterComponent",
     components: {
         jaoIcon,
-        selectBox
+        selectBox,
+        checkBox
     },
     props: {
         options: {
@@ -172,6 +150,7 @@ export default defineComponent({
     align-items: center;
     justify-content: space-between;
     font-family: $accentFont;
+    background-color: var(--bg-color);
 }
 
 .site-filter-icon {
@@ -203,18 +182,6 @@ export default defineComponent({
 .site-filter-name {
     font-size: 18px;
 }
-
-.site-filter-checkbox,
-.site-filter-select {
-    display: flex;
-    input { 
-        display: none; 
-    }
-    svg {
-        height: 18px;
-    }
-}
-
 
 .site-filter-section {
     display: flex;

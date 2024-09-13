@@ -6,7 +6,7 @@
         </span>
         <div class="selectbox-wrapper">
             <span class="selectbox-options" :style="direction == 'up' ? 'bottom: 0;' : ''">
-                <span class="selectbox-option" v-for="(option,key) in options" :key="key" :class="!option.available ? '__isHidden' : ''" @click="option.selected = !option.selected">
+                <span class="selectbox-option" v-for="(option,key) in options" :key="key" :class="!option.available ? '__isHidden' : ''" @click="selectOption(key, $event)">
                     
                     <jaoIcon size="medium"
                         :name="option.selected ? 'checkbox-checked' : 'checkbox'"
@@ -29,7 +29,6 @@
 import { defineComponent, PropType } from "vue"
 import { filter } from "lodash"
 import jaoIcon from "./../jao-icon.vue"
-import gsap from "gsap"
 
 type SelectBoxOptions = {
     value: number | string,
@@ -38,7 +37,7 @@ type SelectBoxOptions = {
 }
 
 export default defineComponent({
-    name: "filterComponent",
+    name: "selectboxFormComponent",
     components: {
         jaoIcon
     },
@@ -55,7 +54,8 @@ export default defineComponent({
     data() {
         return {
             isOpen: false,
-            direction: "down" as "down" | "up"
+            direction: "down" as "down" | "up",
+            lastSelection: undefined as number | undefined
         }
     },
     computed: {
@@ -117,12 +117,29 @@ export default defineComponent({
                 document.removeEventListener("click", this.closeSelect)
                 this.isOpen = false
             }
+        },
+        selectOption(index:number, e:MouseEvent) {
+            const option = this.options[index]
+
+            if (!option) {
+                console.warn("invalid index", index)
+                return
+            }
+            option.selected = !option.selected
+
+            if (e.shiftKey && this.lastSelection) {
+                for (let i = Math.min(index, this.lastSelection); i < Math.max(index, this.lastSelection); i++) {
+                    this.options[i].selected = option.selected
+                }
+            }
+
+            this.lastSelection = index
         }
     }
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "./../../assets/scss/variables";
 
 .selectbox-wrapper {
@@ -146,6 +163,21 @@ export default defineComponent({
     position: relative;
     color: #555;
     
+    &:after {
+        content: "";
+        width: calc(100% - 24px);
+        height: 2px;
+        position: absolute;
+        bottom: -8px;
+        transition: $transitionDefault;
+    }
+    
+    &:hover {
+        &:after {
+            background-color: currentColor;
+        }
+    }
+
     &.__isSelected {
         color: #222;
     }
@@ -167,6 +199,8 @@ export default defineComponent({
     background-color: #fff;
     gap: 8px;
     flex-flow: row wrap;
+    padding: 4px 0;
+    outline: 1px solid #777;
 }
 
 .selectbox-label {
@@ -178,7 +212,12 @@ export default defineComponent({
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
+    padding: 8px 4px;
+
+    &:hover {
+        color: var(--bg-color);
+        background-color: var(--contrast-color);
+    }
 
     &.__isHidden {
         display: none;

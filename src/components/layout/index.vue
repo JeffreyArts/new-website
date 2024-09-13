@@ -149,6 +149,7 @@ export default defineComponent ({
             }
             
             this.updateBlockSizes(this.oldBlocks)
+            this.updateLayoutHeight()
         },
         async blockLoaded(block: BlockType) {
             if (this.options.blocks.length !== this.oldBlocks.length) {
@@ -179,6 +180,7 @@ export default defineComponent ({
                         },
                         onComplete: () => {
                             console.log("Blocks fully loaded 🤑")
+                            this.updateLayoutHeight()
                         }
                     })
                 }, 0)
@@ -278,6 +280,27 @@ export default defineComponent ({
             if (typeof window !== "undefined") {
                 window.dispatchEvent(new CustomEvent("layoutChange"))
             }
+        },
+        updateLayoutHeight() {
+            const layout = this.$el.querySelector('.layout')
+            const blocks = layout.querySelectorAll(".block") as HTMLElement[]
+            let lastBlock = {
+                block: undefined,
+                y: 0
+            } as {
+                block: undefined | HTMLElement,
+                y: number
+            }
+
+            blocks.forEach(block => {
+                if (block.offsetTop, block.clientHeight > lastBlock.y) {
+                    lastBlock =  {
+                        block,
+                        y: block.offsetTop + block.clientHeight
+                    }
+                }
+            })
+            layout.style.height = `${lastBlock.y + 40}px`
         }
     }
 })
