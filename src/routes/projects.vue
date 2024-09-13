@@ -199,7 +199,6 @@ export default defineComponent ({
     methods: {
         async loadPage() {
             try {
-                // const res = await Page.getPageByPath()
                 this.projects = await Page.getProjectsPage() as Array<ProjectType>
                 setTimeout(() => {
 
