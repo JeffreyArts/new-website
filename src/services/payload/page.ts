@@ -3,6 +3,7 @@ import _ from "lodash"
 
 import { BlockType } from "@/components/layout/layout-types"
 import { ProjectType } from "@/routes/projects.vue"
+import { FilterOptions } from "@/components/filter.vue"
 export type PageType =  {
     id: string
     createdAt: string
@@ -20,6 +21,7 @@ export type PageType =  {
     metaDescription: string
     metaTags: string[]
     pageTitle: string
+    filter?: FilterOptions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     custom?: any
 }
@@ -54,6 +56,10 @@ const payloadPage = {
                         data: _.omit(block, ["size", "id"]),
                     } as BlockType
                 })
+            }
+            if (req.data.docs[0]?.filter?.show?.filters) {
+                req.data.docs[0].filter.displayFilters = req.data.docs[0].filter.show.filters
+                delete req.data.docs[0].filter.show
             }
             
             resolve(req.data.docs[0])

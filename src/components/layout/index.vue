@@ -86,24 +86,40 @@ export default defineComponent ({
         },
         "options.blocks": {
             handler() {
-                // Only watch fot block changes when on the live-preview page
-                if (!this.$route.path.includes("live-preview")) {
-                    return
-                }
+                // // Only watch fot block changes when on the live-preview page
+                // if (!this.$route.path.includes("live-preview")) {
+                    //     return
+                    // }
                 
                 if (this.animations) {
                     this.animations.forEach(tween => {
                         gsap.killTweensOf(tween)
                     })
                 }
+                
+                const newBlocks = [] as Array<BlockType>
                 this.options.blocks.forEach(optionBlock => {
                     const oldBlock = _.find(this.oldBlocks, { id: optionBlock.id })
                     if (oldBlock) {
                         oldBlock.position = optionBlock.position
                         oldBlock.size = optionBlock.size
                         oldBlock.data = optionBlock.data
+                    } else {
+                        newBlocks.push(optionBlock)
                     }
                 })
+
+                
+                this.newBlocks = _.map(newBlocks, block => {
+                        return {
+                        ...block,
+                        size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
+                    }
+                }) as Array<BlockType>
+
+                // if (newBlocks.length > 0) {
+                //     this.updateBlockSizes(newBlocks)
+                // }
 
                 if (this.$el) {
                     this.prepareLayoutUpdate()
@@ -131,14 +147,13 @@ export default defineComponent ({
             this.widthRatio = (this.layoutWidth) / this.options.layoutSize
             
             this.updateBlockSizes(this.oldBlocks)
-            this.updateLayoutHeight()
         },
         async blockLoaded(block: BlockType) {
             if (this.options.blocks.length !== this.oldBlocks.length) {
                 this.oldBlocks.push(block)
             }
 
-            if (this.newBlocks.length === this.oldBlocks.length) {
+            if (this.options.blocks.length === this.oldBlocks.length) {
                 this.newBlocks.length = 0
                 
                 await this.updateBlockSizes(this.oldBlocks)
@@ -260,6 +275,8 @@ export default defineComponent ({
             })
             
             if (typeof window !== "undefined") {
+
+                this.updateLayoutHeight()
                 window.dispatchEvent(new CustomEvent("layoutChange"))
             }
         },

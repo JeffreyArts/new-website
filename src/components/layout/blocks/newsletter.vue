@@ -65,7 +65,7 @@ export default defineComponent ({
                 this.email = "" 
                 this.submitMessage = "A mail has been sent to confirm your e-mailaddress"
                 const messageEl = this.$refs["message"] as HTMLElement
-                console.log(messageEl)
+
                 if (!messageEl) {
                     return
                 }

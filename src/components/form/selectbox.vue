@@ -5,7 +5,8 @@
             {{displayName}}
         </span>
         <div class="selectbox-wrapper">
-            <span class="selectbox-options" :style="direction == 'up' ? 'bottom: 0;' : ''">
+
+            <span class="selectbox-options" :style="direction == 'up' ? 'bottom: calc(100% + 4px);' : 'top: calc(100% + 4px);'">
                 <span class="selectbox-option" v-for="(option,key) in options" :key="key" :class="!option.available ? '__isHidden' : ''" @click="selectOption(key, $event)">
                     
                     <jaoIcon size="medium"
@@ -80,13 +81,12 @@ export default defineComponent({
             }
 
             this.isOpen = true
-            if (window.innerHeight - 128 > this.$el.getBoundingClientRect().y) {
+            if (window.innerHeight - 240 > this.$el.getBoundingClientRect().y) {
                 this.direction = "down"
             } else {
                 this.direction = "up"
             }
             
-            console.log("Open select")
             setTimeout(() => {
                 document.addEventListener("click", this.closeSelect)
             },0)
@@ -112,7 +112,6 @@ export default defineComponent({
                 parent = parent.parentElement
             }
             
-            console.log(cancel)
             if (cancel) {
                 document.removeEventListener("click", this.closeSelect)
                 this.isOpen = false
@@ -172,6 +171,7 @@ export default defineComponent({
         transition: $transitionDefault;
     }
     
+    
     &:hover {
         &:after {
             background-color: currentColor;
@@ -191,9 +191,10 @@ export default defineComponent({
 
 .selectbox-options {
     position: absolute;
+    z-index: 2024;
     display: none;
     left: 0;
-    max-height: 128px;
+    max-height: 240px;
     overflow: auto;
     width: calc(100% - 24px);
     background-color: #fff;
@@ -213,11 +214,13 @@ export default defineComponent({
     display: flex;
     align-items: center;
     padding: 8px 4px;
+    gap: 8px;
 
-    &:hover {
-        color: var(--bg-color);
-        background-color: var(--contrast-color);
-    }
+    // This needs to be updated
+    // &:hover {
+    //     color: var(--bg-color);
+    //     background-color: var(--contrast-color);
+    // }
 
     &.__isHidden {
         display: none;

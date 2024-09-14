@@ -6,65 +6,119 @@
         </div>
         
         <div class="site-filter-right">
-            <checkBox style="order: 2"
-                v-if="filterOptions.onlyFavorites"
-                class="site-filter-section"
-                name="Only favorites"
-                v-model="filterVal.onlyFavorites"
-                :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
-
-            
-            <checkBox style="order: 2"
-                v-if="filterOptions.groupSeries"
-                class="site-filter-section"
-                name="Group series"
-                v-model="filterVal.groupSeries"
-                :class="[filterVal.groupSeries ? '__isSelected' : '']" />
+            <template v-for="filter,k in options.displayFilters" :key="k">
+                <checkBox :style="`order: ${k}`"
+                    v-if="filter == 'onlyFavorites'"
+                    class="site-filter-section"
+                    name="Only favorites"
+                    v-model="filterVal.onlyFavorites"
+                    :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
+    
                 
-            <selectBox style="order: 2"
-                v-if="filterOptions.year"
-                class="site-filter-section"
-                name="Year"
-                :options="filterOptions.year"
-                :class="[filterVal.yearOpen ? '__isOpen' : '']" />
+                <checkBox :style="`order: ${k}`"
+                    v-if="filter == 'groupSeries'"
+                    class="site-filter-section"
+                    name="Group series"
+                    v-model="filterVal.groupSeries"
+                    :class="[filterVal.groupSeries ? '__isSelected' : '']" />
+                    
+                <selectBox :style="`order: ${k}`"
+                    v-if="filter == 'year'"
+                    class="site-filter-section"
+                    name="Year"
+                    :options="filterOptions.year"
+                    />
+
+                <selectBox :style="`order: ${k}`"
+                    v-if="filter == 'series'"
+                    class="site-filter-section"
+                    name="Series"
+                    :options="filterOptions.series"
+                    />
+
+                <selectBox :style="`order: ${k}`"
+                    v-if="filter == 'categories'"
+                    class="site-filter-section"
+                    name="Categories"
+                    :options="filterOptions.categories"
+                    />
+            </template>
         </div>
             
     </header>
+    <Layout v-if="blocks.length > 0" id="filterLayout" :options="{
+            layoutGap: 40,
+            id: 'filter',
+            layoutSize: 6,
+            blocks: blocks
+        }"/>
 </template>
 
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import axios from "axios"
 import jaoIcon from "./jao-icon.vue"
 import selectBox from "./form/selectbox.vue"
 import checkBox from "./form/checkbox.vue"
+import { BlockType, LayoutOptions } from "@/components/layout/layout-types"
+import Layout from "@/components/layout/index.vue"
+import { map, omit } from "lodash"
 
-type FilterOptions = {
-    name: string,
-    targetCollection?: string | string[],
-    targetCollectionFilter?: {}
-    filterRange?: {
-        year?: "all" | string[],
-        series?: "all" | string[],
-        categories?: "all" | string[],
-        pieces?: "all" | string[],
-        projects?: "all" | string[],
-    },
-    showFilters?: {
-        year?: boolean,
-        series?: boolean,
-        categories?: boolean,
-        onlyFavorites?: boolean,
-        groupSeries?: boolean,
-    },
+type TargetCollections = "projects" | "pieces"
+
+export type FilterOptions = {
+    type: string
+    name: string
+    targetCollection: TargetCollections | TargetCollections[]
+    prefill: {
+        year?:  string | string[]
+        projects?:  string | string[]
+        series?:  string | string[]
+        categories?:  string | string[]
+    }
+    displayFilters: string[] 
 }
+interface PaginationData {
+    docs: Array<any>;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    limit: number;
+    nextPage: number;
+    page: number;
+    pagingCounter: number;
+    prevPage: null | number;
+    totalDocs: number;
+    totalPages: number;
+}
+
+// type FilterOptions = {
+//     name: string,
+//     targetCollection?: string | string[],
+//     targetCollectionFilter?: {}
+//     filterRange?: {
+//         year?: "all" | string[],
+//         series?: "all" | string[],
+//         categories?: "all" | string[],
+//         pieces?: "all" | string[],
+//         projects?: "all" | string[],
+//     },
+//     showFilters?: {
+//         year?: boolean,
+//         series?: boolean,
+//         categories?: boolean,
+//         onlyFavorites?: boolean,
+//         groupSeries?: boolean,
+//     },
+// }
 
 export default defineComponent({
     name: "filterComponent",
     components: {
         jaoIcon,
         selectBox,
-        checkBox
+        checkBox,
+        Layout
     },
     props: {
         options: {
@@ -74,7 +128,11 @@ export default defineComponent({
     },
     data() {
         return {
-            blocks: [],
+            blocks: [] as Array<BlockType>,
+            limit: 8,
+            page: 1,
+            updating: false,
+            hasNextPage: false,
             filterVal: {
                 onlyFavorites: false,
                 groupSeries: false,
@@ -99,29 +157,73 @@ export default defineComponent({
                     this.filterIcon = "archive"
                     this.filterName = "Archive"
                 } else if (name === "projects") {
-                    this.filterIcon = "projects"
+                    this.filterIcon = "hammer"
                     this.filterName = "Projects"
                 } else if (name === "tools") {
                     this.filterIcon = "wrench"
                     this.filterName = "Tools"
-                } 
-            },
-            immediate: true
-        },
-        "options.filterRange": {
-            handler(filterRange) {
-                if (filterRange.year) {
-                    this.setYearRange(filterRange.year)
+                } else {
+                    this.filterIcon = "archive"
+                    this.filterName = Name
                 }
             },
             immediate: true
-        }
+        },
+        // "options.filterRange": {
+        //     handler(filterRange) {
+        //         if (filterRange.year) {
+        //             this.setYearRange(filterRange.year)
+        //         }
+        //     },
+        //     immediate: true
+        // }
     },
     beforeCreate() {
     },
     mounted() {
+        this.setYearRange("all")
+        this.updateResults()
+
+        document.addEventListener("scroll", this.onScrollEvent)
     },
     methods: {
+        onScrollEvent(e: Event) {
+
+            if (!this.hasNextPage) {
+                return
+            }
+
+            const htmlEl = document.querySelector("html") as HTMLElement
+            const layout = document.getElementById('filterLayout')
+            if (!layout) {
+                return
+            }
+            const blocks = layout.querySelectorAll(".block")
+            let lastBlock = {
+                block: undefined,
+                y: 0
+            } as {
+                block: undefined | HTMLElement,
+                y: number
+            }
+
+            blocks.forEach(Block => {
+                const block = Block as HTMLElement
+                if (block.offsetTop + block.clientHeight > lastBlock.y) {
+                    lastBlock =  {
+                        block,
+                        y: block.offsetTop 
+                    }
+                }
+            })
+
+            
+            if (layout.offsetTop + lastBlock.y - window.innerHeight < htmlEl.scrollTop) {
+
+                this.updateResults(this.page + 1)
+            }
+        
+        },
         setYearRange(range: "all" | {min: number, max: number}) {
             const maxYear = new Date().getFullYear()
             
@@ -136,6 +238,77 @@ export default defineComponent({
                 }
             }
         },
+        
+        getResults: (targetCollection: TargetCollections | TargetCollections[], options?: {
+            limit: number,
+            page: number
+        }) => new Promise<PaginationData>(async (resolve, reject) => {
+            if (!options) {
+                options = {
+                    limit: 8,
+                    page: 1
+                }
+            }
+
+            if (!options.limit) {
+                options.limit = 8
+            }
+
+            if (!options.page) {
+                options.page = 1
+            }
+
+            const collection = targetCollection
+            
+            try {
+                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}?depth=1&limit=${options.limit}&page=${options.page}`)
+                if (req.data?.docs.length < 1) {
+                    throw new Error(`Can not retrieve ${collection}`)
+                }
+                const data = req.data as PaginationData
+                resolve(data)
+
+            } catch(err) {
+                reject(err)
+            }
+        }),
+        updateResults(page = 1) {
+
+            if (this.updating) {
+                return
+            }
+            this.updating = true
+
+            this.getResults(this.options.targetCollection, {
+                limit: this.limit,
+                page: page
+            }).then((data) => {
+                this.hasNextPage = data.hasNextPage
+                
+                if (this.options.targetCollection === "projects") {                    
+                    const blocks = map(data.docs, (doc, index) => {
+                        // console.log(doc)
+                        const block = {
+                            position: this.limit*this.page + index + 1,
+                            size: 3,
+                            id: doc.id,
+                            data: {
+                                blockType: "image",
+                                link: doc.path,
+                                image: doc.thumbnail
+                            }
+                        } as BlockType
+
+                        return block
+                    })
+
+                    this.blocks = [...this.blocks, ...blocks]
+                }
+                this.updating = false
+            }).catch(() => {
+                this.updating = false
+            })
+        }
        
     }
 })
@@ -151,6 +324,11 @@ export default defineComponent({
     justify-content: space-between;
     font-family: $accentFont;
     background-color: var(--bg-color);
+    margin-top: 40px;
+
+    + .layout-wrapper {
+        padding-top: 40px;
+    }
 }
 
 .site-filter-icon {

@@ -9,13 +9,7 @@
             layoutSize: layoutSize,
             blocks: page.blocks
         }"/>
-
-        <Filter :options="{
-            name: 'Archive',
-            filterRange: {
-                year: 'all'
-            }
-        }"/>
+        <Filter v-if="page.filter" :options="page.filter"/>
     </section>
 </template>
 

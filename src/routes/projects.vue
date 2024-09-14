@@ -163,7 +163,6 @@ export default defineComponent ({
     watch: {
         "$route.path": {
             async handler() {
-                console.log(this.$route.path != "/projects")
                 if (this.$route.path != "/projects") {
                     throw new Error("")
                 }

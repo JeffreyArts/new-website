@@ -16,8 +16,6 @@ import gsap from "gsap"
 
 export type ImageBlock = {
     blockType: "image"
-    size: number
-    id: string
     link: string
     description: string
     image: {

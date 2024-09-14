@@ -11,8 +11,6 @@ import SlateText, { SlateNode } from "@/components/slate-text.vue"
 
 export type TextBlock = {
     blockType: "text"
-    size: number
-    id: string
     text: SlateNode
     title: string
 }
