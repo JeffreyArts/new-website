@@ -7,7 +7,7 @@ export type Block = {
     id: string | number;
 }
 
-type Position = {
+export type Position = {
     x: number;
     y: number;
     width: number;

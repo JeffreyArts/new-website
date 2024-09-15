@@ -29,7 +29,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import _ from "lodash"
-import Packer from "@/model/packer"
+import Packer, { Position } from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
@@ -120,14 +120,17 @@ export default defineComponent ({
                 // if (newBlocks.length > 0) {
                 //     this.updateBlockSizes(newBlocks)
                 // }
+                // console.log("oldBlocks",this.oldBlocks.length)
 
-                if (this.$el) {
-                    this.prepareLayoutUpdate()
-                    this.updateResize()
-                    return
-                }
-
-                this.prepareLayoutUpdate()
+                // if (this.oldBlocks.length === 0) {
+                //     this.prepareLayoutUpdate()
+                // }
+                // if (this.$el) {
+                //     return
+                // }
+                
+                // this.prepareLayoutUpdate()
+                this.updateBlockSizes(this.oldBlocks)
             },
             deep:true,
             immediate: true
@@ -135,18 +138,24 @@ export default defineComponent ({
     },
     mounted() {
         if (typeof window !== "undefined") {
-            window.addEventListener("resize", this.updateResize)
+
+            this.prepareLayoutUpdate()
+            this.updateResize()
+            this.updateBlockSizes(this.oldBlocks)
+            window.addEventListener("resize", this.onResizeEvent)
         }
     },
     unmounted() {
-        window.removeEventListener("resize", this.updateResize)
+        window.removeEventListener("resize", this.onResizeEvent)
     },
     methods: {
+        onResizeEvent() {
+            this.updateResize()
+            this.updateBlockSizes(this.oldBlocks)
+        },
         updateResize() {
             this.layoutWidth = this.$el.clientWidth
             this.widthRatio = (this.layoutWidth) / this.options.layoutSize
-            
-            this.updateBlockSizes(this.oldBlocks)
         },
         async blockLoaded(block: BlockType) {
             if (this.options.blocks.length !== this.oldBlocks.length) {
@@ -190,24 +199,21 @@ export default defineComponent ({
                 this.layoutWidth = this.$el.clientWidth
                 this.widthRatio = (this.layoutWidth - this.gap) / this.options.layoutSize
                 
-                if (this.newBlocks.length <= 0) {
-                    this.newBlocks = _.map(this.options.blocks, block => {
-                        return {
-                            ...block,
-                            size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
-                        }
-                    }) as Array<BlockType>
-                }
+                // if (this.newBlocks.length <= 0) {
+                //     this.newBlocks = _.map(this.options.blocks, block => {
+                //         return {
+                //             ...block,
+                //             size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
+                //         }
+                //     }) as Array<BlockType>
+                // }
             }, 10)
         },
-        
-        async updateBlockSizes(blocks: Array<BlockType>) {
-
-            const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-            const blockWidthResized = [] as Array<Promise<void>>
-            
+        async setBlockDimensions(blocks: Array<BlockType>){
+            const result = [] as Array<Promise<void>>
+            // Set block width + height
             _.each(blocks, (block) => {
-                blockWidthResized.push(new Promise((resolve): void => {
+                result.push(new Promise((resolve): void => {
                     const originalBlock = _.find(this.options.blocks, { id: block.id })
                     if (!originalBlock) {
                         throw new Error("Missing original reference")
@@ -233,25 +239,10 @@ export default defineComponent ({
                 })) 
             })
             
-            await Promise.all(blockWidthResized)
-
-            // Convert height to number to match setBlocks
-            // Re-position blocks according their default order to unshuffle setBlocks result
-            const convertedBlocks = _.orderBy(blocks.map(block => {
-                if (typeof block.height !== "number") {
-                    console.warn("Invalid value for block.height", block.height)
-                }
-
-                return {
-                    id: block.id,
-                    position: block.position,
-                    width: block.width || 0,
-                    height: parseFloat(block.height + "")
-                } 
-            }), "position")
-
-            const sortedBlocks = layout.setBlocks(convertedBlocks)
-
+            return await Promise.all(result)
+        },
+        
+        updateBlockPositions(blocks: Array<BlockType>, sortedBlocks: Array<Position>) {
             _.each(sortedBlocks, (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")
@@ -265,7 +256,7 @@ export default defineComponent ({
                 }
                 
                 if (!oldBlock) {
-                    throw new Error("Mismatch in index")
+                    throw new Error("Invalid blockId ")
                 }
                 
                 oldBlock.width = posBlock.width
@@ -273,6 +264,36 @@ export default defineComponent ({
                 oldBlock.y = posBlock.y
                 oldBlock.x = posBlock.x
             })
+        },
+        
+        async updateBlockSizes(blocks: Array<BlockType>) {
+            await this.setBlockDimensions(blocks)
+            
+            // Convert height(:auto) to number to match setBlocks
+            // Re-position blocks according their default order to unshuffle setBlocks result
+            const convertedBlocks = _.orderBy(blocks.map(block => {
+                if (typeof block.height === "undefined") {
+                    block.height = 0
+                }
+
+                if (typeof block.height === "string") {
+                    block.height = parseFloat(block.height)
+                }
+
+                return {
+                    id: block.id,
+                    position: block.position,
+                    width: block.width || 0,
+                    height: block.height
+                }
+            }), "position")
+            
+            const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+            const sortedBlocks = layout.setBlocks(convertedBlocks)
+
+            if (sortedBlocks) {
+                this.updateBlockPositions(blocks, sortedBlocks)
+            }
             
             if (typeof window !== "undefined") {
 

@@ -152,6 +152,9 @@ export default defineComponent({
     watch: {
         "options.name": {
             handler(Name: string) {
+                if (!Name) {
+                    return
+                }
                 const name = Name.toLowerCase()
                 if (name === "archive") {
                     this.filterIcon = "archive"
