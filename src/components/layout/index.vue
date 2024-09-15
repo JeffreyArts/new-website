@@ -250,9 +250,9 @@ export default defineComponent ({
                 } 
             }), "position")
 
-            layout.setBlocks(convertedBlocks)
+            const sortedBlocks = layout.setBlocks(convertedBlocks)
 
-            _.each(layout.getOutput(), (posBlock) => {
+            _.each(sortedBlocks, (posBlock) => {
                 const blockId = posBlock.id as string | number
                 if (!blockId)  throw new Error("Missing id in posBlock")
 

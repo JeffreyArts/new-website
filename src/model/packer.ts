@@ -24,7 +24,6 @@ export default class Packer {
     private layoutWidth: number
     private layoutHeight: number
     private blocks: Block[]
-    private output: Position[]
     private order: Order
     private autoResize?: "width" | "height"
     
@@ -35,7 +34,6 @@ export default class Packer {
         this.layoutWidth = layoutWidth
         this.layoutHeight = layoutHeight
         this.blocks = []
-        this.output = []
         this.order = ["position", "parentPosition", "y", "x"]
 
         if (options) {
@@ -77,7 +75,7 @@ export default class Packer {
     public setDimensions(width: number, height: number) {
         this.layoutWidth = width
         this.layoutHeight = height
-        this.updateLayout(this.output as Block[])
+        return this.updateLayout()
     }
 
     public setBlocks(blocks: Block[]) {
@@ -88,21 +86,17 @@ export default class Packer {
             block.position = index
             return block
         })
-        this.updateLayout(this.blocks)
-    }
-
-    public getOutput(): Position[] {
-        return this.output
+        return this.updateLayout()
     }
 
     public addBlock(block: Block) {
         this.blocks.push(block)
-        this.updateLayout([block])
+        return this.updateLayout()
     }
 
-    private updateLayout(newBlocks: Block[]) {
-        const resultPositions = this.output as Position[]
-        const inputBlocks = [...newBlocks] as Block[]
+    private updateLayout() {
+        const resultPositions = [] as Position[]
+        const inputBlocks = [...this.blocks] as Block[]
         let done = false
         if (inputBlocks.length <= 0) {
             return
@@ -338,7 +332,8 @@ export default class Packer {
             continue
         }
         
-        return this.output
+        return resultPositions
+
     }
 }
 
