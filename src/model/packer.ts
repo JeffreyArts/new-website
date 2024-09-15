@@ -44,7 +44,17 @@ export default class Packer {
         } 
     }
 
-    public setOrder(order?: Order | undefined) {
+        
+    private blocksOverlap = (r1:Position | undefined, r2:Position | undefined) => {
+        if (r1 === undefined || r2 === undefined) {
+            return undefined
+        }
+        return !(r2.x >= r1.x + r1.width ||
+                 r2.x + r2.width <= r1.x ||
+                 r2.y >= r1.y + r1.height ||
+                 r2.y + r2.height <= r1.y)
+    }
+    private setOrder(order?: Order | undefined) {
         const defaultOrder = ["position", "y", "parentPosition","x"]
         
         if (!order) {
@@ -61,23 +71,13 @@ export default class Packer {
             }
         })
 
-        // if (order.length != 3) {
-        //     this.order = order
-        //     defaultOrder.forEach(value => {
-        //         if (!this.order.includes(value)) {
-        //             this.order.push(value)
-        //         }
-        //     })
-        //     return
-        // }
-
         this.order = order
     }
 
     public setDimensions(width: number, height: number) {
         this.layoutWidth = width
         this.layoutHeight = height
-        this.updateLayout()
+        this.updateLayout(this.output as Block[])
     }
 
     public setBlocks(blocks: Block[]) {
@@ -88,7 +88,7 @@ export default class Packer {
             block.position = index
             return block
         })
-        this.updateLayout()
+        this.updateLayout(this.blocks)
     }
 
     public getOutput(): Position[] {
@@ -97,17 +97,17 @@ export default class Packer {
 
     public addBlock(block: Block) {
         this.blocks.push(block)
-        this.updateLayout()
+        this.updateLayout([block])
     }
 
-    private updateLayout() {
-        const resultPositions = [] as Position[]
-        const inputBlocks = [...this.blocks] as Block[]
+    private updateLayout(newBlocks: Block[]) {
+        const resultPositions = this.output as Position[]
+        const inputBlocks = [...newBlocks] as Block[]
         let done = false
         if (inputBlocks.length <= 0) {
             return
         }
-
+        
         const positionOrder = {
             right: 1,
             bottom: 2,
@@ -206,7 +206,7 @@ export default class Packer {
         }
         
 
-        const getOptions = (targetBlock: Position, resultPositions: Position[], inputBlocks: Block[]) => {
+        const getOptions = (targetBlock: Position, inputBlocks: Block[]) => {
             const optionsRight = fitRight(targetBlock, inputBlocks)
             const optionsLeft = fitLeft(targetBlock, inputBlocks)
             const optionsBottom = fitBottom(targetBlock, inputBlocks)
@@ -232,7 +232,7 @@ export default class Packer {
 
         const getNextBlock = (resultPositions: Position[]) => {
             const options = _.filter(_.map(resultPositions, resBlock => {
-                const data = getOptions(resBlock, resultPositions, inputBlocks) as Array<Position | undefined>
+                const data = getOptions(resBlock, inputBlocks) as Array<Position | undefined>
                 const temp  =  _.chain(data)
                     .orderBy(
                         ["y", item => positionOrder[item?.parentPosition || "right"]],
@@ -244,7 +244,7 @@ export default class Packer {
                 return _.map(temp, tempPos => {
                     const sortedResPos = _.sortBy(resultPositions, "y", "asc")
                     _.each(sortedResPos, pos => {
-                        if (rectanglesOverlap(tempPos, pos)) {
+                        if (this.blocksOverlap(tempPos, pos)) {
                             if (tempPos) {
                                 tempPos.y = pos.y + pos.height
                             }
@@ -269,16 +269,6 @@ export default class Packer {
                 return nextBlocks[0]
             } 
             return undefined
-        }
-        
-        const rectanglesOverlap = (r1:Position | undefined, r2:Position | undefined) => {
-            if (r1 === undefined || r2 === undefined) {
-                return undefined
-            }
-            return !(r2.x >= r1.x + r1.width ||
-                     r2.x + r2.width <= r1.x ||
-                     r2.y >= r1.y + r1.height ||
-                     r2.y + r2.height <= r1.y)
         }
         
         while (!done) {
@@ -348,8 +338,7 @@ export default class Packer {
             continue
         }
         
-        this.output = resultPositions
-        return resultPositions
+        return this.output
     }
 }
 
