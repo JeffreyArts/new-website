@@ -1,17 +1,17 @@
 <template>
     <div class="block" :block-size="size">
-        <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"/>
-        <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"/>
-        <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"/>
-        <IframeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'iframe'"/>
-        <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"/>
-        <LineBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'line'"/>
-        <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"/>
-        <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"/>
-        <NewsletterBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'newsletter'"/>
-        <TextBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'text'"/>
-        <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"/>
-        <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"/>
+        <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"                :data-blocktype="data.blockType"/>
+        <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"                  :data-blocktype="data.blockType"/>
+        <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"                  :data-blocktype="data.blockType"/>
+        <IframeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'iframe'"              :data-blocktype="data.blockType"/>
+        <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"                :data-blocktype="data.blockType"/>
+        <LineBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'line'"                  :data-blocktype="data.blockType"/>
+        <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"              :data-blocktype="data.blockType"/>
+        <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"              :data-blocktype="data.blockType"/>
+        <NewsletterBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'newsletter'"      :data-blocktype="data.blockType"/>
+        <TextBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'text'"                  :data-blocktype="data.blockType"/>
+        <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"            :data-blocktype="data.blockType"/>
+        <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"                  :data-blocktype="data.blockType"/>
     </div>
 </template>
 
