@@ -89,6 +89,18 @@ export default defineComponent ({
     &.__isFixed {
         position: absolute;
     } 
+
+    // Display blockType for dev purposes
+    // > *:after {
+    //     content: attr(data-blocktype);
+    //     position: absolute;
+    //     top: 8px;
+    //     background-color: var(--contrast-color);
+    //     color: var(--bg-color);
+    //     padding: 4px 8px;
+    //     left: 12px;
+    //     opacity: 0.7;
+    // }
 }
 
 </style>

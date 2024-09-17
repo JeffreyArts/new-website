@@ -1,28 +1,23 @@
 <template>
     <div class="layout-wrapper">
-        <section class="layout" v-if="options" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
-            
-            <div v-if="oldBlocks.length > 0">
-                <Block v-for="block,key in oldBlocks" :key="key"
-                :id="`oldblock-${block.id}`"
+        
+        <section class="layout" v-if="options && blocks.length > 0" :layout-size="options.layoutSize" :layout-gap="options.layoutGap">
+            <Block v-for="block,key in blocks" :key="key" @blockLoaded="blockLoaded(block)"
+                :id="`block-${block.id}`"
+                :size="block.size" 
+                :data="block.data"
+                :class="{
+                    '__isLoaded' : block.loaded,
+                    '__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'
+                }"
                 :style="{
                     width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
                     height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
                     top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
                     left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
-                }"
-                :class="{'__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'}"
-                :size="block.size" 
-                :data="block.data" />
-            </div>
-            <div v-if="newBlocks.length > 0">
-                <Block v-for="block,key in newBlocks" :key="key" @blockLoaded="blockLoaded(block)"
-                :id="`newblock-${block.id}`"
-                :size="block.size" 
-                :data="block.data">
+                }">
             </Block>
-        </div>
-    </section>
+        </section>
     </div>
 </template>
 
@@ -53,163 +48,114 @@ export default defineComponent ({
             animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
-            oldBlocks: [] as BlockType[],
-            newBlocks: [] as BlockType[],
+            loaded: false,
+            blocks: [] as BlockType[],
         }
     },
     computed: {
     },
     watch:{
         "options.id": {
-            async handler() {
-                if (typeof window === "undefined") {
-                    return
-                }
+            handler() {
+                this.loaded = false
                 if (this.$el) {
-                    this.animations.push(gsap.to(this.$el.querySelectorAll(".block"), {
-                        opacity: 0,
-                        duration: .4,
-                        stagger: {
-                            each: .08,
-                            from: "end"
-                        },
-                        onComplete: () => {
-                            this.oldBlocks.length = 0
-                            this.prepareLayoutUpdate()  
-                        }
-                    }))
-                } else {
-                    this.prepareLayoutUpdate()
+                    gsap.set(this.$el.querySelectorAll(".block"), {
+                        opacity: 0
+                    })
                 }
             }, 
             immediate: true
         },
         "options.blocks": {
-            handler() {
-                // // Only watch fot block changes when on the live-preview page
-                // if (!this.$route.path.includes("live-preview")) {
-                    //     return
-                    // }
+            handler(blocks) {
+                if (blocks.length <= 0) {
+                    return
+                }
                 
                 if (this.animations) {
                     this.animations.forEach(tween => {
                         gsap.killTweensOf(tween)
                     })
                 }
-                
-                const newBlocks = [] as Array<BlockType>
-                this.options.blocks.forEach(optionBlock => {
-                    const oldBlock = _.find(this.oldBlocks, { id: optionBlock.id })
-                    if (oldBlock) {
-                        oldBlock.position = optionBlock.position
-                        oldBlock.size = optionBlock.size
-                        oldBlock.data = optionBlock.data
-                    } else {
-                        newBlocks.push(optionBlock)
-                    }
-                })
 
-                
-                this.newBlocks = _.map(newBlocks, block => {
-                        return {
-                        ...block,
-                        size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
-                    }
-                }) as Array<BlockType>
-
-                // if (newBlocks.length > 0) {
-                //     this.updateBlockSizes(newBlocks)
-                // }
-                // console.log("oldBlocks",this.oldBlocks.length)
-
-                // if (this.oldBlocks.length === 0) {
-                //     this.prepareLayoutUpdate()
-                // }
-                // if (this.$el) {
-                //     return
-                // }
-                
-                // this.prepareLayoutUpdate()
-                this.updateBlockSizes(this.oldBlocks)
+                this.__updateBlocks(this.options.blocks)
             },
-            deep:true,
-            immediate: true
+            deep:false,
+            immediate: true // Cause if will first be an empty array, than it will be filled with blocks
         }
     },
     mounted() {
         if (typeof window !== "undefined") {
-
-            this.prepareLayoutUpdate()
-            this.updateResize()
-            this.updateBlockSizes(this.oldBlocks)
-            window.addEventListener("resize", this.onResizeEvent)
+            window.addEventListener("resize", this.__onResizeEvent)
         }
     },
     unmounted() {
-        window.removeEventListener("resize", this.onResizeEvent)
+        window.removeEventListener("resize", this.__onResizeEvent)
     },
     methods: {
-        onResizeEvent() {
-            this.updateResize()
-            this.updateBlockSizes(this.oldBlocks)
-        },
-        updateResize() {
-            this.layoutWidth = this.$el.clientWidth
-            this.widthRatio = (this.layoutWidth) / this.options.layoutSize
-        },
-        async blockLoaded(block: BlockType) {
-            if (this.options.blocks.length !== this.oldBlocks.length) {
-                this.oldBlocks.push(block)
-            }
 
-            if (this.options.blocks.length === this.oldBlocks.length) {
-                this.newBlocks.length = 0
-                
-                await this.updateBlockSizes(this.oldBlocks)
-
-                if (typeof window !== "undefined") {
-                    setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent("layoutChange"))
-                        this.updateResize()
-                    })
-                }
-                setTimeout(() => {
-                    const blocks = this.$el.querySelectorAll(".block.__isFixed")
-                    gsap.fromTo(blocks, {
-                        opacity: 0
-                    },{
-                        opacity: 1,
-                        duration: .4,
-                        stagger: {
-                            each: .08,
-                            from: "start"
-                        },
-                        onComplete: () => {
-                            console.log("Blocks fully loaded 🤑")
-                            this.updateLayoutHeight()
-                        }
-                    })
-                }, 0)
-            }
-        },
-        prepareLayoutUpdate() { 
+        __onResizeEvent() { 
             clearTimeout(this.resizeDelay)
-            this.resizeDelay = setTimeout(() => {
-                
-                this.layoutWidth = this.$el.clientWidth
-                this.widthRatio = (this.layoutWidth - this.gap) / this.options.layoutSize
-                
-                // if (this.newBlocks.length <= 0) {
-                //     this.newBlocks = _.map(this.options.blocks, block => {
-                //         return {
-                //             ...block,
-                //             size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
-                //         }
-                //     }) as Array<BlockType>
-                // }
-            }, 10)
+            this.resizeDelay = setTimeout(this.updateBlockSizes, 24)
         },
-        async setBlockDimensions(blocks: Array<BlockType>){
+
+        __updateBlocks(newBlocks: BlockType[]){
+            console.log("update blocks", newBlocks)
+            this.blocks = _.values(_.omitBy(_.map(newBlocks, block => {
+                if (this.__findBlock(block.id, this.blocks)) {
+                    return 
+                }
+                
+                return {
+                    ...block,
+                    size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
+                }
+            }), _.isNil))
+        },
+
+        __findBlock(blockId: string | number, targetBlocks: BlockType[]) {
+            if (!blockId)  throw new Error("Missing id in posBlock")
+
+            let foundBlock = undefined
+            if (typeof blockId === "number") {
+                foundBlock = targetBlocks[blockId] as BlockType | undefined
+            } else if (typeof blockId === "string") {
+                foundBlock = _.find(targetBlocks, { id: blockId }) as BlockType | undefined
+            }
+            return foundBlock
+        },
+        __updateLayoutHeight() {
+            if (!this.$el) {
+                return
+            }
+
+            const layout = this.$el.querySelector(".layout")
+
+            if (!layout) {
+                return
+            }
+
+            const blocks = layout.querySelectorAll("[id*=block]") as HTMLElement[]
+            let lastBlock = {
+                block: undefined,
+                y: 0
+            } as {
+                block: undefined | HTMLElement,
+                y: number
+            }
+            
+            blocks.forEach(block => {
+                if (block.offsetTop + block.clientHeight > lastBlock.y) {
+                    lastBlock =  {
+                        block,
+                        y: block.offsetTop + block.clientHeight
+                    }
+                }
+            })
+            // console.log(blocks, lastBlock)
+            layout.style.height = `${lastBlock.y + 40}px`
+        },
+        async __setBlockDimensions(blocks: Array<BlockType>){
             const result = [] as Array<Promise<void>>
             // Set block width + height
             _.each(blocks, (block) => {
@@ -224,11 +170,14 @@ export default defineComponent ({
                     block.height = "auto"
                     
                     setTimeout(() => {
-                        const oldBlock = this.$el.querySelector(`#oldblock-${block.id}`)
-                        if (!oldBlock) {
+                        // console.log(this.$el)
+                        const targetBlock = this.$el.querySelector(`#block-${block.id}`)
+                        
+                        if (!targetBlock) {
                             return
                         }
-                        const blockStyle = window.getComputedStyle(oldBlock)
+                        
+                        const blockStyle = window.getComputedStyle(targetBlock)
                         
                         if (blockStyle) {
                             block.height = parseInt(blockStyle.height)
@@ -241,33 +190,57 @@ export default defineComponent ({
             
             return await Promise.all(result)
         },
-        
-        updateBlockPositions(blocks: Array<BlockType>, sortedBlocks: Array<Position>) {
-            _.each(sortedBlocks, (posBlock) => {
-                const blockId = posBlock.id as string | number
-                if (!blockId)  throw new Error("Missing id in posBlock")
+        blockLoaded(block: BlockType) {
+            if (this.loaded) {
+                return
+            }
+            block.loaded = true
+            // Usefull log for debugging
+            // console.log("Block loaded", block.id, block.data.blockType)
 
-                
-                let oldBlock = undefined
-                if (typeof blockId === "number") {
-                    oldBlock = blocks[blockId] as BlockType | undefined
-                } else if (typeof blockId === "string") {
-                    oldBlock = _.find(blocks, { id: blockId }) as BlockType | undefined
+            if (_.every(_.map(this.blocks, block => block.loaded))) {
+                this.loaded = true
+                this.$emit("blocksUpdated")
+            }
+        },
+
+        updateLayout() {
+            if (!this.$el) {
+                console.warn("Can not call updateLayout when this.$el has not yet been set")
+                return
+            }
+            this.layoutWidth = this.$el.clientWidth
+            this.widthRatio = (this.layoutWidth) / this.options.layoutSize
+            this.__updateLayoutHeight()
+        },
+        
+        fadeInAllBlocks() {
+            // Sort blocks, based on Y position
+            const blocks = this.$el.querySelectorAll(".block")
+            const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
+                return parseFloat(block.style.top) || 0
+            })
+            // this.__updateLayoutHeight()
+            
+            gsap.fromTo(sortedBlocks, {
+                opacity: 0
+            },{
+                opacity: 1,
+                duration: .64,
+                stagger: {
+                    each: .08,
+                    from: "start"
+                },
+                onComplete: () => {
+                    console.log("Blocks fully loaded 🤑")
                 }
-                
-                if (!oldBlock) {
-                    throw new Error("Invalid blockId ")
-                }
-                
-                oldBlock.width = posBlock.width
-                oldBlock.height = posBlock.height
-                oldBlock.y = posBlock.y
-                oldBlock.x = posBlock.x
             })
         },
         
-        async updateBlockSizes(blocks: Array<BlockType>) {
-            await this.setBlockDimensions(blocks)
+        async updateBlockSizes() {
+            const blocks = this.blocks
+            this.updateLayout()
+            await this.__setBlockDimensions(blocks)
             
             // Convert height(:auto) to number to match setBlocks
             // Re-position blocks according their default order to unshuffle setBlocks result
@@ -287,41 +260,32 @@ export default defineComponent ({
                     height: block.height
                 }
             }), "position")
-            
             const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
             const sortedBlocks = layout.setBlocks(convertedBlocks)
+            
 
             if (sortedBlocks) {
-                this.updateBlockPositions(blocks, sortedBlocks)
-            }
+                _.each(sortedBlocks, (posBlock) => {
+                    const blockId = posBlock.id as string | number
+                    let block = this.__findBlock(blockId, blocks)
+                    
+                    if (!block) {
+                        throw new Error("Invalid blockId ")
+                    }
+                    block.width = posBlock.width
+                    block.height = posBlock.height
+                    block.y = posBlock.y
+                    block.x = posBlock.x
+                })
+            }   
             
             if (typeof window !== "undefined") {
-
-                this.updateLayoutHeight()
+                setTimeout(() => {
+                    this.updateLayout()
+                })
                 window.dispatchEvent(new CustomEvent("layoutChange"))
             }
         },
-        updateLayoutHeight() {
-            const layout = this.$el.querySelector('.layout')
-            const blocks = layout.querySelectorAll(".block") as HTMLElement[]
-            let lastBlock = {
-                block: undefined,
-                y: 0
-            } as {
-                block: undefined | HTMLElement,
-                y: number
-            }
-
-            blocks.forEach(block => {
-                if (block.offsetTop + block.clientHeight > lastBlock.y) {
-                    lastBlock =  {
-                        block,
-                        y: block.offsetTop + block.clientHeight
-                    }
-                }
-            })
-            layout.style.height = `${lastBlock.y + 40}px`
-        }
     }
 })
 
@@ -343,6 +307,7 @@ export default defineComponent ({
 
     .block {
         opacity: 0;
+        // opacity: 1;
     }
 }
 

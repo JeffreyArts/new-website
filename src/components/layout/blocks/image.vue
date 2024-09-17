@@ -65,24 +65,6 @@ export default defineComponent ({
             bgSizeCache: "" as string
         }
     },
-    watch: {
-        "options.link": {
-            handler() {
-                if (!this.options.link) {
-                    return
-                }
-
-                if (this.options.link.startsWith("http") || this.options.link.startsWith("/")) {
-                    this.link = this.options.link
-                }
-
-                if (this.options.link == "<pattern>") { 
-                    this.patternHover = true
-                }
-            },
-            immediate: true
-        }
-    },
     computed: {
         ratio() {
             if (this.options.image?.sizes?.image_sm) {
@@ -101,12 +83,31 @@ export default defineComponent ({
             return src
         }
     },
+    watch: {
+        "options.link": {
+            handler() {
+                if (!this.options.link) {
+                    return
+                }
+
+                if (this.options.link.startsWith("http") || this.options.link.startsWith("/")) {
+                    this.link = this.options.link
+                }
+
+                if (this.options.link == "<pattern>") { 
+                    this.patternHover = true
+                }
+            },
+            immediate: true
+        }
+    },
     mounted() {
         if (typeof window === "undefined") {
             return
         }
         
         const img = this.$refs["image"] as HTMLImageElement
+
         if (!img) {
             this.$emit("blockLoaded")
         }
@@ -123,7 +124,8 @@ export default defineComponent ({
             }
         }).then(() => {
             this.$emit("blockLoaded")
-        }).catch(() => {
+        }).catch((err) => {
+            console.error(err)
             this.$emit("blockLoaded")
         })
 
@@ -154,7 +156,6 @@ export default defineComponent ({
             return this.imageSize = "original"
         },
         onMouseEnterEvent(e:Event) {
-
             const target = e.target as HTMLElement
             if (!target) {
                 return

@@ -28,6 +28,7 @@ export type BlockType = {
     ratio?:number
     x?:number
     y?:number
+    loaded?: boolean
     width?:number
     height?:number | string
     data: BlockTypeData

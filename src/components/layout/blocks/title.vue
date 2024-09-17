@@ -32,11 +32,14 @@ export default defineComponent ({
             fontSize: 24,
         }
     },
-    mounted() {        
-        setTimeout(() => {
-            this.$emit("blockLoaded")
-        })
-    }
+    watch: {
+        "options.text": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            immediate: true
+        }
+    },
 })
 
 </script>
@@ -49,7 +52,7 @@ export default defineComponent ({
     align-items: center;
     aspect-ratio: 6/4;
     word-wrap: break-word;
-    padding: 0px 20%;
+    padding: 0px 16%;
 
     h1 {
         font-weight: 240;

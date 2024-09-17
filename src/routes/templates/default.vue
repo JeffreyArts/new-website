@@ -8,20 +8,23 @@
             id: page.id,
             layoutSize: layoutSize,
             blocks: page.blocks
-        }"/>
-        <Filter v-if="page.filter" :options="page.filter"/>
+        }" ref="layout"
+        @blocksUpdated="updateLayout"/>
+
+        <FilterComponent v-if="page.filter?.name" :options="page.filter" ref="filter"
+        @filterChange="updateFilter"/>
     </section>
 </template>
 
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, ref } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import Breadcrumbs from "@/components/breadcrumbs.vue"
-import Filter from "@/components/filter.vue"
+import FilterComponent from "@/components/filter.vue"
 import Layout from "@/components/layout/index.vue"
 
 const setMeta = (route: RouteLocationNormalizedLoaded) => {
@@ -51,17 +54,16 @@ export default defineComponent ({
     components: {
         Breadcrumbs,
         Layout,
-        Filter
+        FilterComponent
     },
     props: [],
     setup() {
         const Payload = payloadStore()
         const route = useRoute()
         const title = route.name as string
-        
 
        
-        return { 
+        return {
             Payload,
             head:  useHead({
                 title,
@@ -144,6 +146,27 @@ export default defineComponent ({
             this.breakpoint = breakPoint
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
             this.layoutSize = this.page.layout[size]
+        },
+        updateLayout() {
+            const refLayout = this.$refs.layout
+            console.log("refLayout", refLayout)
+            
+            if (!refLayout) {
+                return
+            }
+            
+            refLayout.fadeInAllBlocks()
+            
+            setTimeout(() => {
+                console.log("updateBlockSizes ")
+                refLayout.updateBlockSizes()
+                setTimeout(() => {
+                    refLayout.updateBlockSizes()
+                })
+            })
+        },
+        updateFilter() {
+
         }
     }
 })
