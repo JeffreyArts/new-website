@@ -51,7 +51,9 @@
             id: 'filter',
             layoutSize: 6,
             blocks: blocks
-        }"/>
+        }"
+        ref="layout"
+        @blocksUpdated="updateLayout"/>
 </template>
 
 
@@ -141,7 +143,7 @@ export default defineComponent({
             filterOptions: {
                 onlyFavorites: true,
                 groupSeries: true,
-                year: [] as { available: boolean, value: number, selected: boolean}[],
+                year: [] as { available: boolean, value: number, selected: boolean }[],
                 categories: [],
                 series: [],
             },
@@ -197,7 +199,7 @@ export default defineComponent({
             }
 
             const htmlEl = document.querySelector("html") as HTMLElement
-            const layout = document.getElementById('filterLayout')
+            const layout = document.getElementById("filterLayout")
             if (!layout) {
                 return
             }
@@ -227,7 +229,7 @@ export default defineComponent({
             }
         
         },
-        setYearRange(range: "all" | {min: number, max: number}) {
+        setYearRange(range: "all" | { min: number, max: number }) {
             const maxYear = new Date().getFullYear()
             
             if (range == "all") {
@@ -276,7 +278,6 @@ export default defineComponent({
             }
         }),
         updateResults(page = 1) {
-
             if (this.updating) {
                 return
             }
@@ -307,12 +308,36 @@ export default defineComponent({
 
                     this.blocks = [...this.blocks, ...blocks]
                 }
+                this.$emit("filterUpdated")
+                const refLayout = this.$refs.layout
+
+                if (refLayout) {
+                    refLayout.updateBlockSizes()
+                }
+                this.$nextTick(this.updateLayout)
                 this.updating = false
             }).catch(() => {
                 this.updating = false
             })
-        }
-       
+        },
+        updateLayout() {
+            const refLayout = this.$refs.layout
+            console.log("filter refLayout", refLayout)
+            
+            if (!refLayout) {
+                return
+            }
+            console.log("Fade in all blocks")
+            refLayout.fadeInAllBlocks()
+
+            setTimeout(() => {
+                console.log("updateBlockSizes ")
+                refLayout.updateBlockSizes()
+                setTimeout(() => {
+                    refLayout.updateBlockSizes()
+                })
+            })
+        },
     }
 })
 </script>

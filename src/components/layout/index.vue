@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue"
+import { defineComponent, PropType, nextTick } from "vue"
 import _ from "lodash"
 import Packer, { Position } from "@/model/packer"
 import gsap from "gsap"
@@ -100,8 +100,7 @@ export default defineComponent ({
         },
 
         __updateBlocks(newBlocks: BlockType[]){
-            console.log("update blocks", newBlocks)
-            this.blocks = _.values(_.omitBy(_.map(newBlocks, block => {
+            const addBlocks = _.values(_.omitBy(_.map(newBlocks, block => {
                 if (this.__findBlock(block.id, this.blocks)) {
                     return 
                 }
@@ -111,6 +110,7 @@ export default defineComponent ({
                     size: block.size > this.options.layoutSize ? this.options.layoutSize : block.size,
                 }
             }), _.isNil))
+            this.blocks = [...this.blocks, ...addBlocks]
         },
 
         __findBlock(blockId: string | number, targetBlocks: BlockType[]) {
@@ -169,7 +169,7 @@ export default defineComponent ({
                     block.width = block.size * this.widthRatio
                     block.height = "auto"
                     
-                    setTimeout(() => {
+                    nextTick(() => {
                         // console.log(this.$el)
                         const targetBlock = this.$el.querySelector(`#block-${block.id}`)
                         
@@ -280,9 +280,7 @@ export default defineComponent ({
             }   
             
             if (typeof window !== "undefined") {
-                setTimeout(() => {
-                    this.updateLayout()
-                })
+                nextTick(this.updateLayout)
                 window.dispatchEvent(new CustomEvent("layoutChange"))
             }
         },

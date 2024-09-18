@@ -12,7 +12,7 @@
         @blocksUpdated="updateLayout"/>
 
         <FilterComponent v-if="page.filter?.name" :options="page.filter" ref="filter"
-        @filterChange="updateFilter"/>
+        @filterUpdated="updateFilter"/>
     </section>
 </template>
 
@@ -149,7 +149,7 @@ export default defineComponent ({
         },
         updateLayout() {
             const refLayout = this.$refs.layout
-            console.log("refLayout", refLayout)
+            // console.log("refLayout", refLayout)
             
             if (!refLayout) {
                 return
@@ -167,6 +167,22 @@ export default defineComponent ({
         },
         updateFilter() {
 
+            const refFilter = this.$refs.filter
+            
+            if (!refFilter) {
+                return
+            }
+            
+            refFilter.updateLayout()
+            // refLayout.fadeInAllBlocks()
+
+            // setTimeout(() => {
+            //     console.log("updateBlockSizes ")
+            //     refFilter.updateBlockSizes()
+            //     setTimeout(() => {
+            //         refFilter.updateBlockSizes()
+            //     })
+            // })
         }
     }
 })
