@@ -223,9 +223,7 @@ export default defineComponent({
                 }
             })
 
-            
-            if (layout.offsetTop + lastBlock.y - window.innerHeight < htmlEl.scrollTop) {
-
+            if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
                 this.updateResults(this.page + 1)
             }
         
