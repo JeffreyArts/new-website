@@ -18,7 +18,7 @@
 
 
 <script lang="ts">
-import { defineComponent, ref } from "vue"
+import { defineComponent, ref, nextTick } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
@@ -156,14 +156,14 @@ export default defineComponent ({
             }
             
             refLayout.fadeInAllBlocks()
-            
+
+            // setTimeout(() => {
+            //     console.log("updateBlockSizes ")
+            refLayout.updateBlockSizes()
             setTimeout(() => {
-                console.log("updateBlockSizes ")
                 refLayout.updateBlockSizes()
-                setTimeout(() => {
-                    refLayout.updateBlockSizes()
-                })
             })
+            // })
         },
         updateFilter() {
 

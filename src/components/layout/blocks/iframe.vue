@@ -1,11 +1,13 @@
 <template>
     <div class="iframe-block">
         <header class="iframe-block-header">
+            <!-- Used to draw UI buttons -->
             <ul>
                 <li></li>
                 <li></li>
                 <li></li>
             </ul>
+            <!-- /Used to draw UI buttons -->
             
             <span class="iframe-block-header-title">
                 <a :href="options.url" target="_blank" class="iframe-block-header-link">
@@ -106,7 +108,7 @@ export default defineComponent ({
                     const ratio =  height / width
                     this.frame.width = this.$el.clientWidth
                     this.frame.height = this.$el.clientWidth * ratio
-                } else if (window.innerHeight/window.innerWidth > 1) { // Landscape
+                } else if (window.innerHeight/window.innerWidth >= 1) { // Landscape
                     const width = parseInt(this.options.portraitRatio.split("/")[0])
                     const height = parseInt(this.options.portraitRatio.split("/")[1])
                     const ratio =  height / width

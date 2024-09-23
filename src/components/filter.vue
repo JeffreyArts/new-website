@@ -58,7 +58,7 @@
 
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue"
+import { defineComponent, PropType, nextTick } from "vue"
 import axios from "axios"
 import jaoIcon from "./jao-icon.vue"
 import selectBox from "./form/selectbox.vue"
@@ -135,6 +135,7 @@ export default defineComponent({
             page: 1,
             updating: false,
             hasNextPage: false,
+            firstLoad: false,
             filterVal: {
                 onlyFavorites: false,
                 groupSeries: false,
@@ -291,9 +292,7 @@ export default defineComponent({
                 
                 if (this.options.targetCollection === "projects") {                    
                     const blocks = map(data.docs, (doc, index) => {
-                        // console.log(doc)
                         const block = {
-                            position: this.limit*this.page + index + 1,
                             size: 3,
                             id: doc.id,
                             data: {
@@ -305,24 +304,37 @@ export default defineComponent({
 
                         return block
                     })
-
                     this.blocks = [...this.blocks, ...blocks]
                 }
                 this.$emit("filterUpdated")
-                const refLayout = this.$refs.layout
-
-                if (refLayout) {
-                    refLayout.updateBlockSizes()
-                }
-                this.$nextTick(this.updateLayout)
+                setTimeout(() => {
+                    const refLayout = this.$refs.layout
+                    
+                    if (!refLayout) {
+                        return
+                    }
+                    refLayout.fadeInNewBlocks()
+                    setTimeout(() => {
+                        refLayout.updateBlockSizes()
+                        // nextTick(() => {
+                        //     refLayout.updateLayout()
+                        // })
+                    })
+                    
+                })
+                
                 this.updating = false
             }).catch(() => {
                 this.updating = false
             })
         },
         updateLayout() {
+            if (this.firstLoad) {
+                return
+            }
+            
+            this.firstLoad = true
             const refLayout = this.$refs.layout
-            console.log("filter refLayout", refLayout)
             
             if (!refLayout) {
                 return
