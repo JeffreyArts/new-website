@@ -222,8 +222,6 @@ export default defineComponent ({
                 return parseFloat(block.style.top) || 0
             })
             this.updateLayout()
-            console.log("sortedBlocks")
-            // this.__updateLayoutHeight() 
             
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
@@ -236,7 +234,7 @@ export default defineComponent ({
                 },
                 onComplete: () => {
                     gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
-                    this.updateLayout()
+                    nextTick(this.updateLayout)
                 }
             })
         },
@@ -259,7 +257,7 @@ export default defineComponent ({
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
-                    this.updateLayout()
+                    nextTick(this.updateLayout)
                 }
             })
             this.updateLayout()
@@ -343,18 +341,19 @@ export default defineComponent ({
         opacity: 0;
         // opacity: 1;
     }
-    > div:after {
-        content: attr(id);
-        font-size: 12px;
-        font-family: $accentFont;
-        position: absolute;
-        top: 8px;
-        background-color: var(--contrast-color);
-        color: var(--bg-color);
-        padding: 4px 8px;
-        left: 12px;
-        opacity: 0.7;
-    }
+
+    // > div:after {
+    //     content: attr(id);
+    //     font-size: 12px;
+    //     font-family: $accentFont;
+    //     position: absolute;
+    //     top: 8px;
+    //     background-color: var(--contrast-color);
+    //     color: var(--bg-color);
+    //     padding: 4px 8px;
+    //     left: 12px;
+    //     opacity: 0.7;
+    // }
 }
 
 

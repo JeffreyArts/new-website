@@ -358,11 +358,11 @@ export default defineComponent({
             // console.log("Fade in all blocks")
             refLayout.fadeInAllBlocks()
 
-            setTimeout(() => {
+            nextTick(() => {
                 // console.log("updateBlockSizes ")
                 refLayout.updateBlockSizes()
-                setTimeout(() => {
-                    refLayout.updateBlockSizes()
+                nextTick(() => {
+                    refLayout.updateLayout()
                 })
             })
         },
