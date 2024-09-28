@@ -236,7 +236,7 @@ export default defineComponent ({
                 },
                 onComplete: () => {
                     gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
-                    console.log("New blocks added")
+                    this.updateLayout()
                 }
             })
         },
@@ -246,12 +246,7 @@ export default defineComponent ({
             const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
                 return parseFloat(block.style.top) || 0
             })
-            // this.__updateLayoutHeight()
             
-            // gsap.set(sortedBlocks, {
-            //     opacity: 1,
-            // })
-            // this.updateLayout()
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
             },{
@@ -264,12 +259,19 @@ export default defineComponent ({
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
+                    this.updateLayout()
                 }
             })
             this.updateLayout()
         },
         
         async updateBlockSizes() {
+            
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("layoutChange"))
+                this.updateLayout()
+            }
+            
             const blocks = this.blocks
             await this.__setBlockDimensions(blocks)
             
@@ -312,9 +314,8 @@ export default defineComponent ({
                     block.x = posBlock.x
                 })
             }   
-            
+
             if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("layoutChange"))
                 this.updateLayout()
             }
         },

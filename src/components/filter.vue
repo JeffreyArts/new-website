@@ -49,7 +49,7 @@
     <Layout v-if="blocks.length > 0" id="filterLayout" :options="{
             layoutGap: 40,
             id: 'filter',
-            layoutSize: 6,
+            layoutSize: layoutSize,
             blocks: blocks
         }"
         ref="layout"
@@ -133,6 +133,7 @@ export default defineComponent({
             blocks: [] as Array<BlockType>,
             limit: 8,
             page: 1,
+            layoutSize: 3,
             updating: false,
             hasNextPage: false,
             firstLoad: false,
@@ -189,10 +190,17 @@ export default defineComponent({
     mounted() {
         this.setYearRange("all")
         this.updateResults()
-
+        this.updateLayoutSize()
+        window.addEventListener("resize", this.onResizeEvent)
         document.addEventListener("scroll", this.onScrollEvent)
     },
+    unmounted() {
+        window.removeEventListener("resize", this.onResizeEvent)
+    },
     methods: {
+        onResizeEvent(e: Event) {
+            this.updateLayoutSize()
+        },
         onScrollEvent(e: Event) {
 
             if (!this.hasNextPage) {
@@ -212,7 +220,6 @@ export default defineComponent({
                 block: undefined | HTMLElement,
                 y: number
             }
-
             blocks.forEach(Block => {
                 const block = Block as HTMLElement
                 if (block.offsetTop + block.clientHeight > lastBlock.y) {
@@ -222,11 +229,22 @@ export default defineComponent({
                     }
                 }
             })
+            console.log(lastBlock.y, htmlEl.scrollTop - layout.offsetTop  )
 
-            if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
+            if (htmlEl.scrollTop - layout.offsetTop > 0) {
+            // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
                 this.updateResults(this.page + 1)
             }
         
+        },
+        updateLayoutSize() {
+            if (window.innerWidth > 1140) {
+                this.layoutSize = 9
+            } else  if (window.innerWidth > 640) {
+                this.layoutSize = 6
+            } else {
+                this.layoutSize = 6
+            }
         },
         setYearRange(range: "all" | { min: number, max: number }) {
             const maxYear = new Date().getFullYear()
@@ -289,7 +307,7 @@ export default defineComponent({
                 this.hasNextPage = data.hasNextPage
                 
                 if (this.options.targetCollection === "projects") {                    
-                    const blocks = map(data.docs, (doc, index) => {
+                    const blocks = map(data.docs, (doc) => {
                         const block = {
                             size: 3,
                             id: doc.id,
@@ -314,9 +332,9 @@ export default defineComponent({
                     refLayout.fadeInNewBlocks()
                     setTimeout(() => {
                         refLayout.updateBlockSizes()
-                        // nextTick(() => {
-                        //     refLayout.updateLayout()
-                        // })
+                        nextTick(() => {
+                            refLayout.updateLayout()
+                        })
                     })
                     
                 })
@@ -337,11 +355,11 @@ export default defineComponent({
             if (!refLayout) {
                 return
             }
-            console.log("Fade in all blocks")
+            // console.log("Fade in all blocks")
             refLayout.fadeInAllBlocks()
 
             setTimeout(() => {
-                console.log("updateBlockSizes ")
+                // console.log("updateBlockSizes ")
                 refLayout.updateBlockSizes()
                 setTimeout(() => {
                     refLayout.updateBlockSizes()
