@@ -97,6 +97,10 @@ export default defineComponent ({
 
         __onResizeEvent() { 
             clearTimeout(this.resizeDelay)
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("layoutChange"))
+                this.updateLayout()
+            }
             this.resizeDelay = setTimeout(this.updateBlockSizes, 24)
         },
 
@@ -215,7 +219,12 @@ export default defineComponent ({
         },
         
         fadeInNewBlocks() {
-            // Sort blocks, based on Y position
+            
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("layoutChange"))
+                this.updateLayout()
+            }
+
             this.updateBlockSizes()
             const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
             const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
@@ -265,10 +274,6 @@ export default defineComponent ({
         
         async updateBlockSizes() {
             
-            if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("layoutChange"))
-                this.updateLayout()
-            }
             
             const blocks = this.blocks
             await this.__setBlockDimensions(blocks)

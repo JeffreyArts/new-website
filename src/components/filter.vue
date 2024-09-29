@@ -220,6 +220,10 @@ export default defineComponent({
             this.updateLayoutSize()
         },
         onScrollEvent(e: Event) {
+            const refLayout = this.$refs.layout
+            if (refLayout) {
+                refLayout.updateBlockSizes()
+            }
 
             if (!this.hasNextPage) {
                 return
@@ -384,20 +388,15 @@ export default defineComponent({
                     this.blocks = [...this.blocks, ...blocks]
                 }
                 this.$emit("filterUpdated")
-                setTimeout(() => {
+                nextTick(() => {
                     const refLayout = this.$refs.layout
                     
                     if (!refLayout) {
                         return
                     }
                     refLayout.fadeInNewBlocks()
-                    setTimeout(() => {
-                        refLayout.updateBlockSizes()
-                        nextTick(() => {
-                            refLayout.updateLayout()
-                        })
-                    })
-                    
+                    refLayout.updateBlockSizes()
+                    nextTick(refLayout.updateLayout())
                 })
                 
                 this.updating = false
@@ -422,9 +421,7 @@ export default defineComponent({
             nextTick(() => {
                 // console.log("updateBlockSizes ")
                 refLayout.updateBlockSizes()
-                nextTick(() => {
-                    refLayout.updateLayout()
-                })
+                nextTick(refLayout.updateLayout())
             })
         },
     }
