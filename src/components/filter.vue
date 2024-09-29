@@ -65,7 +65,7 @@ import selectBox from "./form/selectbox.vue"
 import checkBox from "./form/checkbox.vue"
 import { BlockType, LayoutOptions } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
-import { map, omit } from "lodash"
+import { map, sortBy } from "lodash"
 
 type TargetCollections = "projects" | "pieces"
 
@@ -146,8 +146,8 @@ export default defineComponent({
                 onlyFavorites: true,
                 groupSeries: true,
                 year: [] as { available: boolean, value: number, selected: boolean }[],
-                categories: [],
-                series: [],
+                categories: [] as { available: boolean, value: number, selected: boolean }[],
+                series: [] as { available: boolean, value: number, selected: boolean }[],
             },
             filterName: "",
             filterIcon: "empty"
@@ -176,10 +176,28 @@ export default defineComponent({
             },
             immediate: true
         },
+        "options.displayFilters": {
+            handler(filterNames: string[]) {
+                if (!filterNames) {
+                    return
+                }
+
+                filterNames.forEach(filterName => {
+                    if (filterName === "series") {
+                        this.setSeries()
+                    } else if (filterName === "year") {
+                        this.setYear("all")
+                    } else if (filterName === "categories") {
+                        this.setCategories()
+                    }
+                })
+            },
+            immediate: true
+        }
         // "options.filterRange": {
         //     handler(filterRange) {
         //         if (filterRange.year) {
-        //             this.setYearRange(filterRange.year)
+        //             this.setYear(filterRange.year)
         //         }
         //     },
         //     immediate: true
@@ -188,8 +206,6 @@ export default defineComponent({
     beforeCreate() {
     },
     mounted() {
-        this.setYearRange("all")
-        this.setSeries()
 
         this.updateResults()
         this.updateLayoutSize()
@@ -246,13 +262,35 @@ export default defineComponent({
                         throw new Error("Can not retrieve series")
                     }
                     const data = req.data as PaginationData
-                    this.filterOptions.series = map(data.docs, doc => {
+                    this.filterOptions.series = sortBy(map(data.docs, doc => {
                         return {
                             value: doc.title,
                             available: true, 
                             selected: false
                         }
-                    })
+                    }), "value")
+                    resolve(data)
+
+                } catch(err) {
+                    reject(err)
+                }
+            })
+        },
+        setCategories() {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/categories/?depth=1&limit=128`)
+                    if (req.data?.docs.length < 1) {
+                        throw new Error("Can not retrieve categories")
+                    }
+                    const data = req.data as PaginationData
+                    this.filterOptions.categories = sortBy(map(data.docs, doc => {
+                        return {
+                            value: doc.title,
+                            available: true, 
+                            selected: false
+                        }
+                    }), "value")
                     resolve(data)
 
                 } catch(err) {
@@ -269,7 +307,7 @@ export default defineComponent({
                 this.layoutSize = 6
             }
         },
-        setYearRange(range: "all" | { min: number, max: number }) {
+        setYear(range: "all" | { min: number, max: number }) {
             const maxYear = new Date().getFullYear()
             
             if (range == "all") {
