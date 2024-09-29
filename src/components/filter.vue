@@ -377,8 +377,10 @@ export default defineComponent({
                             size: 3,
                             id: doc.id,
                             data: {
-                                blockType: "image",
+                                blockType: "projectThumbnail",
                                 link: doc.path,
+                                title: doc.title,
+                                categories: doc.categories,
                                 image: doc.thumbnail
                             }
                         } as BlockType
