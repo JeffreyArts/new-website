@@ -189,6 +189,8 @@ export default defineComponent({
     },
     mounted() {
         this.setYearRange("all")
+        this.setSeries()
+
         this.updateResults()
         this.updateLayoutSize()
         window.addEventListener("resize", this.onResizeEvent)
@@ -235,7 +237,28 @@ export default defineComponent({
             // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
                 this.updateResults(this.page + 1)
             }
-        
+        },
+        setSeries() {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/series/?depth=1&limit=128`)
+                    if (req.data?.docs.length < 1) {
+                        throw new Error("Can not retrieve series")
+                    }
+                    const data = req.data as PaginationData
+                    this.filterOptions.series = map(data.docs, doc => {
+                        return {
+                            value: doc.title,
+                            available: true, 
+                            selected: false
+                        }
+                    })
+                    resolve(data)
+
+                } catch(err) {
+                    reject(err)
+                }
+            })
         },
         updateLayoutSize() {
             if (window.innerWidth > 1140) {
