@@ -466,21 +466,22 @@ export default defineComponent({
 }
 
 .site-filter-right {
-    width: 50%;
+    width: 66%;
     padding-right: 16px;
     display: flex;
     flex-flow: row wrap;
     align-items: center;
-    gap: 16px;
+    gap: 24px;
 }
 
 .site-filter-name {
     font-size: 18px;
+    margin: 40px 0;
 }
 
 .site-filter-section {
     display: flex;
-    width: calc(50% - 8px);
+    width: calc(50% - 16px);
     flex-flow: row;
     align-items: center;
     gap: 8px;
@@ -526,10 +527,14 @@ export default defineComponent({
 @media all and ( min-width: 640px) {
     .site-filter-name {
         font-size: 24px;
+        margin: 40px 0;
     }
 
     .site-filter-icon {
         height: 52px;
+    }
+    .site-filter-right {
+        width: 50%;
     }
 
     .site-filter-left {

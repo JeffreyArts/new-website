@@ -1,6 +1,8 @@
 <template>
     
     <label class="selectbox" @click="openSelect" :class="[isOpen ? '__isOpen' : '']">
+        <small class="selectbox-label-selection" v-if="name != displayName">{{ name }}</small>
+
         <span class="selectbox-label" v-if="name">
             {{displayName}}
         </span>
@@ -61,7 +63,7 @@ export default defineComponent({
     },
     computed: {
         displayName() {
-            const selectedOptions = filter(this.options, {selected: true})
+            const selectedOptions = filter(this.options, { selected: true })
 
             if (selectedOptions.length <= 0) {
                 return this.name
@@ -154,10 +156,9 @@ export default defineComponent({
 
 .selectbox {
     display: flex;
-    width: calc(50% - 8px);
     flex-flow: row;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     justify-content: space-between;
     position: relative;
     color: #555;
@@ -208,6 +209,13 @@ export default defineComponent({
     text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.selectbox-label-selection {
+    position: absolute;
+    top: -1.2em;
+    opacity: .8;
+    font-size: .8em;
 }
 .selectbox-option {
     width: 100%;
