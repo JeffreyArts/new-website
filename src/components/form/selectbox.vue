@@ -15,7 +15,7 @@
                         :name="option.selected ? 'checkbox-checked' : 'checkbox'"
                         :transit-effect="{ duration: .1, delay:.002, effect: 'top-to-bottom'}" 
                         />
-                    {{ option.value }}
+                    {{ option.label }}
                 </span>
             </span>
 
@@ -33,8 +33,9 @@ import { defineComponent, PropType } from "vue"
 import { filter } from "lodash"
 import jaoIcon from "./../jao-icon.vue"
 
-type SelectBoxOptions = {
+export type SelectBoxOptions = {
     value: number | string,
+    label: number | string,
     selected: boolean
     available?: boolean, 
 }
@@ -71,12 +72,24 @@ export default defineComponent({
 
             let name = ""
             selectedOptions.forEach(opt => {
-                name += `${opt.value}, `
+                name += `${opt.label}, `
             })
             return name.slice(0, name.length - 2)
         }
     },
+    mounted() {
+        window.addEventListener("keydown", this.onKeyDown)
+    },
+    unmounted() {
+        window.removeEventListener("keydown", this.onKeyDown)
+    },
     methods: {
+        onKeyDown(e: KeyboardEvent) {
+            if (e.key.toLowerCase() === "escape") {
+                this.isOpen = false
+                document.removeEventListener("click", this.closeSelect)
+            }
+        },
         openSelect() {
             if (this.isOpen) {
                 return

@@ -61,11 +61,12 @@
 import { defineComponent, PropType, nextTick } from "vue"
 import axios from "axios"
 import jaoIcon from "./jao-icon.vue"
-import selectBox from "./form/selectbox.vue"
+import selectBox, { SelectBoxOptions } from "./form/selectbox.vue"
 import checkBox from "./form/checkbox.vue"
+import qs from "qs"
 import { BlockType, LayoutOptions } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
-import { map, sortBy } from "lodash"
+import _, { map, sortBy } from "lodash"
 
 type TargetCollections = "projects" | "pieces"
 
@@ -145,9 +146,9 @@ export default defineComponent({
             filterOptions: {
                 onlyFavorites: true,
                 groupSeries: true,
-                year: [] as { available: boolean, value: number, selected: boolean }[],
-                categories: [] as { available: boolean, value: number, selected: boolean }[],
-                series: [] as { available: boolean, value: number, selected: boolean }[],
+                year: [] as SelectBoxOptions[],
+                categories: [] as SelectBoxOptions[],
+                series: [] as SelectBoxOptions[],
             },
             filterName: "",
             filterIcon: "empty"
@@ -193,6 +194,30 @@ export default defineComponent({
                 })
             },
             immediate: true
+        },
+        "filterOptions.series": {
+            handler() {
+                this.page = 1
+                this.blocks.length = 0
+                this.updateResults()
+            },
+            deep: true
+        },
+        "filterOptions.categories": {
+            handler() {
+                this.page = 1
+                this.blocks.length = 0
+                this.updateResults()
+            },
+            deep: true
+        },
+        "filterOptions.year": {
+            handler() {
+                this.page = 1
+                this.blocks.length = 0
+                this.updateResults()
+            },
+            deep: true
         }
         // "options.filterRange": {
         //     handler(filterRange) {
@@ -268,7 +293,8 @@ export default defineComponent({
                     const data = req.data as PaginationData
                     this.filterOptions.series = sortBy(map(data.docs, doc => {
                         return {
-                            value: doc.title,
+                            value: doc.id,
+                            label: doc.title,
                             available: true, 
                             selected: false
                         }
@@ -290,7 +316,8 @@ export default defineComponent({
                     const data = req.data as PaginationData
                     this.filterOptions.categories = sortBy(map(data.docs, doc => {
                         return {
-                            value: doc.title,
+                            value: doc.id,
+                            label: doc.title,
                             available: true, 
                             selected: false
                         }
@@ -319,6 +346,7 @@ export default defineComponent({
                 for (let index = 2008; index < maxYear; index++) {
                     this.filterOptions.year.push({
                         value: index,
+                        label: index,
                         available: true, 
                         selected: false
                     })
@@ -328,8 +356,12 @@ export default defineComponent({
         
         getResults: (targetCollection: TargetCollections | TargetCollections[], options?: {
             limit: number,
-            page: number
+            page: number,
+            year?: Array<string>,
+            series?: Array<string>,
+            categories?: Array<string>
         }) => new Promise<PaginationData>(async (resolve, reject) => {
+            console.log(options)
             if (!options) {
                 options = {
                     limit: 8,
@@ -345,10 +377,46 @@ export default defineComponent({
                 options.page = 1
             }
 
-            const collection = targetCollection
+            const query = { 
+                where: {}
+            } as {
+                where: {
+                    series?: { in: string[] }
+                    categories?: { in: string[] }
+                    "year.from"?: { in: string[] },
+                    "year.to"?: { in: string[]  }
+                }
+            }
+
+            if (options.series && options.series.length > 0) {
+                query.where.series = {
+                    in: options.series 
+                }
+            }
             
+            if (options.categories && options.categories.length > 0) {
+                query.where.categories = {
+                    in: options.categories 
+                }
+            }
+            if (options.year && options.year.length > 0) {
+                query.where["year.from"] = { in: options.year }
+                query.where["year.to"] = { in: options.year }
+            }
+
+            
+            const stringifiedQuery = qs.stringify(
+                {
+                    depth:1,
+                    limit: options.limit,
+                    page: options.page,
+                    ...query, 
+                },
+                { addQueryPrefix: true },
+            )
+            const collection = targetCollection
             try {
-                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}?depth=1&limit=${options.limit}&page=${options.page}`)
+                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}${stringifiedQuery}`)
                 if (req.data?.docs.length < 1) {
                     throw new Error(`Can not retrieve ${collection}`)
                 }
@@ -364,11 +432,33 @@ export default defineComponent({
                 return
             }
             this.updating = true
-
-            this.getResults(this.options.targetCollection, {
+            const query = {
                 limit: this.limit,
                 page: page
-            }).then((data) => {
+            } as {
+                limit: number,
+                page: number,
+                series?: Array<string>
+                categories?: Array<string>
+                year?: Array<string>
+            }
+
+            const series = _.filter(this.filterOptions.series, { selected: true })
+            if (series.length > 0) {
+                query.series = series.map(serie => serie.value.toString())
+            }
+
+            const categories = _.filter(this.filterOptions.categories, { selected: true })
+            if (categories.length > 0) {
+                query.categories = categories.map(serie => serie.value.toString())
+            }
+
+            const year = _.filter(this.filterOptions.year, { selected: true })
+            if (year.length > 0) {
+                query.year = year.map(serie => serie.value.toString())
+            }
+
+            this.getResults(this.options.targetCollection, query).then((data) => {
                 this.hasNextPage = data.hasNextPage
                 
                 if (this.options.targetCollection === "projects") {                    
