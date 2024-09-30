@@ -182,39 +182,77 @@ export default defineComponent({
                 if (!filterNames) {
                     return
                 }
-
+                const promises = [] as Array<Promise<unknown>>
                 filterNames.forEach(filterName => {
                     if (filterName === "series") {
-                        this.setSeries()
+                        promises.push(this.setSeries())
                     } else if (filterName === "year") {
-                        this.setYear("all")
+                        promises.push(this.setYear("all"))
                     } else if (filterName === "categories") {
-                        this.setCategories()
+                        promises.push(this.setCategories())
                     }
+                })
+
+                Promise.all(promises).then(() => {
+                    this.setDefaults()
+                    this.updateResults()
                 })
             },
             immediate: true
         },
         "filterOptions.series": {
-            handler() {
+            handler(newVal,oldVal) {
+                if (oldVal.length <= 0) {
+                    return
+                }
                 this.page = 1
                 this.blocks.length = 0
+                const querySeries = _.filter(newVal, { selected: true }).map(serie => serie.value).join(",")
+
+                this.$router.replace({
+                    query: {
+                        ...this.$route.query,
+                        series: querySeries
+                    }
+                })
                 this.updateResults()
             },
             deep: true
         },
         "filterOptions.categories": {
-            handler() {
+            handler(newVal,oldVal) {
+                if (oldVal.length <= 0) {
+                    return
+                }
                 this.page = 1
                 this.blocks.length = 0
+                const queryCategories = _.filter(newVal, { selected: true }).map(category => category.value).join(",")
+
+                this.$router.replace({
+                    query: {
+                        ...this.$route.query,
+                        categories: queryCategories
+                    }
+                })
                 this.updateResults()
             },
             deep: true
         },
         "filterOptions.year": {
-            handler() {
+            handler(newVal,oldVal) {
+                if (oldVal.length <= 0) {
+                    return
+                }
                 this.page = 1
                 this.blocks.length = 0
+                const queryYears = _.filter(newVal, { selected: true }).map(year => year.value).join(",")
+
+                this.$router.replace({
+                    query: {
+                        ...this.$route.query,
+                        year: queryYears
+                    }
+                })
                 this.updateResults()
             },
             deep: true
@@ -231,8 +269,6 @@ export default defineComponent({
     beforeCreate() {
     },
     mounted() {
-
-        this.updateResults()
         this.updateLayoutSize()
         window.addEventListener("resize", this.onResizeEvent)
         document.addEventListener("scroll", this.onScrollEvent)
@@ -281,6 +317,36 @@ export default defineComponent({
             if (htmlEl.scrollTop - layout.offsetTop > 0) {
             // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
                 this.updateResults(this.page + 1)
+            }
+        },
+        setDefaults() {
+            if (this.$route.query.series) {
+                const series = this.$route.query.series.split(",")
+                series.forEach((serie: string) => {
+                    const foundSerie = _.find(this.filterOptions.series, { value: serie })
+                    if (foundSerie) {
+                        foundSerie.selected = true
+                    }
+                })
+            }
+            if (this.$route.query.categories) {
+                const categories = this.$route.query.categories.split(",")
+                categories.forEach((category: string) => {
+                    const foundCategory = _.find(this.filterOptions.categories, { value: category })
+                    if (foundCategory) {
+                        foundCategory.selected = true
+                    }
+                })
+            }
+
+            if (this.$route.query.year) {
+                const year = this.$route.query.year.split(",")
+                year.forEach((year: number) => {
+                    const foundYear = _.find(this.filterOptions.year, { value: Number(year) })
+                    if (foundYear) {
+                        foundYear.selected = true
+                    }
+                })
             }
         },
         setSeries() {
@@ -339,19 +405,23 @@ export default defineComponent({
             }
         },
         setYear(range: "all" | { min: number, max: number }) {
-            const maxYear = new Date().getFullYear()
-            
-            if (range == "all") {
-                this.filterOptions.year = []
-                for (let index = 2008; index < maxYear; index++) {
-                    this.filterOptions.year.push({
-                        value: index,
-                        label: index,
-                        available: true, 
-                        selected: false
-                    })
+            return new Promise ((resolve, reject) => {
+
+                const maxYear = new Date().getFullYear()
+                
+                if (range == "all") {
+                    this.filterOptions.year = []
+                    for (let index = 2008; index <= maxYear; index++) {
+                        this.filterOptions.year.push({
+                            value: index,
+                            label: index,
+                            available: true, 
+                            selected: false
+                        })
+                    }
                 }
-            }
+                resolve(this.filterOptions.year)
+            })
         },
         
         getResults: (targetCollection: TargetCollections | TargetCollections[], options?: {
@@ -361,7 +431,7 @@ export default defineComponent({
             series?: Array<string>,
             categories?: Array<string>
         }) => new Promise<PaginationData>(async (resolve, reject) => {
-            console.log(options)
+
             if (!options) {
                 options = {
                     limit: 8,
