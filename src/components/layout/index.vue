@@ -85,7 +85,7 @@ export default defineComponent ({
         }
     },
     mounted() {
-        this.fadeInAllBlocks()
+        // this.fadeInAllBlocks()
         if (typeof window !== "undefined") {
             window.addEventListener("resize", this.__onResizeEvent)
         }
@@ -216,7 +216,9 @@ export default defineComponent ({
         },
         
         fadeInNewBlocks() {
-            
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("layoutChange"))
+            }
             this.updateBlockSizes()
             const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
             const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
@@ -246,13 +248,18 @@ export default defineComponent ({
                 return parseFloat(block.style.top) || 0
             })
             
+            if (typeof window !== "undefined") {
+                nextTick(() => {
+                    window.dispatchEvent(new CustomEvent("layoutChange"))
+                })
+            }
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
             },{
                 opacity: 1,
-                duration: .64,
+                duration: .8,
                 stagger: {
-                    each: .08,
+                    each: .4,
                     from: "start"
                 },
                 onComplete: () => {
@@ -265,10 +272,6 @@ export default defineComponent ({
         },
         
         async updateBlockSizes() {
-            
-            if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("layoutChange"))
-            }
             this.updateLayout()
 
             
