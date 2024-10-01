@@ -470,8 +470,19 @@ export default defineComponent({
                 }
             }
             if (options.year && options.year.length > 0) {
-                query.where["year.from"] = { in: options.year }
-                query.where["year.to"] = { in: options.year }
+                query.where["year.from"] = { in: [] }
+                query.where["year.to"] = { in: [] }
+                options.year.forEach(year => {
+                    if (query && query.where && query.where["year.to"] && query.where["year.from"]) {
+                        if (year == new Date().getFullYear().toString()) {
+                            query.where["year.to"].in.push("-")
+                        } else {
+                            query.where["year.from"].in.push(year)
+                        }
+                        query.where["year.to"].in.push(year)
+                    }
+                })
+                
             }
 
             
