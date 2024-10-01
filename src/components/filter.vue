@@ -567,7 +567,10 @@ export default defineComponent({
                     if (!refLayout) {
                         return
                     }
-                    refLayout.fadeInNewBlocks()
+
+                    if (this.firstLoad) {
+                        refLayout.fadeInNewBlocks()
+                    }
                     refLayout.updateBlockSizes()
                     nextTick(refLayout.updateLayout())
                 })
