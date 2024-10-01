@@ -197,8 +197,6 @@ export default defineComponent ({
             }
             block.loaded = true
             // Usefull log for debugging
-            // console.log("Block loaded", block.id, block.data.blockType)
-
             if (_.every(_.map(this.blocks, block => block.loaded))) {
                 this.loaded = true
                 this.$emit("blocksUpdated")

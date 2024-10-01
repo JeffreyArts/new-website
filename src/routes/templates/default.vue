@@ -167,13 +167,13 @@ export default defineComponent ({
         },
         updateFilter() {
 
-            const refFilter = this.$refs.filter
+            // const refFilter = this.$refs.filter
             
-            if (!refFilter) {
-                return
-            }
+            // if (!refFilter) {
+            //     return
+            // }
             
-            refFilter.updateLayout()
+            // refFilter.updateLayout()
             // refLayout.fadeInAllBlocks()
 
             // setTimeout(() => {
