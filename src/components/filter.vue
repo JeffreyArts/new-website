@@ -26,19 +26,22 @@
                     v-if="filter == 'year'"
                     class="site-filter-section"
                     name="Year"
+                    @change="updateYear"
                     :options="filterOptions.year"
                     />
 
                 <selectBox :style="`order: ${k}`"
                     v-if="filter == 'series'"
                     class="site-filter-section"
+                    @change="updateSeries"
                     name="Series"
                     :options="filterOptions.series"
                     />
-
+                    
                 <selectBox :style="`order: ${k}`"
                     v-if="filter == 'categories'"
                     class="site-filter-section"
+                    @change="updateCategories"
                     name="Categories"
                     :options="filterOptions.categories"
                     />
@@ -200,63 +203,15 @@ export default defineComponent({
             },
             immediate: true
         },
-        "filterOptions.series": {
-            handler(newVal,oldVal) {
-                if (oldVal.length <= 0) {
-                    return
-                }
-                this.page = 1
-                this.blocks.length = 0
-                const querySeries = _.filter(newVal, { selected: true }).map(serie => serie.value).join(",")
-
-                this.$router.replace({
-                    query: {
-                        ...this.$route.query,
-                        series: querySeries
-                    }
-                })
+        "$route.query": {
+            handler() {
+                console.log("Query changed")
+                this.reset()
+                this.setDefaults()
                 this.updateResults()
             },
             deep: true
         },
-        "filterOptions.categories": {
-            handler(newVal,oldVal) {
-                if (oldVal.length <= 0) {
-                    return
-                }
-                this.page = 1
-                this.blocks.length = 0
-                const queryCategories = _.filter(newVal, { selected: true }).map(category => category.value).join(",")
-
-                this.$router.replace({
-                    query: {
-                        ...this.$route.query,
-                        categories: queryCategories
-                    }
-                })
-                this.updateResults()
-            },
-            deep: true
-        },
-        "filterOptions.year": {
-            handler(newVal,oldVal) {
-                if (oldVal.length <= 0) {
-                    return
-                }
-                this.page = 1
-                this.blocks.length = 0
-                const queryYears = _.filter(newVal, { selected: true }).map(year => year.value).join(",")
-
-                this.$router.replace({
-                    query: {
-                        ...this.$route.query,
-                        year: queryYears
-                    }
-                })
-                this.updateResults()
-            },
-            deep: true
-        }
         // "options.filterRange": {
         //     handler(filterRange) {
         //         if (filterRange.year) {
@@ -348,6 +303,13 @@ export default defineComponent({
                     }
                 })
             }
+        },
+        reset() {
+            _.map(this.filterOptions.series, serie => { serie.selected = false })
+            _.map(this.filterOptions.categories, category => { category.selected = false  })
+            _.map(this.filterOptions.year, year => { year.selected = false  })
+            this.blocks.length = 0
+            this.firstLoad = false
         },
         setSeries() {
             return new Promise(async (resolve, reject) => {
@@ -508,6 +470,45 @@ export default defineComponent({
                 reject(err)
             }
         }),
+        updateSeries() {
+            this.page = 1
+            this.blocks.length = 0
+            const querySeries = _.filter(this.filterOptions.series, { selected: true }).map(serie => serie.value).join(",")
+
+            this.$router.replace({
+                query: {
+                    ...this.$route.query,
+                    series: querySeries
+                }
+            })
+            this.updateResults()
+        },
+        updateYear() {
+            this.page = 1
+            this.blocks.length = 0
+            const queryYears = _.filter(this.filterOptions.year, { selected: true }).map(year => year.value).join(",")
+
+            this.$router.replace({
+                query: {
+                    ...this.$route.query,
+                    year: queryYears
+                }
+            })
+            this.updateResults()
+        },
+        updateCategories() {
+            this.page = 1
+            this.blocks.length = 0
+            const queryCategories = _.filter(this.filterOptions.categories, { selected: true }).map(category => category.value).join(",")
+
+            this.$router.replace({
+                query: {
+                    ...this.$route.query,
+                    categories: queryCategories
+                }
+            })
+            this.updateResults()
+        },
         updateResults(page = 1) {
             if (this.updating) {
                 return

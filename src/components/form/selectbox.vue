@@ -147,6 +147,7 @@ export default defineComponent({
                 }
             }
 
+            this.$emit("change")
             this.lastSelection = index
         }
     }

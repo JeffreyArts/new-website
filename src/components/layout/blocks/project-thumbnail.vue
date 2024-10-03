@@ -12,7 +12,7 @@
         </a>
 
         <div class="project-thumbnail-tags" v-if="options.categories">
-            <span class="project-thumbnail-tag" v-for="category, index in options.categories" :key="index">
+            <span class="project-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
                 {{ category.title }}
             </span>
         </div>
@@ -154,6 +154,14 @@ export default defineComponent ({
 
             return this.imageSize = "original"
         },
+        goToCategory(categoryId: string) {
+            this.$router.push({
+                path: "/archive",
+                query: {
+                    categories: categoryId
+                }
+            })
+        }
     }
 })
 

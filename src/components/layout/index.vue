@@ -260,13 +260,17 @@ export default defineComponent ({
                     each: .4,
                     from: "start"
                 },
+                onStart: () => {
+                    this.updateBlockSizes()
+
+                    nextTick(this.updateLayout)
+                },
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
                     nextTick(this.updateBlockSizes)
                 }
             })
-            this.updateLayout()
         },
         
         async updateBlockSizes() {
