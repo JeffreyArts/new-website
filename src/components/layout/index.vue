@@ -217,13 +217,13 @@ export default defineComponent ({
             if (typeof window !== "undefined") {
                 window.dispatchEvent(new CustomEvent("layoutChange"))
             }
-            this.updateBlockSizes()
+            // this.updateBlockSizes()
             const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
             const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
                 return parseFloat(block.style.top) || 0
             })
-            this.updateLayout()
             
+            // this.updateLayout()
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
             },{
@@ -263,7 +263,7 @@ export default defineComponent ({
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
-                    nextTick(this.updateLayout)
+                    nextTick(this.updateBlockSizes)
                 }
             })
             this.updateLayout()
