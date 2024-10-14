@@ -25,6 +25,7 @@ export type ImageBlock = {
         mimeType: string
         title: string
         description: string
+        url: string
         sizes: {
             image_sm: {
                 width: number
@@ -172,7 +173,11 @@ export default defineComponent ({
         addBackgroundPattern() {
             this.bgImageCache = getComputedStyle(document.body).backgroundImage 
             this.bgSizeCache = getComputedStyle(document.body).backgroundSize 
-            document.body.style.backgroundImage = `url(${this.src})`
+
+
+            let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
+            src += `/media/${this.options.image.filename}`
+            document.body.style.backgroundImage = `url(${src})`
             document.body.style.backgroundSize = "auto"
         },
         mouseEnterZoom(target: HTMLElement) {

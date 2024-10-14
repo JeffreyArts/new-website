@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent, PropType, nextTick } from "vue"
 import _ from "lodash"
-import Packer, { Position } from "@/model/packer"
+import Packer from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
 import { BlockType, LayoutOptions } from "./layout-types"
@@ -71,6 +71,7 @@ export default defineComponent ({
                 if (blocks.length <= 0) {
                     return
                 }
+                this.loaded = false
                 
                 if (this.animations) {
                     this.animations.forEach(tween => {
@@ -214,29 +215,36 @@ export default defineComponent ({
         },
         
         fadeInNewBlocks() {
-            if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("layoutChange"))
-            }
-            // this.updateBlockSizes()
-            const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
-            const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
-                return parseFloat(block.style.top) || 0
-            })
-            
-            // this.updateLayout()
-            gsap.fromTo(sortedBlocks, {
-                opacity: 0
-            },{
-                opacity: 1,
-                duration: .64,
-                stagger: {
-                    each: .08,
-                    from: "start"
-                },
-                onComplete: () => {
-                    gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
-                    nextTick(this.updateLayout)
+            return new Promise((resolve, reject) => {
+                
+                if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("layoutChange"))
                 }
+                this.updateBlockSizes()
+                nextTick(this.updateLayout)
+                // this.updateBlockSizes()
+                const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
+                const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
+                    return parseFloat(block.style.top) || 0
+                })
+            
+                // this.updateLayout()
+                gsap.fromTo(sortedBlocks, {
+                    opacity: 0
+                },{
+                    opacity: 1,
+                    duration: .64,
+                    stagger: {
+                        each: .08,
+                        from: "start"
+                    },
+                    onComplete: () => {
+                        // gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
+                        // console.log("New blocks loaded")
+                        // nextTick(this.updateLayout)
+                        resolve(true)
+                    }
+                })
             })
         },
         fadeInAllBlocks() {
@@ -251,6 +259,13 @@ export default defineComponent ({
                     window.dispatchEvent(new CustomEvent("layoutChange"))
                 })
             }
+
+            // Shady solution....
+            setTimeout(() => {
+                this.updateBlockSizes()
+                nextTick(this.updateLayout)
+            },500)
+
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
             },{
@@ -260,11 +275,11 @@ export default defineComponent ({
                     each: .4,
                     from: "start"
                 },
-                onStart: () => {
-                    this.updateBlockSizes()
+                // onStart: () => {
+                //     this.updateBlockSizes()
 
-                    nextTick(this.updateLayout)
-                },
+                //     nextTick(this.updateLayout)
+                // },
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")

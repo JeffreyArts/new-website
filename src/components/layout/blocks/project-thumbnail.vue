@@ -171,6 +171,9 @@ export default defineComponent ({
 <style lang="scss">
 @import "./../../../assets/scss/variables.scss";
 .project-thumbnail-block {
+
+    container-name: project-thumbnail;
+    container-type: inline-size;
     margin: 0;
     
     img {
@@ -242,8 +245,7 @@ export default defineComponent ({
     color: #000;
 }
 
-@media all and (min-width: 640px) {
-
+@container project-thumbnail (min-width: 256px) {
     .project-thumbnail-block-title {
         padding: 8px 0;
         font-size: 24px;

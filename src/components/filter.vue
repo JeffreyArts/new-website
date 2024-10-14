@@ -135,9 +135,9 @@ export default defineComponent({
     data() {
         return {
             blocks: [] as Array<BlockType>,
-            limit: 8,
+            limit: 16,
             page: 1,
-            layoutSize: 3,
+            layoutSize: 4,
             updating: false,
             hasNextPage: false,
             firstLoad: false,
@@ -236,10 +236,14 @@ export default defineComponent({
             this.updateLayoutSize()
         },
         onScrollEvent(e: Event) {
-            const refLayout = this.$refs.layout
-            if (refLayout) {
-                refLayout.updateBlockSizes()
+            if (this.updating) {
+                return
             }
+            // Deze code fixt een issue, maar dit is niet de way to go...
+            // const refLayout = this.$refs.layout
+            // if (refLayout) {
+            //     refLayout.updateBlockSizes()
+            // }
 
             if (!this.hasNextPage) {
                 return
@@ -267,11 +271,14 @@ export default defineComponent({
                     }
                 }
             })
-            console.log(lastBlock.y, htmlEl.scrollTop - layout.offsetTop  )
-
-            if (htmlEl.scrollTop - layout.offsetTop > 0) {
-            // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
-                this.updateResults(this.page + 1)
+            // console.log(htmlEl.scrollTop - layout.offsetTop + window.innerHeight, document.body.clientHeight  - layout.offsetTop)
+            const scrollOffset = htmlEl.scrollTop - layout.offsetTop + window.innerHeight
+            const endOffScroll = document.body.clientHeight  - layout.offsetTop
+            if (scrollOffset > endOffScroll - window.innerHeight * .25) {
+                console.log("Load next")
+                // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
+                this.page = this.page + 1
+                this.updateResults(this.page)
             }
         },
         setDefaults() {
@@ -326,8 +333,8 @@ export default defineComponent({
                             available: true, 
                             selected: false
                         }
-                    }), "value")
-                    resolve(data)
+                    }), "label", "desc")
+                    resolve(this.filterOptions.series)
 
                 } catch(err) {
                     reject(err)
@@ -349,8 +356,8 @@ export default defineComponent({
                             available: true, 
                             selected: false
                         }
-                    }), "value")
-                    resolve(data)
+                    }), "label", "desc")
+                    resolve(this.filterOptions.categories)
 
                 } catch(err) {
                     reject(err)
@@ -358,10 +365,12 @@ export default defineComponent({
             })
         },
         updateLayoutSize() {
-            if (window.innerWidth > 1140) {
+            if (window.innerWidth > 1240) {
+                this.layoutSize = 15
+            } else if (window.innerWidth > 800) {
+                this.layoutSize = 12
+            } else if (window.innerWidth > 640) {
                 this.layoutSize = 9
-            } else  if (window.innerWidth > 640) {
-                this.layoutSize = 6
             } else {
                 this.layoutSize = 6
             }
@@ -396,13 +405,13 @@ export default defineComponent({
 
             if (!options) {
                 options = {
-                    limit: 8,
+                    limit: 16,
                     page: 1
                 }
             }
 
             if (!options.limit) {
-                options.limit = 8
+                options.limit = 16
             }
 
             if (!options.page) {
@@ -571,9 +580,16 @@ export default defineComponent({
 
                     if (this.firstLoad) {
                         refLayout.fadeInNewBlocks()
+                            .then(() => {
+                                refLayout.updateBlockSizes()
+                                setTimeout(()=>{
+
+                                    nextTick(refLayout.updateLayout())
+                                })
+                                // gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
+                            })
+                            .catch(console.error)
                     }
-                    refLayout.updateBlockSizes()
-                    nextTick(refLayout.updateLayout())
                 })
                 
                 this.updating = false
