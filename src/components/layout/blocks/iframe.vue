@@ -15,6 +15,8 @@
                     <jaoIcon name="external-link" size="medium" />
                 </a>
             </span>
+
+            <span class="iframe-block-header-refresh-button" @click="refreshIframe" v-if="showRefresh">Refresh</span>
             
         </header>
 
@@ -45,6 +47,7 @@ export type IframeBlock = {
     id: string
     title: string
     url: string
+    showRefresh: boolean
     autoScaling: string
     portraitRatio: string
     landscapeRatio: string
@@ -65,6 +68,7 @@ export default defineComponent ({
         return {
             scale: 1,
             title: "",
+            showRefresh: false,
             frame: {
                 width: 0,
                 height: 0,
@@ -77,6 +81,7 @@ export default defineComponent ({
             return
         }
         this.setTitle()
+        this.showRefresh = this.options.showRefresh
         
         const iframe = this.$refs["iframe"] as HTMLIFrameElement
         
@@ -89,6 +94,13 @@ export default defineComponent ({
         window.removeEventListener("layoutChange", this.onLayoutChange)
     },
     methods: {
+        refreshIframe(){
+            const iframe = this.$refs["iframe"] as HTMLIFrameElement
+            if (!iframe){
+                return
+            }
+            iframe.src = iframe.src
+        },
         setTitle(){
             this.title = this.options.title
 
@@ -265,6 +277,29 @@ export default defineComponent ({
         transition: $transitionDefault;
         height: 26px;
         color: #111;
+    }
+}
+
+.iframe-block-header-refresh-button {
+    position: absolute;
+    right: 16px;
+    font-size: 12px;
+    border: 1px solid var(--contrast-color);
+    background-color: rgba(255,255,255,.4);
+    padding: 4px 8px;
+    text-shadow: 0 1px rgba(255,255,255,.8);
+    transition: $transitionDefault;
+    opacity: 0.9;
+    border-radius: 3px;
+    cursor: pointer;
+    
+    &:hover,
+    &:focus {
+        opacity: 0.9;
+        background-color: #fff;
+        background-color: rgba(255,255,255,.8);
+        border-radius: 1px;
+        scale: 1.1;
     }
 }
 </style>
