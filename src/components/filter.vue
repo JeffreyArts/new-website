@@ -366,9 +366,9 @@ export default defineComponent({
         },
         updateLayoutSize() {
             if (window.innerWidth > 1240) {
-                this.layoutSize = 15
-            } else if (window.innerWidth > 800) {
                 this.layoutSize = 12
+            } else if (window.innerWidth > 800) {
+                this.layoutSize = 9
             } else if (window.innerWidth > 640) {
                 this.layoutSize = 9
             } else {
