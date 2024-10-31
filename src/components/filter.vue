@@ -62,14 +62,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType, nextTick } from "vue"
-import axios from "axios"
+import Filter from "./../services/filter"
 import jaoIcon from "./jao-icon.vue"
 import selectBox, { SelectBoxOptions } from "./form/selectbox.vue"
 import checkBox from "./form/checkbox.vue"
-import qs from "qs"
-import { BlockType, LayoutOptions } from "@/components/layout/layout-types"
+import { BlockType } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
-import _, { map, sortBy } from "lodash"
+import { map, filter, find } from "lodash"
 
 type TargetCollections = "projects" | "pieces"
 
@@ -85,38 +84,6 @@ export type FilterOptions = {
     }
     displayFilters: string[] 
 }
-interface PaginationData {
-    docs: Array<any>;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-    limit: number;
-    nextPage: number;
-    page: number;
-    pagingCounter: number;
-    prevPage: null | number;
-    totalDocs: number;
-    totalPages: number;
-}
-
-// type FilterOptions = {
-//     name: string,
-//     targetCollection?: string | string[],
-//     targetCollectionFilter?: {}
-//     filterRange?: {
-//         year?: "all" | string[],
-//         series?: "all" | string[],
-//         categories?: "all" | string[],
-//         pieces?: "all" | string[],
-//         projects?: "all" | string[],
-//     },
-//     showFilters?: {
-//         year?: boolean,
-//         series?: boolean,
-//         categories?: boolean,
-//         onlyFavorites?: boolean,
-//         groupSeries?: boolean,
-//     },
-// }
 
 export default defineComponent({
     name: "filterComponent",
@@ -188,15 +155,21 @@ export default defineComponent({
                 const promises = [] as Array<Promise<unknown>>
                 filterNames.forEach(filterName => {
                     if (filterName === "series") {
-                        promises.push(this.setSeries())
+                        const seriePromise = Filter.getSeries()
+                        seriePromise.then(res => { this.filterOptions.series = res })
+                        promises.push(seriePromise)
                     } else if (filterName === "year") {
-                        promises.push(this.setYear("all"))
+                        const yearsPromise = Filter.getYears("all")
+                        yearsPromise.then(res => { this.filterOptions.year = res })
+                        promises.push(yearsPromise)
                     } else if (filterName === "categories") {
-                        promises.push(this.setCategories())
+                        const categoriesPromise = Filter.getCategories()
+                        categoriesPromise.then(res => { this.filterOptions.categories = res })
+                        promises.push(categoriesPromise)
                     }
                 })
 
-                Promise.all(promises).then(() => {
+                Promise.all(promises).then((results) => {
                     this.setDefaults()
                     this.updateResults()
                 })
@@ -205,21 +178,12 @@ export default defineComponent({
         },
         "$route.query": {
             handler() {
-                console.log("Query changed")
                 this.reset()
                 this.setDefaults()
                 this.updateResults()
             },
             deep: true
         },
-        // "options.filterRange": {
-        //     handler(filterRange) {
-        //         if (filterRange.year) {
-        //             this.setYear(filterRange.year)
-        //         }
-        //     },
-        //     immediate: true
-        // }
     },
     beforeCreate() {
     },
@@ -232,18 +196,13 @@ export default defineComponent({
         window.removeEventListener("resize", this.onResizeEvent)
     },
     methods: {
-        onResizeEvent(e: Event) {
+        onResizeEvent() {
             this.updateLayoutSize()
         },
-        onScrollEvent(e: Event) {
+        onScrollEvent() {
             if (this.updating) {
                 return
             }
-            // Deze code fixt een issue, maar dit is niet de way to go...
-            // const refLayout = this.$refs.layout
-            // if (refLayout) {
-            //     refLayout.updateBlockSizes()
-            // }
 
             if (!this.hasNextPage) {
                 return
@@ -262,6 +221,7 @@ export default defineComponent({
                 block: undefined | HTMLElement,
                 y: number
             }
+            
             blocks.forEach(Block => {
                 const block = Block as HTMLElement
                 if (block.offsetTop + block.clientHeight > lastBlock.y) {
@@ -271,12 +231,10 @@ export default defineComponent({
                     }
                 }
             })
-            // console.log(htmlEl.scrollTop - layout.offsetTop + window.innerHeight, document.body.clientHeight  - layout.offsetTop)
+
             const scrollOffset = htmlEl.scrollTop - layout.offsetTop + window.innerHeight
             const endOffScroll = document.body.clientHeight  - layout.offsetTop
-            if (scrollOffset > endOffScroll - window.innerHeight * .25) {
-                console.log("Load next")
-                // if (layout.offsetTop + lastBlock.y < htmlEl.scrollTop + window.innerHeight/2) {
+            if (scrollOffset > endOffScroll - window.innerHeight * .33) {
                 this.page = this.page + 1
                 this.updateResults(this.page)
             }
@@ -285,16 +243,17 @@ export default defineComponent({
             if (this.$route.query.series) {
                 const series = this.$route.query.series.split(",")
                 series.forEach((serie: string) => {
-                    const foundSerie = _.find(this.filterOptions.series, { value: serie })
+                    const foundSerie = find(this.filterOptions.series, { value: serie })
                     if (foundSerie) {
                         foundSerie.selected = true
                     }
                 })
             }
+
             if (this.$route.query.categories) {
                 const categories = this.$route.query.categories.split(",")
                 categories.forEach((category: string) => {
-                    const foundCategory = _.find(this.filterOptions.categories, { value: category })
+                    const foundCategory = find(this.filterOptions.categories, { value: category })
                     if (foundCategory) {
                         foundCategory.selected = true
                     }
@@ -304,7 +263,7 @@ export default defineComponent({
             if (this.$route.query.year) {
                 const year = this.$route.query.year.split(",")
                 year.forEach((year: number) => {
-                    const foundYear = _.find(this.filterOptions.year, { value: Number(year) })
+                    const foundYear = find(this.filterOptions.year, { value: Number(year) })
                     if (foundYear) {
                         foundYear.selected = true
                     }
@@ -312,57 +271,11 @@ export default defineComponent({
             }
         },
         reset() {
-            _.map(this.filterOptions.series, serie => { serie.selected = false })
-            _.map(this.filterOptions.categories, category => { category.selected = false  })
-            _.map(this.filterOptions.year, year => { year.selected = false  })
+            map(this.filterOptions.series, serie => { serie.selected = false })
+            map(this.filterOptions.categories, category => { category.selected = false  })
+            map(this.filterOptions.year, year => { year.selected = false  })
             this.blocks.length = 0
             this.firstLoad = false
-        },
-        setSeries() {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/series/?depth=1&limit=128`)
-                    if (req.data?.docs.length < 1) {
-                        throw new Error("Can not retrieve series")
-                    }
-                    const data = req.data as PaginationData
-                    this.filterOptions.series = sortBy(map(data.docs, doc => {
-                        return {
-                            value: doc.id,
-                            label: doc.title,
-                            available: true, 
-                            selected: false
-                        }
-                    }), "label", "desc")
-                    resolve(this.filterOptions.series)
-
-                } catch(err) {
-                    reject(err)
-                }
-            })
-        },
-        setCategories() {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/categories/?depth=1&limit=128`)
-                    if (req.data?.docs.length < 1) {
-                        throw new Error("Can not retrieve categories")
-                    }
-                    const data = req.data as PaginationData
-                    this.filterOptions.categories = sortBy(map(data.docs, doc => {
-                        return {
-                            value: doc.id,
-                            label: doc.title,
-                            available: true, 
-                            selected: false
-                        }
-                    }), "label", "desc")
-                    resolve(this.filterOptions.categories)
-
-                } catch(err) {
-                    reject(err)
-                }
-            })
         },
         updateLayoutSize() {
             if (window.innerWidth > 1240) {
@@ -375,114 +288,10 @@ export default defineComponent({
                 this.layoutSize = 6
             }
         },
-        setYear(range: "all" | { min: number, max: number }) {
-            return new Promise ((resolve, reject) => {
-
-                const maxYear = new Date().getFullYear()
-                
-                if (range == "all") {
-                    this.filterOptions.year = []
-                    for (let index = 2008; index <= maxYear; index++) {
-                        this.filterOptions.year.push({
-                            value: index,
-                            label: index,
-                            available: true, 
-                            selected: false
-                        })
-                    }
-                }
-                resolve(this.filterOptions.year)
-            })
-        },
-        
-        getResults: (targetCollection: TargetCollections | TargetCollections[], options?: {
-            limit: number,
-            page: number,
-            year?: Array<string>,
-            series?: Array<string>,
-            categories?: Array<string>
-        }) => new Promise<PaginationData>(async (resolve, reject) => {
-
-            if (!options) {
-                options = {
-                    limit: 16,
-                    page: 1
-                }
-            }
-
-            if (!options.limit) {
-                options.limit = 16
-            }
-
-            if (!options.page) {
-                options.page = 1
-            }
-
-            const query = { 
-                where: {}
-            } as {
-                where: {
-                    series?: { in: string[] }
-                    categories?: { in: string[] }
-                    "year.from"?: { in: string[] },
-                    "year.to"?: { in: string[]  }
-                }
-            }
-
-            if (options.series && options.series.length > 0) {
-                query.where.series = {
-                    in: options.series 
-                }
-            }
-            
-            if (options.categories && options.categories.length > 0) {
-                query.where.categories = {
-                    in: options.categories 
-                }
-            }
-            if (options.year && options.year.length > 0) {
-                query.where["year.from"] = { in: [] }
-                query.where["year.to"] = { in: [] }
-                options.year.forEach(year => {
-                    if (query && query.where && query.where["year.to"] && query.where["year.from"]) {
-                        if (year == new Date().getFullYear().toString()) {
-                            query.where["year.to"].in.push("-")
-                        } else {
-                            query.where["year.from"].in.push(year)
-                        }
-                        query.where["year.to"].in.push(year)
-                    }
-                })
-                
-            }
-
-            
-            const stringifiedQuery = qs.stringify(
-                {
-                    depth:1,
-                    limit: options.limit,
-                    page: options.page,
-                    ...query, 
-                },
-                { addQueryPrefix: true },
-            )
-            const collection = targetCollection
-            try {
-                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/${collection}${stringifiedQuery}`)
-                if (req.data?.docs.length < 1) {
-                    throw new Error(`Can not retrieve ${collection}`)
-                }
-                const data = req.data as PaginationData
-                resolve(data)
-
-            } catch(err) {
-                reject(err)
-            }
-        }),
         updateSeries() {
             this.page = 1
             this.blocks.length = 0
-            const querySeries = _.filter(this.filterOptions.series, { selected: true }).map(serie => serie.value).join(",")
+            const querySeries = filter(this.filterOptions.series, { selected: true }).map(serie => serie.value).join(",")
 
             this.$router.replace({
                 query: {
@@ -495,7 +304,7 @@ export default defineComponent({
         updateYear() {
             this.page = 1
             this.blocks.length = 0
-            const queryYears = _.filter(this.filterOptions.year, { selected: true }).map(year => year.value).join(",")
+            const queryYears = filter(this.filterOptions.year, { selected: true }).map(year => year.value).join(",")
 
             this.$router.replace({
                 query: {
@@ -508,7 +317,7 @@ export default defineComponent({
         updateCategories() {
             this.page = 1
             this.blocks.length = 0
-            const queryCategories = _.filter(this.filterOptions.categories, { selected: true }).map(category => category.value).join(",")
+            const queryCategories = filter(this.filterOptions.categories, { selected: true }).map(category => category.value).join(",")
 
             this.$router.replace({
                 query: {
@@ -534,22 +343,22 @@ export default defineComponent({
                 year?: Array<string>
             }
 
-            const series = _.filter(this.filterOptions.series, { selected: true })
+            const series = filter(this.filterOptions.series, { selected: true })
             if (series.length > 0) {
                 query.series = series.map(serie => serie.value.toString())
             }
 
-            const categories = _.filter(this.filterOptions.categories, { selected: true })
+            const categories = filter(this.filterOptions.categories, { selected: true })
             if (categories.length > 0) {
                 query.categories = categories.map(serie => serie.value.toString())
             }
 
-            const year = _.filter(this.filterOptions.year, { selected: true })
+            const year = filter(this.filterOptions.year, { selected: true })
             if (year.length > 0) {
                 query.year = year.map(serie => serie.value.toString())
             }
 
-            this.getResults(this.options.targetCollection, query).then((data) => {
+            Filter.query(this.options.targetCollection, query).then((data) => {
                 this.hasNextPage = data.hasNextPage
                 
                 if (this.options.targetCollection === "projects") {                    
@@ -570,6 +379,7 @@ export default defineComponent({
                     })
                     this.blocks = [...this.blocks, ...blocks]
                 }
+
                 this.$emit("filterUpdated")
                 nextTick(() => {
                     const refLayout = this.$refs.layout
@@ -579,16 +389,13 @@ export default defineComponent({
                     }
 
                     if (this.firstLoad) {
-                        refLayout.fadeInNewBlocks()
-                            .then(() => {
-                                refLayout.updateBlockSizes()
-                                setTimeout(()=>{
+                        refLayout.fadeInNewBlocks().then(() => {
+                            refLayout.updateBlockSizes()
+                            setTimeout(()=>{
 
-                                    nextTick(refLayout.updateLayout())
-                                })
-                                // gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
+                                nextTick(refLayout.updateLayout())
                             })
-                            .catch(console.error)
+                        }).catch(console.error)
                     }
                 })
                 
@@ -608,11 +415,9 @@ export default defineComponent({
             if (!refLayout) {
                 return
             }
-            // console.log("Fade in all blocks")
             refLayout.fadeInAllBlocks()
-
+            
             nextTick(() => {
-                // console.log("updateBlockSizes ")
                 refLayout.updateBlockSizes()
                 nextTick(refLayout.updateLayout())
             })

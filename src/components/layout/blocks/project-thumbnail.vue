@@ -39,6 +39,7 @@ export type ProjectThumbnailBlock = {
         mimeType: string
         title: string
         description: string
+        url: string
         sizes: {
             image_sm: {
                 width: number
@@ -90,6 +91,11 @@ export default defineComponent ({
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
+
+            if (this.options.image.mimeType.includes("svg")) {
+                return src + this.options.image.url
+            }
+
             if (this.imageSize === "original") {
                 src += `/media/${this.options.image.filename}`
             } else {

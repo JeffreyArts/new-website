@@ -3,7 +3,6 @@
         <a :href="link" v-if="link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
-
         <span v-if="!link">
             <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent"/>
         </span>
@@ -76,6 +75,11 @@ export default defineComponent ({
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
+            
+            if (this.options.image.mimeType.includes("svg")) {
+                return src + this.options.image.url
+            }
+
             if (this.imageSize === "original") {
                 src += `/media/${this.options.image.filename}`
             } else {
@@ -136,7 +140,7 @@ export default defineComponent ({
         window.removeEventListener("layoutChange", this.updateLayoutChange)
     },
     methods: {
-        updateLayoutChange(e:Event) {
+        updateLayoutChange() {
             const width = this.$el.clientWidth
             if (width > this.options.image.width) {
                 return this.imageSize = "original"
