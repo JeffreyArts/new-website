@@ -180,6 +180,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables";
+@use "./../assets/scss/variables";
 
 </style>

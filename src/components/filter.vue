@@ -427,14 +427,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables";
+@use "./../assets/scss/variables";
 .site-filter {
     width: 100%;
     display: flex;
     gap: 8px;
     align-items: center;
     justify-content: space-between;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     background-color: var(--bg-color);
     margin-top: 40px;
 

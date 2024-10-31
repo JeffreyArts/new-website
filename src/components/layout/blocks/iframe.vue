@@ -156,7 +156,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 
 .iframe-block {
     position: relative;
@@ -173,7 +173,7 @@ export default defineComponent ({
     justify-content: center;
     border-radius: 8px 8px 0 0;
     gap:12px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
 
 
     ul { 
@@ -214,7 +214,7 @@ export default defineComponent ({
     text-decoration: none;
 
     svg {
-        transition: $transitionDefault;
+        transition: var(--transition-default);
         height: 13px;
         translate: 0 2px;
         opacity: 0;
@@ -260,7 +260,7 @@ export default defineComponent ({
 
 .iframe-block-fullscreen-button {
     display: inline-block;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
     padding: 8px 4px 4px 8px;
     position: absolute;
     bottom: 0;
@@ -274,7 +274,7 @@ export default defineComponent ({
         }
     }
     svg {
-        transition: $transitionDefault;
+        transition: var(--transition-default);
         height: 26px;
         color: #111;
     }
@@ -288,7 +288,7 @@ export default defineComponent ({
     background-color: rgba(255,255,255,.4);
     padding: 4px 8px;
     text-shadow: 0 1px rgba(255,255,255,.8);
-    transition: $transitionDefault;
+    transition: var(--transition-default);
     opacity: 0.9;
     border-radius: 3px;
     cursor: pointer;

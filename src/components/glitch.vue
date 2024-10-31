@@ -257,7 +257,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables.scss";
+@use "./../assets/scss/variables.scss";
 .glitch {
     position: relative;
     z-index: 1;

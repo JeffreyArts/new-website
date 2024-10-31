@@ -367,7 +367,7 @@ export default defineComponent ({
     // > div:after {
     //     content: attr(id);
     //     font-size: 12px;
-    //     font-family: $accentFont;
+    //     font-family: var(--accent-font);
     //     position: absolute;
     //     top: 8px;
     //     background-color: var(--contrast-color);

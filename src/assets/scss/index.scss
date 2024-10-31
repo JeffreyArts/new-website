@@ -1,9 +1,9 @@
-@import 'normalize.css';
-@import './variables.scss';
-@import './fonts.scss';
-@import './buttons.scss';
-@import './input.scss';
-@import './app.scss';
-@import './icons.scss';
+@forward 'normalize.css';
+@forward './variables.scss';
+@forward './fonts.scss';
+@forward './buttons.scss';
+@forward './input.scss';
+@forward './app.scss';
+@forward './icons.scss';
 
-@import './../../../node_modules/highlight.js/styles/monokai-sublime.css';
+@forward './../../../node_modules/highlight.js/styles/monokai-sublime.css';

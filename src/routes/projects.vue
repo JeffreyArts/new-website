@@ -316,7 +316,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/variables.scss";
+@use "@/assets/scss/variables.scss";
 .projects-container {
     padding: 40px 16px;
     width: 100vw;
@@ -398,7 +398,7 @@ export default defineComponent ({
     padding: 8px 16px 12px;
     font-size: 16px;
     line-height: 1.28;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     background-color: rgba(255,255,255,.96);
 }
 
@@ -413,7 +413,7 @@ export default defineComponent ({
     display: none;
     align-items: center;
     height: 40px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     font-size: 24px;
     cursor: pointer;
     z-index: 1;

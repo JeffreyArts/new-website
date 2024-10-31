@@ -44,7 +44,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables";
+@use "./../../../assets/scss/variables";
 .text-block {
     // background-color: #ffffe8;
     line-height: 1.28;
@@ -56,7 +56,7 @@ export default defineComponent ({
         color: var(--blue);
         [v="1"] {
             fill: var(--blue);
-            transition: $transitionDefault;
+            transition: var(--transition-default);
         }
 
         &:hover,
@@ -82,7 +82,7 @@ export default defineComponent ({
     display: inline-block;
     border-left: 4px solid var(--accent-color);
     padding-left: 12px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     line-height: 1.2em;
 }
 
@@ -95,10 +95,10 @@ export default defineComponent ({
 
 
 .text-block-text {
-    font-family: $defaultFont;
+    font-family: var(--default-font);
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: $accentFont;
+        font-family: var(--accent-font);
         margin: 0 0 8px;
     }
     

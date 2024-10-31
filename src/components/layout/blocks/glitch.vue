@@ -91,7 +91,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 
 .glitch-block {
     display: flex;
@@ -101,7 +101,7 @@ export default defineComponent ({
     padding: 0px 20%;
     font-size: 32px;
     line-height: 1;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
 }
 
 </style>

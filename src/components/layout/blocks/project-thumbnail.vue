@@ -175,7 +175,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 .project-thumbnail-block {
 
     container-name: project-thumbnail;
@@ -186,7 +186,7 @@ export default defineComponent ({
         width: 100%;
         outline: 1px solid transparent;
         object-fit: cover;
-        transition: $transitionDefault;
+        transition: var(--transition-default);
     }
 }
 .project-thumbnail-block-wrapper {
@@ -194,7 +194,7 @@ export default defineComponent ({
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
     opacity: 0.9;
     filter: saturate(.9);
     
@@ -225,12 +225,12 @@ export default defineComponent ({
     padding: 8px;
     justify-content: space-between;
     width: 100%;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     font-size: 16px 0;
     font-weight: normal;
     line-height: 1em;
     align-items: center;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
 
     svg {
         height: 10px;
@@ -246,7 +246,7 @@ export default defineComponent ({
     font-size: 12px;
     padding: 4px 8px;
     display: inline-block;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     background-color: #f0f0f0;
     color: #000;
 }

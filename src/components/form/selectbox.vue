@@ -155,7 +155,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "./../../assets/scss/variables";
+@use "./../../assets/scss/variables";
 
 .selectbox-wrapper {
     display: flex;
@@ -183,7 +183,7 @@ export default defineComponent({
         height: 2px;
         position: absolute;
         bottom: -8px;
-        transition: $transitionDefault;
+        transition: var(--transition-default);
     }
     
     
