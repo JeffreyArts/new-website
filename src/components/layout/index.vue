@@ -227,13 +227,13 @@ export default defineComponent ({
                 const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
                     return parseFloat(block.style.top) || 0
                 })
-            
+                
                 // this.updateLayout()
                 gsap.fromTo(sortedBlocks, {
                     opacity: 0
                 },{
                     opacity: 1,
-                    duration: .64,
+                    duration: .4,
                     stagger: {
                         each: .08,
                         from: "start"
@@ -265,6 +265,8 @@ export default defineComponent ({
                 this.updateBlockSizes()
                 nextTick(this.updateLayout)
             },500)
+            
+            
 
             gsap.fromTo(sortedBlocks, {
                 opacity: 0
@@ -272,14 +274,9 @@ export default defineComponent ({
                 opacity: 1,
                 duration: .8,
                 stagger: {
-                    each: .4,
+                    each: .8/sortedBlocks.length,
                     from: "start"
-                },
-                // onStart: () => {
-                //     this.updateBlockSizes()
-
-                //     nextTick(this.updateLayout)
-                // },
+                }
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
