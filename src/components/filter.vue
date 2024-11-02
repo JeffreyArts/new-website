@@ -391,7 +391,38 @@ export default defineComponent({
                         return block
                     })
                     this.blocks = [...this.blocks, ...blocks]
-                }
+                } else if (this.options.targetCollection === "pieces") {                    
+                    const blocks = map(data.docs, (doc) => {
+
+                        let properties = {}
+                        if (doc.type === "image") {
+                            properties = doc.imageProperties.image
+                        } else if (doc.type === "iframe") {
+                            properties = doc.iframeProperties
+                        } else if (doc.type === "code") {
+                            properties = doc.codeProperties
+                        } else if (doc.type === "youtube") {
+                            properties = doc.youtubeProperties
+                        }
+
+                        const block = {
+                            size: 3,
+                            id: doc.id,
+                            data: {
+                                blockType: "pieceThumbnail",
+                                pieceType: doc.type,
+                                link: doc.path,
+                                categories: doc.categories,
+                                series: doc.series,
+                                title: doc.title,
+                                properties: properties
+                            }
+                        } as BlockType
+
+                        return block
+                    })
+                    this.blocks = [...this.blocks, ...blocks]
+                }  
 
                 this.$emit("filterUpdated")
                 nextTick(() => {
@@ -409,6 +440,8 @@ export default defineComponent({
                                 nextTick(refLayout.updateLayout())
                             })
                         }).catch(console.error)
+                    } else {
+                        this.updateLayout()
                     }
                 })
                 

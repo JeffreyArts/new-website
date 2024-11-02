@@ -12,7 +12,8 @@
         <TextBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'text'"                  :data-blocktype="data.blockType"/>
         <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"            :data-blocktype="data.blockType"/>
         <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"                  :data-blocktype="data.blockType"/>
-        <ProjectThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectThumbnail'"      :data-blocktype="data.blockType"/>
+        <PieceThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'pieceThumbnail'"      :data-blocktype="data.blockType"/>
+        <ProjectThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectThumbnail'"  :data-blocktype="data.blockType"/>
     </div>
 </template>
 
@@ -28,6 +29,7 @@ import NoteBlock from "./note.vue"
 import TextBlock from "./text.vue"
 import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
+import PieceThumbnailBlock from "./piece-thumbnail.vue"
 import ProjectThumbnailBlock from "./project-thumbnail.vue"
 import YoutubeBlock from "./youtube.vue"
 import YearBlock from "./year.vue"
@@ -44,6 +46,7 @@ export default defineComponent ({
         LineBlock,
         NewsletterBlock,
         NoteBlock,
+        PieceThumbnailBlock,
         ProjectThumbnailBlock,
         TextBlock,
         TitleBlock,

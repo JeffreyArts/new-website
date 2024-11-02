@@ -319,7 +319,7 @@ export default defineComponent ({
                     const blockId = posBlock.id as string | number
                     let block = this.__findBlock(blockId, blocks)
                     if (block?.data.blockType === "iframe") {
-                        console.log("block", block)
+                        // console.log("block", block)
                     }
 
                     if (!block) {
