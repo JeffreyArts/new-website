@@ -47,6 +47,7 @@ export default defineComponent ({
             animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
+            packerLayout: undefined as Packer | undefined,
             loaded: false,
             blocks: [] as BlockType[],
         }
@@ -262,8 +263,9 @@ export default defineComponent ({
 
             // Shady solution....
             setTimeout(() => {
-                this.updateBlockSizes()
-                nextTick(this.updateLayout)
+                this.__updateLayoutHeight()
+                // this.updateBlockSizes()
+                // nextTick(this.updateLayout)
             },500)
             
             
@@ -287,8 +289,7 @@ export default defineComponent ({
         
         async updateBlockSizes() {
             this.updateLayout()
-
-            
+        
             const blocks = this.blocks
             await this.__setBlockDimensions(blocks)
             
@@ -310,8 +311,11 @@ export default defineComponent ({
                     height: block.height
                 }
             }), "position")
-            const layout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-            const sortedBlocks = layout.setBlocks(convertedBlocks)
+            
+            if (!this.packerLayout) {
+                this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+            }
+            const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks)
             
 
             if (sortedBlocks) {

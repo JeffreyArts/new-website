@@ -148,9 +148,12 @@ export default defineComponent({
                 } else if (name === "same_project") {
                     this.filterIcon = "hammer"
                     this.filterName = Name
+
                     if ( this.pageDetails?.project) {
                         this.filterName = this.pageDetails.project.title
                         this.filterIcon = "wrench"
+                    } else if ( this.pageDetails?.title) {
+                        this.filterName = this.pageDetails.title
                     }
                 } else {
                     this.filterIcon = "archive"
@@ -349,11 +352,20 @@ export default defineComponent({
                 limit: this.limit,
                 page: page
             } as {
-                limit: number,
-                page: number,
+                limit: number
+                page: number
+                project?: string
                 series?: Array<string>
                 categories?: Array<string>
                 year?: Array<string>
+            }
+
+            if (this.options.name.toLowerCase() === "same_project" && this.pageDetails) {
+                if (this.pageDetails?.project){
+                    query.project = this.pageDetails?.project.id
+                } else {
+                    query.project = this.pageDetails.id
+                }
             }
 
             const series = filter(this.filterOptions.series, { selected: true })

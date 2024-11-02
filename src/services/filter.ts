@@ -1,6 +1,6 @@
 import qs from "qs"
 import axios from "axios"
-import { map, sortBy } from "lodash"
+import { eq, map, sortBy } from "lodash"
 
 type TargetCollections = "projects" | "pieces"
 
@@ -20,6 +20,7 @@ interface PaginationData {
 interface FilterOptions {
     limit: number,
     page: number,
+    project?: string,
     year?: Array<string>,
     series?: Array<string>,
     categories?: Array<string>
@@ -27,9 +28,11 @@ interface FilterOptions {
 
 interface FilterQuery {
     where: {
+        project: {equals: string}
         series?: { in: string[] }
         categories?: { in: string[] }
-        "year.from"?: { in: string[] },
+        "year"?: { in: string[] }
+        "year.from"?: { in: string[] }
         "year.to"?: { in: string[]  }
     }
 }
@@ -74,20 +77,36 @@ const Filter = {
                 in: options.categories 
             }
         }
+        
+        if (options.project) {
+            query.where.project = {
+                equals: options.project 
+            }
+        }
+
         if (options.year && options.year.length > 0) {
-            query.where["year.from"] = { in: [] }
-            query.where["year.to"] = { in: [] }
-            options.year.forEach(year => {
-                if (query && query.where && query.where["year.to"] && query.where["year.from"]) {
-                    if (year == new Date().getFullYear().toString()) {
-                        query.where["year.to"].in.push("-")
-                    } else {
-                        query.where["year.from"].in.push(year)
+            if (targetCollection === "pieces") {
+                query.where["year"] = { in: [] }
+                options.year.forEach(year => {
+                    if (query.where["year"]) {
+                        query.where["year"].in.push(year)
                     }
-                    query.where["year.to"].in.push(year)
-                }
-            })
-            
+                })
+            } else {
+
+                query.where["year.from"] = { in: [] }
+                query.where["year.to"] = { in: [] }
+                options.year.forEach(year => {
+                    if (query && query.where && query.where["year.to"] && query.where["year.from"]) {
+                        if (year == new Date().getFullYear().toString()) {
+                            query.where["year.to"].in.push("-")
+                        } else {
+                            query.where["year.from"].in.push(year)
+                        }
+                        query.where["year.to"].in.push(year)
+                    }
+                })
+            }
         }
 
         // Stringify query
