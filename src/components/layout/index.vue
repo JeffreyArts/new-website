@@ -276,7 +276,7 @@ export default defineComponent ({
                 stagger: {
                     each: .8/sortedBlocks.length,
                     from: "start"
-                }
+                },
                 onComplete: () => {
                     gsap.set(blocks, { opacity: 1 })
                     console.log("Blocks fully loaded 🤑")
