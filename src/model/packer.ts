@@ -53,7 +53,7 @@ export default class Packer {
                  r2.y + r2.height <= r1.y)
     }
     private setOrder(order?: Order | undefined) {
-        const defaultOrder = ["position", "y", "parentPosition","x"]
+        const defaultOrder = ["position", "y","x"]
         
         if (!order) {
             this.order = defaultOrder
@@ -61,7 +61,7 @@ export default class Packer {
         }
 
         // Validate input value
-        const possibleValues = ["position", "y", "parentPosition","x"]
+        const possibleValues = ["position", "y","x"]
 
         order.forEach(value => {
             if (!possibleValues.includes(value)) {
