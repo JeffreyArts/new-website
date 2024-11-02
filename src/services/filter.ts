@@ -96,6 +96,7 @@ const Filter = {
                 depth:1,
                 limit: options.limit,
                 page: options.page,
+                sort: "-year.from",
                 ...query, 
             },
             { addQueryPrefix: true },
