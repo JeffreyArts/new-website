@@ -21,6 +21,7 @@ export type PageType =  {
     metaDescription: string
     metaTags: string[]
     pageTitle: string
+    project?: ProjectType
     filter?: FilterOptions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     custom?: any

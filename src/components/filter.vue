@@ -69,6 +69,7 @@ import checkBox from "./form/checkbox.vue"
 import { BlockType } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
 import { map, filter, find } from "lodash"
+import { PageType } from "@/services/payload/page"
 
 type TargetCollections = "projects" | "pieces"
 
@@ -97,6 +98,10 @@ export default defineComponent({
         options: {
             type: Object as PropType<FilterOptions>,
             required: true
+        },
+        pageDetails: {
+            type: Object as PropType<PageType>,
+            required: false
         },
     },
     data() {
@@ -140,10 +145,18 @@ export default defineComponent({
                 } else if (name === "tools") {
                     this.filterIcon = "wrench"
                     this.filterName = "Tools"
+                } else if (name === "same_project") {
+                    this.filterIcon = "hammer"
+                    this.filterName = Name
+                    if ( this.pageDetails?.project) {
+                        this.filterName = this.pageDetails.project.title
+                        this.filterIcon = "wrench"
+                    }
                 } else {
                     this.filterIcon = "archive"
                     this.filterName = Name
                 }
+                
             },
             immediate: true
         },

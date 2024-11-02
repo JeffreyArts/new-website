@@ -11,8 +11,7 @@
         }" ref="layout"
         @blocksUpdated="updateLayout"/>
 
-        <FilterComponent v-if="page.filter?.name" :options="page.filter" ref="filter"
-        @filterUpdated="updateFilter"/>
+        <FilterComponent v-if="page.filter?.name" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
     </section>
 </template>
 
