@@ -303,6 +303,7 @@ export default defineComponent ({
 .piece-thumbnail-block-code-wrapper {
     width: 100%;
     background: var(--contrast-color);
+    color: var(--bg-color);
     overflow: auto;
     max-height: 240px;
     padding-left: 16px;
