@@ -38,9 +38,10 @@ interface FilterQuery {
 }
 
 interface FilterOptionValue {
-    value: string | number,
-    label: string | number,
-    available: boolean, 
+    value: string | number
+    label: string | number
+    available: boolean 
+    disabled: boolean
     selected: boolean
 }
 

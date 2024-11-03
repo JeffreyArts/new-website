@@ -262,6 +262,7 @@ export default defineComponent({
                     const foundSerie = find(this.filterOptions.series, { value: serie.id })
                     if (foundSerie) {
                         foundSerie.selected = true
+                        foundSerie.disabled = true
                     }
                 });
             }
@@ -270,6 +271,7 @@ export default defineComponent({
                     const foundCategory = find(this.filterOptions.categories, { value: category.id })
                     if (foundCategory) {
                         foundCategory.selected = true
+                        foundCategory.disabled = true
                     }
                 });
             }
@@ -277,6 +279,7 @@ export default defineComponent({
                 this.options.prefill.year.forEach(year => {
                     const foundYear = find(this.filterOptions.year, { value: Number(year) })
                     if (foundYear) {
+                        foundYear.disabled = true
                         foundYear.selected = true
                     }
                 });

@@ -9,7 +9,12 @@
         <div class="selectbox-wrapper">
 
             <span class="selectbox-options" :style="direction == 'up' ? 'bottom: calc(100% + 4px);' : 'top: calc(100% + 4px);'">
-                <span class="selectbox-option" v-for="(option,key) in options" :key="key" :class="!option.available ? '__isHidden' : ''" @click="selectOption(key, $event)">
+                <span class="selectbox-option" v-for="(option,key) in options" :key="key" @click="selectOption(key, $event)"
+                    :class="[
+                        !option.available ? '__isHidden' : '',
+                        option.disabled ? '__isDisabled' : '',
+
+                    ]">
                     
                     <jaoIcon size="medium"
                         :name="option.selected ? 'checkbox-checked' : 'checkbox'"
@@ -38,6 +43,7 @@ export type SelectBoxOptions = {
     label: number | string,
     selected: boolean
     available?: boolean, 
+    disabled?: boolean, 
 }
 
 export default defineComponent({
@@ -246,6 +252,12 @@ export default defineComponent({
 
     &.__isHidden {
         display: none;
+    }
+
+    &.__isDisabled {
+        opacity: 0.7;
+        pointer-events: none;
+        cursor: not-allowed;
     }
 }
 </style>
