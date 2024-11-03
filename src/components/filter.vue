@@ -78,10 +78,10 @@ export type FilterOptions = {
     name: string
     targetCollection: TargetCollections | TargetCollections[]
     prefill: {
-        year?:  string | string[]
-        projects?:  string | string[]
-        series?:  string | string[]
-        categories?:  string | string[]
+        year?:  string[]
+        projects?: {id:string}[]
+        series?: {id:string}[]
+        categories?:  {id:string}[]
     }
     displayFilters: string[] 
 }
@@ -256,6 +256,33 @@ export default defineComponent({
             }
         },
         setDefaults() {
+            // Process filter prefils
+            if (this.options.prefill.series) {
+                this.options.prefill.series.forEach(serie => {
+                    const foundSerie = find(this.filterOptions.series, { value: serie.id })
+                    if (foundSerie) {
+                        foundSerie.selected = true
+                    }
+                });
+            }
+            if (this.options.prefill.categories) {
+                this.options.prefill.categories.forEach(category => {
+                    const foundCategory = find(this.filterOptions.categories, { value: category.id })
+                    if (foundCategory) {
+                        foundCategory.selected = true
+                    }
+                });
+            }
+            if (this.options.prefill.year) {
+                this.options.prefill.year.forEach(year => {
+                    const foundYear = find(this.filterOptions.year, { value: Number(year) })
+                    if (foundYear) {
+                        foundYear.selected = true
+                    }
+                });
+            }
+
+            // Process route queries
             if (this.$route.query.series) {
                 const series = this.$route.query.series.split(",")
                 series.forEach((serie: string) => {
