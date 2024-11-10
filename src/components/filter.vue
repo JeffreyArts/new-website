@@ -435,30 +435,12 @@ export default defineComponent({
                     this.blocks = [...this.blocks, ...blocks]
                 } else if (this.options.targetCollection === "pieces") {                    
                     const blocks = map(data.docs, (doc) => {
-
-                        let properties = {}
-                        if (doc.type === "image") {
-                            properties = doc.imageProperties.image
-                        } else if (doc.type === "iframe") {
-                            properties = doc.iframeProperties
-                        } else if (doc.type === "code") {
-                            properties = doc.codeProperties
-                        } else if (doc.type === "youtube") {
-                            properties = doc.youtubeProperties
-                        }
-
                         const block = {
                             size: 3,
                             id: doc.id,
                             data: {
                                 blockType: "pieceThumbnail",
-                                pieceType: doc.type,
-                                link: doc.path,
-                                categories: doc.categories,
-                                series: doc.series,
-                                year: doc.year.toString(),
-                                title: doc.title,
-                                properties: properties
+                                piece: doc
                             }
                         } as BlockType
 

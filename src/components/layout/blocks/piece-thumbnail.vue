@@ -1,11 +1,11 @@
 <template>
     <div class="piece-thumbnail-block">
-        <a class="piece-thumbnail-block-wrapper" :href="options.link">
-            <figure v-if="options.pieceType === 'image'" class="piece-thumbnail-block-image-wrapper">
+        <a class="piece-thumbnail-block-wrapper" :href="options.piece.path">
+            <figure v-if="options.piece.type === 'image'" class="piece-thumbnail-block-image-wrapper">
                 <img :src="src" class="piece-thumbnail-block-image" ref="image"/>
             </figure>
 
-            <section v-if="options.pieceType === 'youtube'" class="piece-thumbnail-block-youtube-wrapper">
+            <section v-if="options.piece.type === 'youtube'" class="piece-thumbnail-block-youtube-wrapper">
                 <iframe 
                 :style="`aspect-ratio: ${ratio};`"
                 :src="src"
@@ -13,29 +13,28 @@
                 ref="youtube"/>
             </section>
                 
-            <section v-if="options.pieceType === 'code'" class="piece-thumbnail-block-code-wrapper">
-                <highlightjs :language="options.properties.language" :code="options.properties.code" ref="code"/>
+            <section v-if="options.piece.type === 'code'" class="piece-thumbnail-block-code-wrapper">
+                <highlightjs :language="options.piece.codeProperties.language" :code="options.piece.codeProperties.code" ref="code"/>
             </section>
 
             
-            <section v-if="options.pieceType === 'iframe'" class="piece-thumbnail-block-iframe-wrapper">
+            <section v-if="options.piece.type === 'iframe'" class="piece-thumbnail-block-iframe-wrapper">
                 <iframe 
                 :style="`aspect-ratio: ${ratio};`"
                 :src="src"
                 frameborder="0" 
                 ref="iframe"/>
-                <!-- <highlightjs :language="options.properties.language" :code="options.properties.code" ref="code"/> -->
             </section>
         </a>
 
         <footer class="piece-thumbnail-footer">
             <div class="piece-thumbnail-footer-left">
                 <h4 class="piece-thumbnail-block-title">
-                    <span>{{ options.title }}</span>
+                    <span>{{ options.piece.title }}</span>
                     <!-- <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon> -->
                 </h4>
-                <div class="piece-thumbnail-tags" v-if="options.categories">
-                    <span class="piece-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
+                <div class="piece-thumbnail-tags" v-if="options.piece.categories">
+                    <span class="piece-thumbnail-tag" v-for="category, index in options.piece.categories" :key="index" @click="goToCategory(category.id)">
                         {{ category.title }}
                     </span>
                 </div>
@@ -60,6 +59,7 @@ export type IframeProperties = {
     landscapeRatio: string
     portraitRatio: string
     autoScaling: boolean
+    url:string
 }
 
 export type YoutubeProperties = {
@@ -70,7 +70,7 @@ export type YoutubeProperties = {
 export type CodeProperties = {
     title: string
     link: string
-    language: string
+    language: "typescript" | "javascript" | "arduino" | "bash" | "css" | "html" | "php"
     code: string
 }
 
@@ -81,6 +81,7 @@ export type ImageProperties = {
     width: number
     mimeType: number
     url: string
+    filename: string
     sizes: {
         image_sm: {
             width: number
@@ -102,19 +103,24 @@ export type ImageProperties = {
 
 export type PieceThumbnailBlock = {
     blockType: "pieceThumbnail"
-    pieceType: string
-    link: string
-    title: string
-    year: string
-    categories?: Array<{
-        id: string
+    piece: {
+        type: string
+        path: string
         title: string
-    }>
-    series?: Array<{
-        id: string
-        title: string
-    }>
-    properties: IframeProperties | ImageProperties | YoutubeProperties | CodeProperties
+        year: string
+        categories?: Array<{
+            id: string
+            title: string
+        }>
+        series?: Array<{
+            id: string
+            title: string
+        }>
+        youtubeProperties: YoutubeProperties,
+        imageProperties: ImageProperties,
+        codeProperties: CodeProperties,
+        iframeProperties: IframeProperties
+    }
 }
 
 export default defineComponent ({
@@ -147,36 +153,40 @@ export default defineComponent ({
     },
     computed: {
         ratio() {
-            if (this.options.pieceType === "image") {
-                if (this.options.properties?.sizes?.image_sm) {
-                    return this.options.properties.sizes.image_sm.width / this.options.properties.sizes.image_sm.width
+            if (this.options.piece.type === "image") {
+                let imageProperties = this.options.piece.imageProperties.image ? this.options.piece.imageProperties.image : this.options.piece.imageProperties
+
+                if (imageProperties?.sizes?.image_sm) {
+                    return imageProperties.sizes.image_sm.width / imageProperties.sizes.image_sm.width
                 }
-            } else if (this.options.pieceType === "youtube") {
-                const ratio = this.options.properties.ratio.split("/")
-                return ratio[0]/ratio[1]
-            } else if (this.options.pieceType === "iframe") {
-                const ratio = this.options.properties.landscapeRatio.split("/")
-                return ratio[0]/ratio[1]
+            } else if (this.options.piece.type === "youtube") {
+                const ratio = this.options.piece.youtubeProperties.ratio.split("/")
+                return Number(ratio[0])/Number(ratio[1])
+            } else if (this.options.piece.type === "iframe") {
+                const ratio = this.options.piece.iframeProperties.landscapeRatio.split("/")
+                return Number(ratio[0])/Number(ratio[1])
             } 
             return  "undefined"
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
 
-            if (this.options.pieceType === "image") {
-                if (this.options.properties.mimeType.includes("svg")) {
-                    return src + this.options.properties.url
+            if (this.options.piece.type === "image") {
+                let imageProperties = this.options.piece.imageProperties.image ? this.options.piece.imageProperties.image : this.options.piece.imageProperties
+
+                if (imageProperties.mimeType.includes("svg")) {
+                    return src + imageProperties.url
                 }
 
                 if (this.imageSize === "original") {
-                    src += `/media/${this.options.properties.filename}`
+                    src += `/media/${imageProperties.filename}`
                 } else {
-                    src += this.options.properties.sizes[this.imageSize].url
+                    src += imageProperties.sizes[this.imageSize].url
                 }
-            } else if (this.options.pieceType === "youtube") {
-                src = this.options.properties.url
-            } else if (this.options.pieceType === "iframe") {
-                src = this.options.properties.url
+            } else if (this.options.piece.type === "youtube") {
+                src = this.options.piece.youtubeProperties.url
+            } else if (this.options.piece.type === "iframe") {
+                src = this.options.piece.iframeProperties.url
             }
 
             return src
@@ -213,8 +223,13 @@ export default defineComponent ({
         })
 
 
-        if (this.$refs.yearSVG && this.options.year) {
-            this.$refs.yearSVG.appendChild(Icon(this.options.year, "medium"))
+        if (this.$refs.yearSVG && this.options.piece.year) {
+            const svgContainer = this.$refs.yearSVG as HTMLElement
+            const SVGElement = Icon(this.options.piece.year, "medium")
+            if (!svgContainer || !SVGElement) {
+                return
+            }
+            svgContainer.appendChild(SVGElement)
         }
 
         window.addEventListener("layoutChange", this.updateLayoutChange)
@@ -225,7 +240,7 @@ export default defineComponent ({
     methods: {
         updateLayoutChange() {
             // const width = this.$el.clientWidth
-            // if (width > this.options.properties.width) {
+            // if (width > this.options.piece.properties.width) {
             //     return this.imageSize = "original"
             // }
             
