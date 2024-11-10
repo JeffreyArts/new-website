@@ -10,8 +10,7 @@
             blocks: page.blocks
         }" ref="layout"
         @blocksUpdated="updateLayout"/>
-
-        <FilterComponent v-if="page.filter?.name" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
+        <FilterComponent v-if="page.filter?.name && showFilters" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
     </section>
 </template>
 
@@ -68,6 +67,15 @@ export default defineComponent ({
                 title,
                 meta: setMeta(route)
             }) 
+        }
+    },
+    computed: {
+        showFilters() {
+            if (typeof this.page.displayFilters === "boolean") {
+                return this.page.displayFilters
+            } else {
+                return true
+            }
         }
     },
     data() {
