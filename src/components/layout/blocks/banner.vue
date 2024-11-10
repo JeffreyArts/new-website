@@ -1,6 +1,8 @@
 <template>
     <figure class="banner-block" :title="options.description">
-        <a class="banner-block-image-container" :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
+        <a class="banner-block-image-container" :href="options.link" 
+            :target="options._blank ? '_blank' : ''"
+            v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
         <span class="banner-block-image-container" v-if="!options.link">
@@ -26,6 +28,7 @@ export type BannerBlock = {
     id: string
     link: string
     title: string
+    _blank: boolean
     description: string
     image: {
         width: number
