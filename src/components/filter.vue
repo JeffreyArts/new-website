@@ -456,6 +456,7 @@ export default defineComponent({
                                 link: doc.path,
                                 categories: doc.categories,
                                 series: doc.series,
+                                year: doc.year.toString(),
                                 title: doc.title,
                                 properties: properties
                             }

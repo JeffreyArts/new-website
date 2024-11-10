@@ -26,25 +26,34 @@
                 ref="iframe"/>
                 <!-- <highlightjs :language="options.properties.language" :code="options.properties.code" ref="code"/> -->
             </section>
-
-
-            <h4 class="piece-thumbnail-block-title">
-                <span>{{ options.title }}</span>
-                <!-- <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon> -->
-            </h4>
         </a>
 
-        <div class="piece-thumbnail-tags" v-if="options.categories">
-            <span class="piece-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
-                {{ category.title }}
-            </span>
-        </div>
+        <footer class="piece-thumbnail-footer">
+            <div class="piece-thumbnail-footer-left">
+                <h4 class="piece-thumbnail-block-title">
+                    <span>{{ options.title }}</span>
+                    <!-- <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon> -->
+                </h4>
+                <div class="piece-thumbnail-tags" v-if="options.categories">
+                    <span class="piece-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
+                        {{ category.title }}
+                    </span>
+                </div>
+            </div>
+            <div class="piece-thumbnail-footer-right">
+                <figure ref="yearSVG"></figure>
+                
+                <jaoIcon name="comment" size="medium"></jaoIcon>
+                <jaoIcon name="heart-outline" size="medium"></jaoIcon>
+            </div>
+        </footer>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import jaoIcon from "@/components/jao-icon.vue"
+import Icon from "jao-icons"
 import highlightjs from "./../../highlightjs.vue"
 
 export type IframeProperties = {
@@ -96,6 +105,7 @@ export type PieceThumbnailBlock = {
     pieceType: string
     link: string
     title: string
+    year: string
     categories?: Array<{
         id: string
         title: string
@@ -127,6 +137,7 @@ export default defineComponent ({
             patternHover: false,
             bgImageCache: "" as string,
             bgSizeCache: "" as string,
+            yearSVG: undefined as undefined | SVGAElement,
             frame: {
                 width: 0 as number,
                 height: 0 as number,
@@ -201,6 +212,11 @@ export default defineComponent ({
             this.$emit("blockLoaded")
         })
 
+
+        if (this.$refs.yearSVG && this.options.year) {
+            this.$refs.yearSVG.appendChild(Icon(this.options.year, "medium"))
+        }
+
         window.addEventListener("layoutChange", this.updateLayoutChange)
     },
     unmounted() {
@@ -261,12 +277,13 @@ export default defineComponent ({
 
     &:hover,
     &:focus {
+        background:var(--bg-color);
         filter: saturate(1.04);
         opacity: 1;
         img {
             border-radius: 8px;
             outline: 1px solid var(--bg-color);
-            box-shadow: 0 0 8px rgba(0,0,0,.32);
+            box-shadow: 0 0 12px rgba(0,0,0,.16);
         }
     }
 }
@@ -312,11 +329,11 @@ export default defineComponent ({
 .piece-thumbnail-block-title {
     display: flex;
     margin: 0;
-    padding: 8px;
+    padding: 8px 0 0;
     justify-content: space-between;
     width: 100%;
     font-family: var(--accent-font);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: normal;
     line-height: 1em;
     align-items: center;
@@ -332,19 +349,54 @@ export default defineComponent ({
     gap: 8px;
     flex-flow: row wrap;
 }
+
 .piece-thumbnail-tag {
-    font-size: 12px;
-    padding: 4px 8px;
-    display: inline-block;
+    font-size: 10px;
+    opacity: 0.6;
     font-family: var(--accent-font);
-    background-color: #f0f0f0;
-    color: #000;
+    color: var(--contrast-color);
+
+    &:hover, 
+    &:focus {
+        text-decoration: underline;
+        cursor: pointer;
+    }
 }
 
 @container piece-thumbnail (min-width: 256px) {
     .piece-thumbnail-block-title {
-        padding: 8px 0;
-        font-size: 24px;
+        padding: 8px 0 4px;
+        font-size: 16px;
+    }
+}
+
+.piece-thumbnail-footer {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+
+.piece-thumbnail-footer-left {
+    max-width: 80%;
+}
+
+.piece-thumbnail-footer-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    opacity: 0.8;
+
+    figure {
+        margin: 0;
+    }
+
+    svg {
+        height: 24px;
+        display: block;
+
+        rect[v="0"] {
+            opacity: 0;
+        }
     }
 }
 </style>
