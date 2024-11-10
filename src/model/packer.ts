@@ -72,12 +72,6 @@ export default class Packer {
         this.order = order
     }
 
-    public setDimensions(width: number, height: number) {
-        this.layoutWidth = width
-        this.layoutHeight = height
-        return this.updateLayout()
-    }
-
     public setBlocks(blocks: Block[]) {
         this.blocks = _.map(blocks, (block, index) => {
             if (!block.id) {
@@ -94,14 +88,16 @@ export default class Packer {
         return this.updateLayout()
     }
 
-    private updateLayout() {
+    // cacheLength is being used in the updateLayout.getNextBlock method
+    // Here it limits the amount of blocks it will run through, improving the performance
+    private updateLayout(cacheLength = 8) {
         const resultPositions = [] as Position[]
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
         if (inputBlocks.length <= 0) {
             return
         }
-        
+
         const positionOrder = {
             right: 1,
             bottom: 2,
@@ -225,39 +221,38 @@ export default class Packer {
         })
 
         const getNextBlock = (resultPositions: Position[]) => {
-            const options = _.filter(_.map(resultPositions, resBlock => {
-                const data = getOptions(resBlock, inputBlocks) as Array<Position | undefined>
-                const temp  =  _.chain(data)
-                    .orderBy(
-                        ["y", item => positionOrder[item?.parentPosition || "right"]],
-                        ["asc", "asc"]
-                    )
-                    .without(undefined)
-                    .value()
+            const options = [];
+            let startI = resultPositions.length - cacheLength < 0 ? 0 : resultPositions.length - cacheLength
 
-                return _.map(temp, tempPos => {
-                    const sortedResPos = _.sortBy(resultPositions, "y", "asc")
-                    _.each(sortedResPos, pos => {
+            for (let i = startI; i < resultPositions.length; i++) {
+                const resBlock = resultPositions[i];
+                const data = getOptions(resBlock, inputBlocks).filter(Boolean);
+            
+                // Sort positions by y and by custom parent position order
+                const sortedData = _.orderBy(
+                    data,
+                    [ "y", item => positionOrder[item?.parentPosition || "right"]],
+                    ["asc", "asc"]
+                );
+            
+                // Adjust positions to avoid overlaps
+                for (const tempPos of sortedData) {
+                    for (const pos of resultPositions.sort((a, b) => a.y - b.y)) {
                         if (this.blocksOverlap(tempPos, pos)) {
-                            if (tempPos) {
-                                tempPos.y = pos.y + pos.height
-                            }
+                            tempPos.y = pos.y + pos.height;
                         }
-                    })
-                    return tempPos
-                })
-            }), res => res.length > 0)
-            
+                    }
+                    options.push(tempPos);
+                }
+            }
             
 
-            const nextBlocks = _.chain(_.flatten(options))
-                .orderBy(
-                    orderByOptions.property,
-                    orderByOptions.order
-                )
-                .without(undefined)
+            const nextBlocks = _(options)
+                .flatten()
+                .compact() // Removes undefined values
+                .orderBy(orderByOptions.property, orderByOptions.order)
                 .take(1)
-                .value() as  Array<Position>
+                .value() as Array<Position>
 
             if (nextBlocks.length === 1)  {
                 return nextBlocks[0]
