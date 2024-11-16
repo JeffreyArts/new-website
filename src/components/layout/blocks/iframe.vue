@@ -16,7 +16,7 @@
                 </a>
             </span>
 
-            <span class="iframe-block-header-refresh-button" @click="refreshIframe" v-if="showRefresh">Refresh</span>
+            <span class="iframe-block-header-refresh-button" @click="refreshIframe" v-if="options.showRefresh">Refresh</span>
             
         </header>
 
@@ -27,7 +27,7 @@
                 width: `${frame.width}px`}"
                 :type="frame.size"
                 ref="iframeBlock">
-                <iframe :src="options.url" frameborder="0" allow="fullscreen" allowfullscreen ref="iframe"/>
+                <iframe :src="options.url" frameborder="0" allow="fullscreen" allowfullscreen ref="iframe" />
             </div>
         </section>
 
@@ -68,7 +68,6 @@ export default defineComponent ({
         return {
             scale: 1,
             title: "",
-            showRefresh: false,
             frame: {
                 width: 0,
                 height: 0,
@@ -81,13 +80,8 @@ export default defineComponent ({
             return
         }
         this.setTitle()
-        this.showRefresh = this.options.showRefresh
-        
-        const iframe = this.$refs["iframe"] as HTMLIFrameElement
-        
-        iframe.addEventListener("load", () => {
-            this.$emit("blockLoaded")
-        })
+
+        this.$emit("blockLoaded")
         window.addEventListener("layoutChange", this.onLayoutChange)
     },
     unmounted() {
