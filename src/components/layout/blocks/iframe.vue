@@ -79,6 +79,7 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
+        this.onLayoutChange()
         this.setTitle()
 
         this.$emit("blockLoaded")
@@ -143,6 +144,7 @@ export default defineComponent ({
                 this.scale = this.$el.clientWidth / this.frame.width
 
             }
+            this.refreshIframe()
         }
     },
 })

@@ -55,8 +55,7 @@
             layoutSize: layoutSize,
             blocks: blocks
         }"
-        ref="layout"
-        @blocksUpdated="updateLayout"/>
+        ref="layout"/>
 </template>
 
 
@@ -229,6 +228,12 @@ export default defineComponent({
             if (!layout) {
                 return
             }
+
+            // Skip loading new items when the current ones have not yet been processed
+            if (layout.classList.contains('__isLoaded')) {
+                return
+            }
+
             const blocks = layout.querySelectorAll(".block")
             let lastBlock = {
                 block: undefined,
@@ -250,7 +255,7 @@ export default defineComponent({
 
             const scrollOffset = htmlEl.scrollTop - layout.offsetTop + window.innerHeight
             const endOffScroll = document.body.clientHeight  - layout.offsetTop
-            if (scrollOffset > endOffScroll - window.innerHeight * .33) {
+            if (scrollOffset > endOffScroll - window.innerHeight * .777) {
                 this.page = this.page + 1
                 this.updateResults(this.page)
             }
@@ -450,49 +455,54 @@ export default defineComponent({
                 }  
 
                 this.$emit("filterUpdated")
-                nextTick(() => {
-                    const refLayout = this.$refs.layout
-                    
-                    if (!refLayout) {
-                        return
-                    }
+                this.$nextTick(() => {
+                    console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
 
-                    if (this.firstLoad) {
-                        refLayout.fadeInNewBlocks().then(() => {
-                            refLayout.updateBlockSizes()
-                            setTimeout(()=>{
-
-                                nextTick(refLayout.updateLayout())
-                            })
-                        }).catch(console.error)
-                    } else {
-                        this.updateLayout()
-                    }
+                    this.updating = false
                 })
                 
-                this.updating = false
-            }).catch(() => {
+                // nextTick(() => {
+                //     const refLayout = this.$refs.layout
+                    
+                //     if (!refLayout) {
+                //         return
+                //     }
+
+                //     if (this.firstLoad) {
+                //         refLayout.fadeInNewBlocks().then(() => {
+                //             refLayout.updateBlockSizes()
+                //             setTimeout(()=>{
+
+                //                 nextTick(refLayout.updateLayout())
+                //             })
+                //         }).catch(console.error)
+                //     } else {
+                //         this.updateLayout()
+                //     }
+                // })
+            }).catch(err => {
+                console.error(err)
                 this.updating = false
             })
         },
-        updateLayout() {
-            if (this.firstLoad) {
-                return
-            }
+        // updateLayout() {
+        //     if (this.firstLoad) {
+        //         return
+        //     }
             
-            this.firstLoad = true
-            const refLayout = this.$refs.layout
+        //     this.firstLoad = true
+        //     const refLayout = this.$refs.layout
             
-            if (!refLayout) {
-                return
-            }
-            refLayout.fadeInAllBlocks()
+        //     if (!refLayout) {
+        //         return
+        //     }
+        //     refLayout.fadeInAllBlocks()
             
-            nextTick(() => {
-                refLayout.updateBlockSizes()
-                nextTick(refLayout.updateLayout())
-            })
-        },
+        //     nextTick(() => {
+        //         refLayout.updateBlockSizes()
+        //         nextTick(refLayout.updateLayout())
+        //     })
+        // },
     }
 })
 </script>

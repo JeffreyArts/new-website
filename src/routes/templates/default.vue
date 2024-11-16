@@ -8,8 +8,7 @@
             id: page.id,
             layoutSize: layoutSize,
             blocks: page.blocks
-        }" ref="layout"
-        @blocksUpdated="updateLayout"/>
+        }" ref="layout"/>
         <FilterComponent v-if="page.filter?.name && showFilters" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
     </section>
 </template>
@@ -154,24 +153,24 @@ export default defineComponent ({
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
             this.layoutSize = this.page.layout[size]
         },
-        updateLayout() {
-            const refLayout = this.$refs.layout
-            // console.log("refLayout", refLayout)
+        // updateLayout() {
+        //     const refLayout = this.$refs.layout
+        //     // console.log("refLayout", refLayout)
             
-            if (!refLayout) {
-                return
-            }
+        //     if (!refLayout) {
+        //         return
+        //     }
             
-            refLayout.fadeInAllBlocks()
+        //     refLayout.fadeInAllBlocks()
 
-            // setTimeout(() => {
-            //     console.log("updateBlockSizes ")
-            refLayout.updateBlockSizes()
-            setTimeout(() => {
-                refLayout.updateBlockSizes()
-            })
-            // })
-        },
+        //     // setTimeout(() => {
+        //     //     console.log("updateBlockSizes ")
+        //     refLayout.updateBlockSizes()
+        //     setTimeout(() => {
+        //         refLayout.updateBlockSizes()
+        //     })
+        //     // })
+        // },
         updateFilter() {
 
             // const refFilter = this.$refs.filter
