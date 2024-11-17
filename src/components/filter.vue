@@ -13,14 +13,6 @@
                     name="Only favorites"
                     v-model="filterVal.onlyFavorites"
                     :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
-    
-                
-                <checkBox :style="`order: ${k}`"
-                    v-if="filter == 'groupSeries'"
-                    class="site-filter-section"
-                    name="Group series"
-                    v-model="filterVal.groupSeries"
-                    :class="[filterVal.groupSeries ? '__isSelected' : '']" />
                     
                 <selectBox :style="`order: ${k}`"
                     v-if="filter == 'year'"
@@ -114,12 +106,10 @@ export default defineComponent({
             firstLoad: false,
             filterVal: {
                 onlyFavorites: false,
-                groupSeries: false,
                 yearOpen: false,
             },
             filterOptions: {
                 onlyFavorites: true,
-                groupSeries: true,
                 year: [] as SelectBoxOptions[],
                 categories: [] as SelectBoxOptions[],
                 series: [] as SelectBoxOptions[],
@@ -224,16 +214,16 @@ export default defineComponent({
             }
 
             const htmlEl = document.querySelector("html") as HTMLElement
-            const layout = document.getElementById("filterLayout")
-            if (!layout) {
+            const layoutWrapper = document.getElementById("filterLayout")
+            if (!layoutWrapper) {
                 return
             }
-
+            const layout = layoutWrapper.querySelector(".layout")
+            // console.log(layout.classList)
             // Skip loading new items when the current ones have not yet been processed
-            if (layout.classList.contains('__isLoaded')) {
+            if (!layout || !layout.classList.contains('__isLoaded')) {
                 return
             }
-
             const blocks = layout.querySelectorAll(".block")
             let lastBlock = {
                 block: undefined,
@@ -253,9 +243,9 @@ export default defineComponent({
                 }
             })
 
-            const scrollOffset = htmlEl.scrollTop - layout.offsetTop + window.innerHeight
-            const endOffScroll = document.body.clientHeight  - layout.offsetTop
-            if (scrollOffset > endOffScroll - window.innerHeight * .777) {
+            const scrollOffset = htmlEl.scrollTop - layoutWrapper.offsetTop + window.innerHeight
+            const endOffScroll = document.body.clientHeight  - layoutWrapper.offsetTop
+            if (scrollOffset > endOffScroll - window.innerHeight * .5) {
                 this.page = this.page + 1
                 this.updateResults(this.page)
             }
@@ -457,7 +447,6 @@ export default defineComponent({
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
                     console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
-
                     this.updating = false
                 })
                 

@@ -1,7 +1,10 @@
 <template>
     <div class="layout-wrapper">
         <section  class="layout"
-            :class="{'__isLoaded' : loaded}"
+            :class="{
+                '__isLoaded': loaded,
+                '__isProcessing': processing
+            }"
             v-if="options && blocks.length > 0"
             :layout-size="options.layoutSize"
             :layout-gap="options.layoutGap">
@@ -54,6 +57,7 @@ export default defineComponent ({
             widthRatio: 0 as number,
             packerLayout: undefined as Packer | undefined,
             loaded: false,
+            processing: false,
             newBlocks: [] as BlockType[],
             blocks: [] as BlockType[],
         }
@@ -167,7 +171,6 @@ export default defineComponent ({
                     block.height = "auto"
                     
                     nextTick(() => {
-                        // console.log(this.$el)
                         const targetBlock = this.$el.querySelector(`#block-${block.id}`)
                         
                         if (!targetBlock) {
@@ -188,38 +191,26 @@ export default defineComponent ({
             return await Promise.all(result)
         },
         async blockLoaded(block: BlockType) {
-            if (this.loaded) {
+            if (block.loaded) {
                 return
-            }
-            // console.log("Block loaded", block)
+            }   
             block.loaded = true
             this.newBlocks.push(block)
             
             if (_.every(_.map(this.blocks, block => block.loaded))) {
                 this.loaded = false
+                this.processing = true
+                
                 await this.updateBlockSizes()
                 if (typeof window !== "undefined") {
-                    console.log("Layout Change")
                     window.dispatchEvent(new CustomEvent("layoutChange"))
                 }
-                console.info("%c┌─────┐", "background-color: #0f9; padding: 4px 8px;")
-                this.newBlocks.forEach((newBlock) => {
-                    const blockElement = this.$el.querySelector(`#block-${newBlock.id}`)
-                    console.log(blockElement.clientHeight, newBlock.height,`#block-${newBlock.id}`)
+
+                this.fadeInBlocks().then(() => {
+                    this.loaded = true
+                    this.processing = false
+                    this.updateLayout()
                 })
-                setTimeout(async () => {
-                    console.info("%c└─────┘", "background-color: #0f9; padding: 4px 8px;")
-                    await this.updateBlockSizes()
-                    this.newBlocks.forEach((newBlock) => {
-                        const blockElement = this.$el.querySelector(`#block-${newBlock.id}`)
-                        console.log(blockElement.clientHeight, newBlock.height, `#block-${newBlock.id}`)
-                    })
-                    this.fadeInBlocks().then(() => {
-                        console.info("%cBlocks fully faded in", "background-color: #f09; color: white; padding: 4px 8px;")
-                        this.loaded = true
-                        this.updateLayout()
-                    })
-                }, 500)
             }
         },
         updateLayout() {
@@ -232,7 +223,8 @@ export default defineComponent ({
             this.__updateLayoutHeight()
         },
         fadeInBlocks() {
-            return new Promise((resolve, reject) => {
+            return new Promise(async(resolve, reject) => {
+
                 const promises = [] as Promise<void>[]
                 this.newBlocks = _.sortBy(this.newBlocks,["y", "x"])
                 this.newBlocks.forEach((newBlock, newBlockIndex) => {
@@ -243,8 +235,6 @@ export default defineComponent ({
                         duration = .4
                     }
 
-                    // console.log("duration", duration)
-
                     promises.push(new Promise((resolve)=> {
                         gsap.fromTo(blockElement, {
                             opacity: 0
@@ -254,6 +244,7 @@ export default defineComponent ({
                             duration,
                             delay,
                             onComplete: () => {
+                                this.updateBlockSizes()
                                 resolve()
                             }
                         })
@@ -262,82 +253,11 @@ export default defineComponent ({
 
                 Promise.all(promises).then(() => {
                     // Reset newBlocks array
-                    this.newBlocks.length = 0
+                    this.newBlocks = []
                     resolve(true)
                 })
             })
         },
-        // fadeInNewBlocks() {
-        //     return new Promise((resolve, reject) => {
-                
-        //         if (typeof window !== "undefined") {
-        //             window.dispatchEvent(new CustomEvent("layoutChange"))
-        //         }
-        //         this.updateBlockSizes()
-        //         nextTick(this.updateLayout)
-        //         // this.updateBlockSizes()
-        //         const blocks = this.$el.querySelectorAll(".block:not(.__isLoaded)")
-        //         const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
-        //             return parseFloat(block.style.top) || 0
-        //         })
-                
-        //         // this.updateLayout()
-        //         gsap.fromTo(sortedBlocks, {
-        //             opacity: 0
-        //         },{
-        //             opacity: 1,
-        //             duration: .4,
-        //             stagger: {
-        //                 each: .08,
-        //                 from: "start"
-        //             },
-        //             onComplete: () => {
-        //                 // gsap.set(this.$el.querySelectorAll(".block"), { opacity: 1 })
-        //                 // console.log("New blocks loaded")
-        //                 // nextTick(this.updateLayout)
-        //                 resolve(true)
-        //             }
-        //         })
-        //     })
-        // },
-        // fadeInAllBlocks() {
-        //     // Sort blocks, based on Y position
-        //     const blocks = this.$el.querySelectorAll(".block")
-        //     const sortedBlocks = _.sortBy(blocks, (block: HTMLElement) => {
-        //         return parseFloat(block.style.top) || 0
-        //     })
-            
-        //     if (typeof window !== "undefined") {
-        //         nextTick(() => {
-        //             window.dispatchEvent(new CustomEvent("layoutChange"))
-        //         })
-        //     }
-
-        //     // Shady solution....
-        //     setTimeout(() => {
-        //         this.__updateLayoutHeight()
-        //         // this.updateBlockSizes()
-        //         // nextTick(this.updateLayout)
-        //     },500)
-            
-            
-
-        //     gsap.fromTo(sortedBlocks, {
-        //         opacity: 0
-        //     },{
-        //         opacity: 1,
-        //         duration: .8,
-        //         stagger: {
-        //             each: .8/sortedBlocks.length,
-        //             from: "start"
-        //         },
-        //         onComplete: () => {
-        //             gsap.set(blocks, { opacity: 1 })
-        //             console.log("Blocks fully loaded 🤑")
-        //             nextTick(this.updateBlockSizes)
-        //         }
-        //     })
-        // },
         updateBlockSizes() {
             return new Promise(async (resolve) => {
                     
@@ -370,14 +290,10 @@ export default defineComponent ({
                 }
                 const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks)
                 
-
                 if (sortedBlocks) {
                     _.each(sortedBlocks, (posBlock) => {
                         const blockId = posBlock.id as string | number
                         let block = this.__findBlock(blockId, blocks)
-                        if (block?.data.blockType === "iframe") {
-                            // console.log("block", block)
-                        }
 
                         if (!block) {
                             throw new Error("Invalid blockId ")
@@ -390,11 +306,13 @@ export default defineComponent ({
                 }   
 
                 if (typeof window !== "undefined") {
-                    this.updateLayout()
+                    this.__updateLayoutHeight()
                 }
 
                 this.$nextTick(() => {
-                    requestAnimationFrame(resolve)
+                    setTimeout(() => {
+                        requestAnimationFrame(resolve)
+                    })
                 })
             })
         },
