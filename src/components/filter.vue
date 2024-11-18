@@ -380,6 +380,7 @@ export default defineComponent({
                 limit: number
                 page: number
                 project?: string
+                archived?: boolean
                 series?: Array<string>
                 categories?: Array<string>
                 year?: Array<string>
@@ -391,6 +392,14 @@ export default defineComponent({
                 } else {
                     query.project = this.pageDetails.id
                 }
+            }
+            console.log(this.options.name)
+            if (this.options.name.toLowerCase() === "archive") {
+                query.archived = true
+            }
+            
+            if (this.options.name.toLowerCase() === "projects") {
+                query.archived = false
             }
 
             const series = filter(this.filterOptions.series, { selected: true })

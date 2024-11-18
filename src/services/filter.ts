@@ -20,6 +20,7 @@ interface PaginationData {
 interface FilterOptions {
     limit: number,
     page: number,
+    archived?: boolean,
     project?: string,
     year?: Array<string>,
     series?: Array<string>,
@@ -28,6 +29,7 @@ interface FilterOptions {
 
 interface FilterQuery {
     where: {
+        archived: {equals: boolean}
         project: {equals: string}
         series?: { in: string[] }
         categories?: { in: string[] }
@@ -41,6 +43,7 @@ interface FilterOptionValue {
     value: string | number
     label: string | number
     available: boolean 
+    archived: boolean 
     disabled: boolean
     selected: boolean
 }
@@ -67,6 +70,12 @@ const Filter = {
         // Define query
         const query = { where: {}} as FilterQuery
 
+        if (typeof options.archived === "boolean") {
+            query.where.archived = {
+                equals: options.archived 
+            }
+        }
+        
         if (options.series && options.series.length > 0) {
             query.where.series = {
                 in: options.series 
