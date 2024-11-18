@@ -1,5 +1,5 @@
 <template>
-    <section class="default-template">
+    <section class="default-template" v-if="!is404">
 
         <Breadcrumbs />
         
@@ -11,6 +11,8 @@
         }" ref="layout"/>
         <FilterComponent v-if="page.filter?.name && showFilters" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
     </section>
+    
+    <page404 v-if="is404"/>
 </template>
 
 
@@ -23,6 +25,7 @@ import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import Breadcrumbs from "@/components/breadcrumbs.vue"
 import FilterComponent from "@/components/filter.vue"
 import Layout from "@/components/layout/index.vue"
+import page404 from "@/routes/error-404.vue"
 
 const setMeta = (route: RouteLocationNormalizedLoaded) => {
     const meta = [] as Array<{
@@ -51,6 +54,7 @@ export default defineComponent ({
     components: {
         Breadcrumbs,
         Layout,
+        page404,
         FilterComponent
     },
     props: [],
@@ -81,6 +85,7 @@ export default defineComponent ({
         return {
             breakpoint: "",
             layoutSize: 8,
+            is404: false,
             page: {} as PageType,
         }
     },
@@ -124,7 +129,8 @@ export default defineComponent ({
 
             } catch (error) {
                 console.error("Error loading page:", error)
-                this.$router.push("/404")
+                this.is404 = true
+                // this.$router.push("/404")
             }
         },
         updateLayoutSize() {
