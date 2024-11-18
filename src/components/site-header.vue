@@ -209,7 +209,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables";
+@use "./../assets/scss/variables";
 .site-header-logo {
     height: 36px;
     padding: 7px;
@@ -238,7 +238,7 @@ export default defineComponent({
 }
 
 .site-header-navigation-item {
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     position: relative;
 
     a {
@@ -279,7 +279,7 @@ export default defineComponent({
     font-size: .8em;
     opacity: 0;
     pointer-events: none;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
     align-items: center;
 
     &:hover {

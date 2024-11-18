@@ -80,7 +80,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 .code-block-header {
     background-color: #dfdfdf;
     background-image: linear-gradient(0deg, rgba(0,0,0,.08), transparent);
@@ -91,7 +91,7 @@ export default defineComponent ({
     border-radius: 8px 8px 0 0;
     padding: 8px;
     gap:12px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     justify-content: space-between;
 
     svg {
@@ -109,7 +109,7 @@ export default defineComponent ({
     a { 
         color: #111;
         opacity: .64;
-        transition: $transitionDefault;
+        transition: var(--transition-default);
 
         &:hover,
         &:focus {

@@ -30,9 +30,9 @@ export default defineComponent ({
             handler() {
                 if (this.maxRows) {
                     this.rows = this.maxRows
-                    setTimeout(() => {
+                    // setTimeout(() => {
                         this.setLines()
-                    })
+                    // })
                 }
             },
             immediate: true

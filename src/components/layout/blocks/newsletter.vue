@@ -65,7 +65,7 @@ export default defineComponent ({
                 this.email = "" 
                 this.submitMessage = "A mail has been sent to confirm your e-mailaddress"
                 const messageEl = this.$refs["message"] as HTMLElement
-                console.log(messageEl)
+
                 if (!messageEl) {
                     return
                 }
@@ -119,7 +119,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 .newsletter-block {
     width: 100%;
     position: relative;
@@ -150,7 +150,7 @@ export default defineComponent ({
     color: var(--bg-color);
     border: 0 none transparent;
     padding: 8px 16px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     font-size: 20px;
     margin-top: 16px;
 }

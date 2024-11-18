@@ -144,7 +144,6 @@ export default defineComponent ({
                     this.updateLayoutSize()
                 }
                 this.oldData = oldData
-                console.log(this.oldData)
                 
             } catch (error) {
                 console.error("Error loading page:", error)
@@ -155,7 +154,7 @@ export default defineComponent ({
             if (!this.page.layout) {
                 return
             }
-            // console.log(this.page)
+            
             // Match these with Payload::pages.fields.layout for best DX
             const breakPoints = {
                 xs: 320,
@@ -183,5 +182,5 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/variables.scss";
+@use "@/assets/scss/variables.scss";
 </style>

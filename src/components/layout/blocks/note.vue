@@ -45,7 +45,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 .note-block {
     background-color: #ffffe8;
     padding: 16px 20px;
@@ -57,7 +57,7 @@ export default defineComponent ({
         color: var(--blue);
         [v="1"] {
             fill: var(--blue);
-            transition: $transitionDefault;
+            transition: var(--transition-default);
         }
 
         &:hover,
@@ -86,10 +86,10 @@ export default defineComponent ({
 
 
 .note-block {
-    font-family: $accentFont;
+    font-family: var(--accent-font);
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: $defaultFont;
+        font-family: var(--default-font);
         margin: 0 0 8px;
     }
     

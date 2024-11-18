@@ -1,11 +1,13 @@
 <template>
     <div class="iframe-block">
         <header class="iframe-block-header">
+            <!-- Used to draw UI buttons -->
             <ul>
                 <li></li>
                 <li></li>
                 <li></li>
             </ul>
+            <!-- /Used to draw UI buttons -->
             
             <span class="iframe-block-header-title">
                 <a :href="options.url" target="_blank" class="iframe-block-header-link">
@@ -13,6 +15,8 @@
                     <jaoIcon name="external-link" size="medium" />
                 </a>
             </span>
+
+            <span class="iframe-block-header-refresh-button" @click="refreshIframe" v-if="options.showRefresh">Refresh</span>
             
         </header>
 
@@ -23,7 +27,7 @@
                 width: `${frame.width}px`}"
                 :type="frame.size"
                 ref="iframeBlock">
-                <iframe :src="options.url" frameborder="0" allow="fullscreen" allowfullscreen ref="iframe"/>
+                <iframe :src="options.url" frameborder="0" allow="fullscreen" allowfullscreen ref="iframe" />
             </div>
         </section>
 
@@ -43,6 +47,7 @@ export type IframeBlock = {
     id: string
     title: string
     url: string
+    showRefresh: boolean
     autoScaling: string
     portraitRatio: string
     landscapeRatio: string
@@ -74,19 +79,23 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
+        this.onLayoutChange()
         this.setTitle()
-        
-        const iframe = this.$refs["iframe"] as HTMLIFrameElement
-        
-        iframe.addEventListener("load", () => {
-            this.$emit("blockLoaded")
-        })
+
+        this.$emit("blockLoaded")
         window.addEventListener("layoutChange", this.onLayoutChange)
     },
     unmounted() {
         window.removeEventListener("layoutChange", this.onLayoutChange)
     },
     methods: {
+        refreshIframe(){
+            const iframe = this.$refs["iframe"] as HTMLIFrameElement
+            if (!iframe){
+                return
+            }
+            iframe.src = iframe.src
+        },
         setTitle(){
             this.title = this.options.title
 
@@ -106,7 +115,7 @@ export default defineComponent ({
                     const ratio =  height / width
                     this.frame.width = this.$el.clientWidth
                     this.frame.height = this.$el.clientWidth * ratio
-                } else if (window.innerHeight/window.innerWidth > 1) { // Landscape
+                } else if (window.innerHeight/window.innerWidth >= 1) { // Landscape
                     const width = parseInt(this.options.portraitRatio.split("/")[0])
                     const height = parseInt(this.options.portraitRatio.split("/")[1])
                     const ratio =  height / width
@@ -135,6 +144,7 @@ export default defineComponent ({
                 this.scale = this.$el.clientWidth / this.frame.width
 
             }
+            this.refreshIframe()
         }
     },
 })
@@ -142,7 +152,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 
 .iframe-block {
     position: relative;
@@ -159,7 +169,7 @@ export default defineComponent ({
     justify-content: center;
     border-radius: 8px 8px 0 0;
     gap:12px;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
 
 
     ul { 
@@ -200,7 +210,7 @@ export default defineComponent ({
     text-decoration: none;
 
     svg {
-        transition: $transitionDefault;
+        transition: var(--transition-default);
         height: 13px;
         translate: 0 2px;
         opacity: 0;
@@ -246,7 +256,7 @@ export default defineComponent ({
 
 .iframe-block-fullscreen-button {
     display: inline-block;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
     padding: 8px 4px 4px 8px;
     position: absolute;
     bottom: 0;
@@ -260,9 +270,32 @@ export default defineComponent ({
         }
     }
     svg {
-        transition: $transitionDefault;
+        transition: var(--transition-default);
         height: 26px;
         color: #111;
+    }
+}
+
+.iframe-block-header-refresh-button {
+    position: absolute;
+    right: 16px;
+    font-size: 12px;
+    border: 1px solid var(--contrast-color);
+    background-color: rgba(255,255,255,.4);
+    padding: 4px 8px;
+    text-shadow: 0 1px rgba(255,255,255,.8);
+    transition: var(--transition-default);
+    opacity: 0.9;
+    border-radius: 3px;
+    cursor: pointer;
+    
+    &:hover,
+    &:focus {
+        opacity: 0.9;
+        background-color: #fff;
+        background-color: rgba(255,255,255,.8);
+        border-radius: 1px;
+        scale: 1.1;
     }
 }
 </style>

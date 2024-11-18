@@ -180,41 +180,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables";
-.site-breadcrumbs {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    font-family: $accentFont;
-    
-    a {
-        color: var(--contrast-color);
-        opacity: 0.64;
-        text-decoration: none;
-        transition: $transitionFast;
+@use "./../assets/scss/variables";
 
-        &:last-child {
-            opacity: 0.8;
-        }
-
-        &:focus,
-        &:hover {
-            opacity: 1;
-        }
-    }
-
-    .char {
-        display: inline-block;
-    }
-}
-
-.site-breadcrumbs-icon {
-    height: 26px;
-}
-
-.site-breadcrumbs-chevron {
-    height: 10px;
-    margin-left: 8px;
-}
 </style>

@@ -1,6 +1,8 @@
 <template>
     <figure class="banner-block" :title="options.description">
-        <a class="banner-block-image-container" :href="options.link" v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
+        <a class="banner-block-image-container" :href="options.link" 
+            :target="options._blank ? '_blank' : ''"
+            v-if="options.link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
             <img :src="src" :alt="options.description" ref="image"/>
         </a>
         <span class="banner-block-image-container" v-if="!options.link">
@@ -26,6 +28,7 @@ export type BannerBlock = {
     id: string
     link: string
     title: string
+    _blank: boolean
     description: string
     image: {
         width: number
@@ -179,7 +182,7 @@ export default defineComponent ({
 </script>
 
 <style lang="scss">
-@import "./../../../assets/scss/variables.scss";
+@use "./../../../assets/scss/variables.scss";
 .banner-block {
     aspect-ratio: 4/1;
     position: relative;
@@ -202,7 +205,7 @@ export default defineComponent ({
         width: 100%;
         object-fit: cover;
         opacity: 0.8;
-        transition: $transitionDefault;
+        transition: var(--transition-default);
     }
 }
 .banner-block-image-container {
@@ -214,7 +217,7 @@ export default defineComponent ({
 
 .banner-block-title {
     pointer-events: none;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     color: #fff;
     text-shadow: 0 0 2px rgba(0,0,0,.32);
     text-align: center;
@@ -225,7 +228,7 @@ export default defineComponent ({
     padding-left: 20%;
     padding-right: 20%;
     align-items: center;
-    transition: $transitionDefault;
+    transition: var(--transition-default);
 }
 
 </style>

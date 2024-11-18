@@ -118,7 +118,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables.scss";
+@use "./../assets/scss/variables.scss";
 .language-selector-container {
     position: relative;
     z-index: 2024;

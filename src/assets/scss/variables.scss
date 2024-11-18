@@ -7,6 +7,9 @@
     --purple: #7f06b7;
     --pink: #f3018e;
     
+    // --primary-bg-color: #030303;
+    // --bg-color: #111;
+    // --contrast-color: #fff;
     --primary-bg-color: #fafafa;
     --bg-color: #fff;
     --contrast-color: #222;
@@ -17,11 +20,16 @@
     --accent-color: #f38508;
     --primary-color: #f3018e;
     --bg-size: 16px;
+
+    --default-font: "Open sans", serif, "Helvetica", "Arial", "Verdana", sans-serif;
+    --accent-font: "FixedSys", sans-serif;
+    --transition-default: .64s ease all;
+    --transition-fast: .12s all linear;
 }
 
   
-$defaultFont: "Open sans", serif, "Helvetica", "Arial", "Verdana", sans-serif;
-$accentFont: "FixedSys", sans-serif;
+// var(--default-font): "Open sans", serif, "Helvetica", "Arial", "Verdana", sans-serif;
+// var(--accent-font): "FixedSys", sans-serif;
 
-$transitionDefault: .64s ease all;
-$transitionFast: .12s all linear;
+// var(--transition-default): .64s ease all;
+// var(--transition-fast): .12s all linear;

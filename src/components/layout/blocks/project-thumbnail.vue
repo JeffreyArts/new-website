@@ -1,22 +1,37 @@
 <template>
-    <figure class="image-block" :title="options.description">
-        <a :href="link" v-if="link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
-            <img :src="src" :alt="options.description" ref="image"/>
+    <div class="project-thumbnail-block">
+        <a class="project-thumbnail-block-wrapper" :href="options.link">
+            <figure class="project-thumbnail-block-image-wrapper">
+                <img :src="src" class="project-thumbnail-block-image" ref="image"/>
+            </figure>
+            
+            <h4 class="project-thumbnail-block-title">
+                <span>{{ options.title }}</span>
+                <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon>
+            </h4>
         </a>
-        <span v-if="!link">
-            <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent"/>
-        </span>
-    </figure>
+
+        <div class="project-thumbnail-tags" v-if="options.categories">
+            <span class="project-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
+                {{ category.title }}
+            </span>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import gsap from "gsap"
+import jaoIcon from "@/components/jao-icon.vue"
 
-export type ImageBlock = {
-    blockType: "image"
+export type ProjectThumbnailBlock = {
+    blockType: "projectThumbnail"
     link: string
-    description: string
+    categories: Array<{
+        id: string
+        title: string
+    }>
+    title: string
     image: {
         width: number
         height: number
@@ -46,12 +61,13 @@ export type ImageBlock = {
 }
 
 export default defineComponent ({
-    name: "imageBlock",
+    name: "projectThumbnailBlock",
     components: {
+        jaoIcon
     }, 
     props: {
         options: {
-            type: Object as PropType<ImageBlock>,
+            type: Object as PropType<ProjectThumbnailBlock>,
             required: true,
         },
     },
@@ -75,7 +91,7 @@ export default defineComponent ({
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            
+
             if (this.options.image.mimeType.includes("svg")) {
                 return src + this.options.image.url
             }
@@ -89,22 +105,6 @@ export default defineComponent ({
         }
     },
     watch: {
-        "options.link": {
-            handler() {
-                if (!this.options.link) {
-                    return
-                }
-
-                if (this.options.link.startsWith("http") || this.options.link.startsWith("/")) {
-                    this.link = this.options.link
-                }
-
-                if (this.options.link == "<pattern>") { 
-                    this.patternHover = true
-                }
-            },
-            immediate: true
-        }
     },
     mounted() {
         if (typeof window === "undefined") {
@@ -160,87 +160,14 @@ export default defineComponent ({
 
             return this.imageSize = "original"
         },
-        onMouseEnterEvent(e:Event) {
-            const target = e.target as HTMLElement
-            if (!target) {
-                return
-            }
-
-            if (this.link) {
-                this.mouseEnterZoom(target)
-            }
-            
-            if (this.patternHover) {
-                this.addBackgroundPattern()
-            }
-        },
-        addBackgroundPattern() {
-            this.bgImageCache = getComputedStyle(document.body).backgroundImage 
-            this.bgSizeCache = getComputedStyle(document.body).backgroundSize 
-
-
-            let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            src += `/media/${this.options.image.filename}`
-            document.body.style.backgroundImage = `url(${src})`
-            document.body.style.backgroundSize = "auto"
-        },
-        mouseEnterZoom(target: HTMLElement) {
-            const img = target.querySelector("img") 
-            if (!img) {
-                return
-            }
-
-            if (this.hoverEvent) {
-                gsap.killTweensOf(this.hoverEvent)
-            }
-
-            this.hoverEvent = gsap.to(img, {
-                scale: (img.clientWidth + 40) / img.clientWidth,
-                boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.16)`,
-                duration: .64,
-                zIndex: 1,
-                ease: "bounce.out"
+        goToCategory(categoryId: string) {
+            this.$router.push({
+                path: "/archive",
+                query: {
+                    categories: categoryId
+                }
             })
-        },
-        onMouseLeaveEvent(e:Event) {
-
-            const target = e.target as HTMLElement
-            if (!target) {
-                return
-            }
-
-            if (this.link) {
-                this.mouseLeaveZoom(target)
-            }
-            
-            if (this.patternHover) {
-                this.removeBackgroundPattern()
-            }
-        },
-        mouseLeaveZoom(target: HTMLElement) {
-            
-            const img = target.querySelector("img") 
-            if (!img) {
-                return
-            }
-
-            if (this.hoverEvent) {
-                gsap.killTweensOf(this.hoverEvent)
-            }
-
-            this.hoverEvent = gsap.to(img, {
-                scale: 1,
-                boxShadow: "0 0 0px rgba(0,0,0,0)",
-                duration: .8,
-                ease: "power3.out"
-            })
-        },
-        removeBackgroundPattern() {
-            document.body.style.backgroundSize = this.bgSizeCache
-            document.body.style.backgroundImage = this.bgImageCache
-            this.bgSizeCache = ""
-            this.bgImageCache = ""
-        },
+        }
     }
 })
 
@@ -249,13 +176,85 @@ export default defineComponent ({
 
 <style lang="scss">
 @use "./../../../assets/scss/variables.scss";
-.image-block {
+.project-thumbnail-block {
+
+    container-name: project-thumbnail;
+    container-type: inline-size;
     margin: 0;
     
     img {
         width: 100%;
+        outline: 1px solid transparent;
         object-fit: cover;
+        transition: var(--transition-default);
+    }
+}
+.project-thumbnail-block-wrapper {
+    color: var(--contrast-color);
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: var(--transition-default);
+    opacity: 0.9;
+    filter: saturate(.9);
+    
+    &:hover,
+    &:focus {
+        filter: saturate(1.04);
+        opacity: 1;
+        .project-thumbnail-block-title {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+        img {
+            border-radius: 8px;
+            outline: 1px solid var(--bg-color);
+            box-shadow: 0 0 8px rgba(0,0,0,.32);
+        }
     }
 }
 
+.project-thumbnail-block-image-wrapper {
+    margin: 0;
+    display: flex;
+}
+
+.project-thumbnail-block-title {
+    display: flex;
+    margin: 0;
+    padding: 8px;
+    justify-content: space-between;
+    width: 100%;
+    font-family: var(--accent-font);
+    font-size: 16px 0;
+    font-weight: normal;
+    line-height: 1em;
+    align-items: center;
+    transition: var(--transition-default);
+
+    svg {
+        height: 10px;
+    }
+}
+
+.project-thumbnail-tags {
+    display: flex;
+    gap: 8px;
+    flex-flow: row wrap;
+}
+.project-thumbnail-tag {
+    font-size: 12px;
+    padding: 4px 8px;
+    display: inline-block;
+    font-family: var(--accent-font);
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+@container project-thumbnail (min-width: 256px) {
+    .project-thumbnail-block-title {
+        padding: 8px 0;
+        font-size: 24px;
+    }
+}
 </style>

@@ -1,7 +1,7 @@
-@import "./variables.scss";
+@use "./variables.scss";
 
 body {
-    font-family: $defaultFont, sans-serif;
+    font-family: var(--default-font), sans-serif;
     font-size: 16px;
 }
 

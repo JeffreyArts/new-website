@@ -7,7 +7,7 @@ export type Block = {
     id: string | number;
 }
 
-type Position = {
+export type Position = {
     x: number;
     y: number;
     width: number;
@@ -24,7 +24,6 @@ export default class Packer {
     private layoutWidth: number
     private layoutHeight: number
     private blocks: Block[]
-    private output: Position[]
     private order: Order
     private autoResize?: "width" | "height"
     
@@ -35,7 +34,6 @@ export default class Packer {
         this.layoutWidth = layoutWidth
         this.layoutHeight = layoutHeight
         this.blocks = []
-        this.output = []
         this.order = ["position", "parentPosition", "y", "x"]
 
         if (options) {
@@ -44,8 +42,18 @@ export default class Packer {
         } 
     }
 
-    public setOrder(order?: Order | undefined) {
-        const defaultOrder = ["position", "y", "parentPosition","x"]
+        
+    private blocksOverlap = (r1:Position | undefined, r2:Position | undefined) => {
+        if (r1 === undefined || r2 === undefined) {
+            return undefined
+        }
+        return !(r2.x >= r1.x + r1.width ||
+                 r2.x + r2.width <= r1.x ||
+                 r2.y >= r1.y + r1.height ||
+                 r2.y + r2.height <= r1.y)
+    }
+    private setOrder(order?: Order | undefined) {
+        const defaultOrder = ["position", "y","x"]
         
         if (!order) {
             this.order = defaultOrder
@@ -53,7 +61,7 @@ export default class Packer {
         }
 
         // Validate input value
-        const possibleValues = ["position", "y", "parentPosition","x"]
+        const possibleValues = ["position", "y","x"]
 
         order.forEach(value => {
             if (!possibleValues.includes(value)) {
@@ -61,23 +69,7 @@ export default class Packer {
             }
         })
 
-        // if (order.length != 3) {
-        //     this.order = order
-        //     defaultOrder.forEach(value => {
-        //         if (!this.order.includes(value)) {
-        //             this.order.push(value)
-        //         }
-        //     })
-        //     return
-        // }
-
         this.order = order
-    }
-
-    public setDimensions(width: number, height: number) {
-        this.layoutWidth = width
-        this.layoutHeight = height
-        this.updateLayout()
     }
 
     public setBlocks(blocks: Block[]) {
@@ -88,23 +80,23 @@ export default class Packer {
             block.position = index
             return block
         })
-        this.updateLayout()
-    }
-
-    public getOutput(): Position[] {
-        return this.output
+        return this.updateLayout()
     }
 
     public addBlock(block: Block) {
         this.blocks.push(block)
-        this.updateLayout()
+        return this.updateLayout()
     }
 
-    private updateLayout() {
+    // cacheLength is being used in the updateLayout.getNextBlock method
+    // Here it limits the amount of blocks it will run through, improving the performance
+    private updateLayout(cacheLength = 8) {
         const resultPositions = [] as Position[]
         const inputBlocks = [...this.blocks] as Block[]
         let done = false
-
+        if (inputBlocks.length <= 0) {
+            return
+        }
 
         const positionOrder = {
             right: 1,
@@ -204,7 +196,7 @@ export default class Packer {
         }
         
 
-        const getOptions = (targetBlock: Position, resultPositions: Position[], inputBlocks: Block[]) => {
+        const getOptions = (targetBlock: Position, inputBlocks: Block[]) => {
             const optionsRight = fitRight(targetBlock, inputBlocks)
             const optionsLeft = fitLeft(targetBlock, inputBlocks)
             const optionsBottom = fitBottom(targetBlock, inputBlocks)
@@ -229,54 +221,43 @@ export default class Packer {
         })
 
         const getNextBlock = (resultPositions: Position[]) => {
-            const options = _.filter(_.map(resultPositions, resBlock => {
-                const data = getOptions(resBlock, resultPositions, inputBlocks) as Array<Position | undefined>
-                const temp  =  _.chain(data)
-                    .orderBy(
-                        ["y", item => positionOrder[item?.parentPosition || "right"]],
-                        ["asc", "asc"]
-                    )
-                    .without(undefined)
-                    .value()
+            const options = [];
+            let startI = resultPositions.length - cacheLength < 0 ? 0 : resultPositions.length - cacheLength
 
-                return _.map(temp, tempPos => {
-                    const sortedResPos = _.sortBy(resultPositions, "y", "asc")
-                    _.each(sortedResPos, pos => {
-                        if (rectanglesOverlap(tempPos, pos)) {
-                            if (tempPos) {
-                                tempPos.y = pos.y + pos.height
-                            }
+            for (let i = startI; i < resultPositions.length; i++) {
+                const resBlock = resultPositions[i];
+                const data = getOptions(resBlock, inputBlocks).filter(Boolean);
+            
+                // Sort positions by y and by custom parent position order
+                const sortedData = _.orderBy(
+                    data,
+                    [ "y", item => positionOrder[item?.parentPosition || "right"]],
+                    ["asc", "asc"]
+                );
+            
+                // Adjust positions to avoid overlaps
+                for (const tempPos of sortedData) {
+                    for (const pos of resultPositions.sort((a, b) => a.y - b.y)) {
+                        if (this.blocksOverlap(tempPos, pos)) {
+                            tempPos.y = pos.y + pos.height;
                         }
-                    })
-                    return tempPos
-                })
-            }), res => res.length > 0)
-            
+                    }
+                    options.push(tempPos);
+                }
+            }
             
 
-            const nextBlocks = _.chain(_.flatten(options))
-                .orderBy(
-                    orderByOptions.property,
-                    orderByOptions.order
-                )
-                .without(undefined)
+            const nextBlocks = _(options)
+                .flatten()
+                .compact() // Removes undefined values
+                .orderBy(orderByOptions.property, orderByOptions.order)
                 .take(1)
-                .value() as  Array<Position>
+                .value() as Array<Position>
 
             if (nextBlocks.length === 1)  {
                 return nextBlocks[0]
             } 
             return undefined
-        }
-        
-        const rectanglesOverlap = (r1:Position | undefined, r2:Position | undefined) => {
-            if (r1 === undefined || r2 === undefined) {
-                return undefined
-            }
-            return !(r2.x >= r1.x + r1.width ||
-                     r2.x + r2.width <= r1.x ||
-                     r2.y >= r1.y + r1.height ||
-                     r2.y + r2.height <= r1.y)
         }
         
         while (!done) {
@@ -346,8 +327,8 @@ export default class Packer {
             continue
         }
         
-        this.output = resultPositions
         return resultPositions
+
     }
 }
 

@@ -111,19 +111,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "./../assets/scss/variables";
+@use "./../assets/scss/variables";
 .site-breadcrumbs {
     width: 100%;
     display: flex;
     gap: 8px;
     align-items: center;
-    font-family: $accentFont;
+    font-family: var(--accent-font);
     
     a {
         color: var(--contrast-color);
         opacity: 0.64;
         text-decoration: none;
-        transition: $transitionFast;
+        transition: var(--transition-fast);
 
         &:last-child {
             opacity: 0.8;

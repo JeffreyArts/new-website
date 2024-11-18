@@ -1,4 +1,4 @@
-@import './variables.scss';
+@use './variables.scss';
 
 .button {
     background-color: transparent;
@@ -9,7 +9,7 @@
     display: inline-block;
     align-items: center;
     padding: 0 32px;
-    transition: $transitionFast;
+    transition: var(--transition-fast);
     cursor: pointer;
     
     &.small {

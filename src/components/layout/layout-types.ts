@@ -7,6 +7,8 @@ import { ImageBlock } from "./blocks/image.vue"
 import { LineBlock } from "./blocks/line.vue"
 import { NewsletterBlock } from "./blocks/newsletter.vue"
 import { NoteBlock } from "./blocks/note.vue"
+import { ProjectThumbnailBlock } from "./blocks/project-thumbnail.vue"
+import { PieceThumbnailBlock } from "./blocks/piece-thumbnail.vue"
 import { TextBlock } from "./blocks/text.vue"
 import { TitleBlock } from "./blocks/title.vue"
 import { YearBlock } from "./blocks/year.vue"
@@ -19,7 +21,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | TextBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
+export type BlockTypeData = TitleBlock | TextBlock | PieceThumbnailBlock | ProjectThumbnailBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
 
 export type BlockType = {
     size: number
@@ -28,6 +30,7 @@ export type BlockType = {
     ratio?:number
     x?:number
     y?:number
+    loaded?: boolean
     width?:number
     height?:number | string
     data: BlockTypeData

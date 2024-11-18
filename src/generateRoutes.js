@@ -64,9 +64,9 @@ const generateRoutes = async (url, filename) => {
 
 // Call the function with the API URL
 if (apiUrl) {
-    generateRoutes(`${apiUrl}/pages`, "pages")
-    generateRoutes(`${apiUrl}/pieces`, "pieces")
-    generateRoutes(`${apiUrl}/projects`, "projects")
+    generateRoutes(`${apiUrl}/pages?limit=9999`, "pages")
+    generateRoutes(`${apiUrl}/pieces?limit=9999`, "pieces")
+    generateRoutes(`${apiUrl}/projects?limit=9999`, "projects")
 } else {
     console.error("API URL is not defined in the .env file.")
 }

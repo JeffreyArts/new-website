@@ -1,19 +1,27 @@
 <template>
-    <Layout v-if="page.layout" :options="{
-        layoutGap: 40,
-        id: page.id,
-        layoutSize: layoutSize,
-        blocks: page.blocks
-    }"/>
+    <section class="default-template">
+
+        <Breadcrumbs />
+        
+        <Layout v-if="page.layout" :options="{
+            layoutGap: 40,
+            id: page.id,
+            layoutSize: layoutSize,
+            blocks: page.blocks
+        }" ref="layout"/>
+        <FilterComponent v-if="page.filter?.name && showFilters" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
+    </section>
 </template>
 
 
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, ref, nextTick } from "vue"
 import payloadStore from "@/stores/payload"
 import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
+import Breadcrumbs from "@/components/breadcrumbs.vue"
+import FilterComponent from "@/components/filter.vue"
 import Layout from "@/components/layout/index.vue"
 
 const setMeta = (route: RouteLocationNormalizedLoaded) => {
@@ -41,22 +49,32 @@ const setMeta = (route: RouteLocationNormalizedLoaded) => {
 export default defineComponent ({ 
     name: "defaultTemplate",
     components: {
-        Layout 
+        Breadcrumbs,
+        Layout,
+        FilterComponent
     },
     props: [],
     setup() {
         const Payload = payloadStore()
         const route = useRoute()
         const title = route.name as string
-        
 
        
-        return { 
+        return {
             Payload,
             head:  useHead({
                 title,
                 meta: setMeta(route)
             }) 
+        }
+    },
+    computed: {
+        showFilters() {
+            if (typeof this.page.displayFilters === "boolean") {
+                return this.page.displayFilters
+            } else {
+                return true
+            }
         }
     },
     data() {
@@ -134,12 +152,69 @@ export default defineComponent ({
             this.breakpoint = breakPoint
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
             this.layoutSize = this.page.layout[size]
+        },
+        // updateLayout() {
+        //     const refLayout = this.$refs.layout
+        //     // console.log("refLayout", refLayout)
+            
+        //     if (!refLayout) {
+        //         return
+        //     }
+            
+        //     refLayout.fadeInAllBlocks()
+
+        //     // setTimeout(() => {
+        //     //     console.log("updateBlockSizes ")
+        //     refLayout.updateBlockSizes()
+        //     setTimeout(() => {
+        //         refLayout.updateBlockSizes()
+        //     })
+        //     // })
+        // },
+        updateFilter() {
+
+            // const refFilter = this.$refs.filter
+            
+            // if (!refFilter) {
+            //     return
+            // }
+            
+            // refFilter.updateLayout()
+            // refLayout.fadeInAllBlocks()
+
+            // setTimeout(() => {
+            //     console.log("updateBlockSizes ")
+            //     refFilter.updateBlockSizes()
+            //     setTimeout(() => {
+            //         refFilter.updateBlockSizes()
+            //     })
+            // })
         }
     }
 })
 
 </script>
 
-<style lang="scss">
-@import "@/assets/scss/variables.scss";
+<style lang="scss" scoped>
+@use "@/assets/scss/variables.scss";
+
+
+
+.site-breadcrumbs {
+    margin-top: 40px;
+    margin-left: 8px;
+}
+    
+@media screen and (min-width: 640px) {
+    .site-breadcrumbs {
+        margin-left: 16px;
+        margin-top: 60px;
+    }
+}
+
+@media screen and (min-width: 800px) {
+    .site-breadcrumbs {
+        margin-top: 80px;
+    }
+}
 </style>
