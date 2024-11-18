@@ -1,6 +1,6 @@
 <template>
     <div class="project-thumbnail-block">
-        <a class="project-thumbnail-block-wrapper" :href="options.link">
+        <router-link class="project-thumbnail-block-wrapper" :to="options.link">
             <figure class="project-thumbnail-block-image-wrapper">
                 <img :src="src" class="project-thumbnail-block-image" ref="image"/>
             </figure>
@@ -9,7 +9,7 @@
                 <span>{{ options.title }}</span>
                 <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon>
             </h4>
-        </a>
+        </router-link>
 
         <div class="project-thumbnail-tags" v-if="options.categories">
             <span class="project-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">

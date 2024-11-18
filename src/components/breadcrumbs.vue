@@ -12,6 +12,7 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import { startCase } from "lodash"
+import payloadStore from "@/stores/payload"
 import jaoIcon from "./jao-icon.vue"
 import gsap from "gsap"
 
@@ -28,20 +29,24 @@ export default defineComponent({
     data() {
         return {
             path: [] as BreadcrumbItem[],
-            icon: "empty"
+            icon: "empty",
+            animation: undefined as undefined | gsap.core.Tween
         }
     },
     watch: {
-        "$route.path": {
+        "Payload.page.data": {
             handler() {
-                // Add new content
-                setTimeout(() => {
-
-                    this.changePath()
-                    this.changeIcon()
-                })
+                this.changePath()
+                this.changeIcon()
             }, 
             immediate: true
+        }
+    },
+    setup() {
+        const Payload = payloadStore()
+       
+        return {
+            Payload,
         }
     },
     beforeCreate() {
@@ -55,9 +60,31 @@ export default defineComponent({
             if (this.$route.path.startsWith("/project")) { this.icon = "hammer"}
             if (this.$route.path.startsWith("/tool")) { this.icon = "wrench"}
             if (this.$route.path.startsWith("/about")) { this.icon = "user"}
+
+            if (this.Payload.page?.data) {
+                if (typeof this.Payload.page.data.archived === "boolean") {
+                    if (this.Payload.page.data.archived) {
+                        this.icon = "archive"
+                    } else {
+                        this.icon = "hammer"
+                    }
+                }
+
+                if (typeof this.Payload.page.data.project?.archived === "boolean") {
+                        if (this.Payload.page.data.project.archived) {
+                        this.icon = "archive"
+                    } else {
+                        this.icon = "hammer"
+                    }
+                }
+            }
         },
         changePath() {
-            gsap.to(".site-breadcrumbs-route .char, .site-breadcrumbs-chevron", {
+            if (this.animation) {
+                gsap.killTweensOf(this.animation)
+            }
+
+            this.animation = gsap.to(".site-breadcrumbs-route .char, .site-breadcrumbs-chevron", {
                 opacity: 0,
                 scale: 0,
                 duration: .24,
@@ -67,7 +94,6 @@ export default defineComponent({
                 },
                 onComplete: () => {
                     this.updatePath()
-                    
                     this.$nextTick(() => {
                         gsap.fromTo(".site-breadcrumbs-route .char, .site-breadcrumbs-chevron", {
                             opacity: 0,
@@ -90,10 +116,26 @@ export default defineComponent({
             this.path = arr.map((path: string, key:number) => {
                 let name = startCase(path).toLowerCase()
                 name = name.charAt(0).toUpperCase() + name.slice(1)
+
+                if (this.Payload.page?.data && key == 0) {
+
+                    if (typeof this.Payload.page.data.archived === "boolean") {
+                        if (this.Payload.page.data.archived) {
+                           name = "Archive"
+                        }
+                    }
+                    if (typeof this.Payload.page.data.project?.archived === "boolean") {
+                        if (this.Payload.page.data.project.archived) {
+                           name = "Archive"
+                        }
+                    }
+                }
+                
                 if (name === "piece" && key === 0) {
                     name = "archive"
                     link = link.replace("/piece","/archive")
                 }
+
                 link += `/${path}`
                 
                 return {

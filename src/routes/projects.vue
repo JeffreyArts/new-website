@@ -73,6 +73,7 @@ export type ProjectType = {
     id: string
     createdAt?: string
     updatedAt?: string
+    archived?: boolean
     path: string
     title: string
     year: string

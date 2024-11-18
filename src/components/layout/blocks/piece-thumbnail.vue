@@ -1,6 +1,6 @@
 <template>
     <div class="piece-thumbnail-block">
-        <a class="piece-thumbnail-block-wrapper" :href="options.piece.path">
+        <router-link class="piece-thumbnail-block-wrapper" :to="options.piece.path">
             <figure v-if="options.piece.type === 'image'" class="piece-thumbnail-block-image-wrapper">
                 <img :src="src" class="piece-thumbnail-block-image" ref="image"/>
             </figure>
@@ -25,7 +25,7 @@
                 frameborder="0" 
                 ref="iframe"/>
             </section>
-        </a>
+        </router-link>
 
         <footer class="piece-thumbnail-footer">
             <div class="piece-thumbnail-footer-left">

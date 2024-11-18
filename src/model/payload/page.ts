@@ -22,6 +22,7 @@ export interface PageType {
     metaDescription: string;
     metaTags: string[];
     pageTitle: string;
+    archived?: boolean;
     project?: ProjectType;
     filter?: FilterOptions;
     custom?: any; // eslint-disable-line @typescript-eslint/no-explicit-any

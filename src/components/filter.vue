@@ -315,7 +315,8 @@ export default defineComponent({
             map(this.filterOptions.series, serie => { serie.selected = false })
             map(this.filterOptions.categories, category => { category.selected = false  })
             map(this.filterOptions.year, year => { year.selected = false  })
-            this.blocks.length = 0
+            this.blocks = []
+            this.updating = false
             this.firstLoad = false
         },
         updateLayoutSize() {
