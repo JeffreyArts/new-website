@@ -3,23 +3,23 @@
 
         <Breadcrumbs />
         
-        <Layout v-if="page.layout" :options="{
+        <Layout v-if="Payload?.page?.data?.layout" :options="{
             layoutGap: 40,
-            id: page.id,
+            id: Payload.page?.data.id,
             layoutSize: layoutSize,
-            blocks: page.blocks
+            blocks: Payload.page?.data.blocks
         }" ref="layout"/>
-        <FilterComponent v-if="page.filter?.name && showFilters" :options="page.filter" :pageDetails="page" ref="filter" @filterUpdated="updateFilter"/>
+        <FilterComponent v-if="Payload.page?.data?.filter?.name && showFilters" :options="Payload.page?.data?.filter" :pageDetails="Payload.page.data" ref="filter" @filterUpdated="updateFilter"/>
     </section>
-    
+
     <page404 v-if="is404"/>
 </template>
 
 
 <script lang="ts">
 import { defineComponent, ref, nextTick } from "vue"
+import { PageType } from "@/model/payload/page"
 import payloadStore from "@/stores/payload"
-import Page, { PageType } from "@/services/payload/page"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import Breadcrumbs from "@/components/breadcrumbs.vue"
@@ -74,8 +74,8 @@ export default defineComponent ({
     },
     computed: {
         showFilters() {
-            if (typeof this.page.displayFilters === "boolean") {
-                return this.page.displayFilters
+            if (this.Payload?.page?.data?.filter && typeof this.Payload.page.data.filter.displayFilters === "boolean") {
+                return this.Payload.page.data.filter.displayFilters
             } else {
                 return true
             }
@@ -86,7 +86,6 @@ export default defineComponent ({
             breakpoint: "",
             layoutSize: 8,
             is404: false,
-            page: {} as PageType,
         }
     },
     watch: {
@@ -124,8 +123,8 @@ export default defineComponent ({
     methods: {
         async loadPage() {
             try {
-                const res = await Page.getPageByPath(this.$route.path)
-                this.page = res as PageType
+                const res = await this.Payload.getPageByPath(this.$route.path)
+                // this.Payload.page?.data = res as PageType
 
             } catch (error) {
                 console.error("Error loading page:", error)
@@ -134,10 +133,9 @@ export default defineComponent ({
             }
         },
         updateLayoutSize() {
-            if (!this.page.layout) {
+            if (!this.Payload.page?.data.layout) {
                 return
             }
-            // console.log(this.page)
             // Match these with Payload::pages.fields.layout for best DX
             const breakPoints = {
                 xs: 320,
@@ -157,44 +155,10 @@ export default defineComponent ({
             }
             this.breakpoint = breakPoint
             const size = `size_${this.breakpoint}` as "size_xs" | "size_s" | "size_m" | "size_l" | "size_xl" 
-            this.layoutSize = this.page.layout[size]
+            this.layoutSize = this.Payload.page?.data.layout[size]
         },
-        // updateLayout() {
-        //     const refLayout = this.$refs.layout
-        //     // console.log("refLayout", refLayout)
-            
-        //     if (!refLayout) {
-        //         return
-        //     }
-            
-        //     refLayout.fadeInAllBlocks()
-
-        //     // setTimeout(() => {
-        //     //     console.log("updateBlockSizes ")
-        //     refLayout.updateBlockSizes()
-        //     setTimeout(() => {
-        //         refLayout.updateBlockSizes()
-        //     })
-        //     // })
-        // },
         updateFilter() {
-
-            // const refFilter = this.$refs.filter
-            
-            // if (!refFilter) {
-            //     return
-            // }
-            
-            // refFilter.updateLayout()
-            // refLayout.fadeInAllBlocks()
-
-            // setTimeout(() => {
-            //     console.log("updateBlockSizes ")
-            //     refFilter.updateBlockSizes()
-            //     setTimeout(() => {
-            //         refFilter.updateBlockSizes()
-            //     })
-            // })
+            // Do stuff if you'd wish
         }
     }
 })

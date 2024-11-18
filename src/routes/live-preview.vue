@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import payloadStore from "@/stores/payload"
-import { PageType } from "@/services/payload/page"
+import { PageType } from "@/model/payload/page"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
 import Layout from "@/components/layout/index.vue"

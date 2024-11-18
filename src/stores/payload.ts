@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import AuthModel from "@/model/payload/auth"
+import PageModel, { PageType } from "@/model/payload/page"
 import { AxiosRequestConfig, AxiosResponse } from "axios"
 import axios from "axios"
 
@@ -12,7 +13,8 @@ export const Payload = defineStore({
     id: "Payload",
     state: () => ({
         baseUrl: "",
-        auth: undefined as AuthModel | undefined 
+        auth: undefined as AuthModel | undefined,
+        page: undefined as PageModel | undefined 
     }),
     actions: {
         init() {
@@ -26,6 +28,7 @@ export const Payload = defineStore({
 
             this.baseUrl = url
             this.auth = new AuthModel(this.baseUrl)
+            this.page = new PageModel()
         },
         GET(path: string) {
             return this.REST("GET", path)
@@ -95,8 +98,14 @@ export const Payload = defineStore({
             }
     
             return this.auth.register(request)
-            
         },
+        pageData: {} as PageType,
+        async getPageByPath(path: string): Promise<PageType | undefined> {
+            if (!this.page) {
+                return undefined
+            }
+            return this.page?.getPageByPath(path)
+        }
     },
     getters: {
     }

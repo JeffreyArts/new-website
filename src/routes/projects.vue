@@ -58,7 +58,7 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import payloadStore from "@/stores/payload"
-import Page, { PageType } from "@/services/payload/page"
+import Page, { PageType } from "@/model/payload/page"
 import Breadcrumbs from "./../components/breadcrumbs.vue"
 import _ from "lodash"
 import gsap from "gsap"
@@ -197,8 +197,9 @@ export default defineComponent ({
     },
     methods: {
         async loadPage() {
+            const page = new Page()
             try {
-                this.projects = await Page.getProjectsPage() as Array<ProjectType>
+                this.projects = await page.getProjectsPage() as Array<ProjectType>
                 setTimeout(() => {
 
                     gsap.fromTo(".projects-main", {

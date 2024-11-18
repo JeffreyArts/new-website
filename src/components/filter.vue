@@ -60,7 +60,7 @@ import checkBox from "./form/checkbox.vue"
 import { BlockType } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
 import { map, filter, find } from "lodash"
-import { PageType } from "@/services/payload/page"
+import { PageType } from "@/model/payload/page"
 
 type TargetCollections = "projects" | "pieces"
 
