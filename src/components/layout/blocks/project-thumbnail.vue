@@ -1,6 +1,6 @@
 <template>
     <div class="project-thumbnail-block">
-        <router-link class="project-thumbnail-block-wrapper" :to="options.link">
+        <a class="project-thumbnail-block-wrapper" :href="options.link">
             <figure class="project-thumbnail-block-image-wrapper">
                 <img :src="src" class="project-thumbnail-block-image" ref="image"/>
             </figure>
@@ -9,7 +9,7 @@
                 <span>{{ options.title }}</span>
                 <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon>
             </h4>
-        </router-link>
+        </a>
 
         <div class="project-thumbnail-tags" v-if="options.categories">
             <span class="project-thumbnail-tag" v-for="category, index in options.categories" :key="index" @click="goToCategory(category.id)">
@@ -83,7 +83,7 @@ export default defineComponent ({
     },
     computed: {
         ratio() {
-            if (this.options.image?.sizes?.image_sm) {
+            if (this.options.image?.sizes.image_sm) {
                 return this.options.image.sizes.image_sm.width / this.options.image.sizes.image_sm.width
                 // add placeholder image
             }
@@ -91,8 +91,11 @@ export default defineComponent ({
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
+            if (!this.options.image) {
+                return
+            }
 
-            if (this.options.image.mimeType.includes("svg")) {
+            if (this.options.image?.mimeType.includes("svg")) {
                 return src + this.options.image.url
             }
 
@@ -142,6 +145,10 @@ export default defineComponent ({
     methods: {
         updateLayoutChange() {
             const width = this.$el.clientWidth
+            if (!this.options.image) {
+                return this.imageSize = "original"
+            }
+            
             if (width > this.options.image.width) {
                 return this.imageSize = "original"
             }

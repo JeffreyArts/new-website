@@ -4,7 +4,6 @@ import ResetPassword from "@/routes/auth/password-reset.vue"
 import Error404 from "@/routes/error-404.vue"
 import Error301 from "@/routes/error-301.vue"
 import LivePreview from "@/routes/live-preview.vue"
-import ProjectsPage from "@/routes/projects.vue"
 import pageRoutes from "./pages.json"
 import projectRoutes from "./projects.json"
 import pieceRoutes from "./pieces.json"
@@ -31,12 +30,7 @@ const routes = [
         path: "/reset-password",
         name: "Reset password",
         component: ResetPassword,
-    },
-    {
-        path: "/projects",
-        name: "Projects",
-        component: ProjectsPage,
-    },
+    }
 ]
 
 const addRoutes = (route:  {

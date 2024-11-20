@@ -14,6 +14,7 @@
         <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"                  :data-blocktype="data.blockType"/>
         <PieceThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'pieceThumbnail'"      :data-blocktype="data.blockType"/>
         <ProjectThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectThumbnail'"  :data-blocktype="data.blockType"/>
+        <ProjectArticleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectArticle'"  :data-blocktype="data.blockType"/>
     </div>
 </template>
 
@@ -31,6 +32,7 @@ import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
 import PieceThumbnailBlock from "./piece-thumbnail.vue"
 import ProjectThumbnailBlock from "./project-thumbnail.vue"
+import ProjectArticleBlock from "./project-article.vue"
 import YoutubeBlock from "./youtube.vue"
 import YearBlock from "./year.vue"
 import { BlockType } from "@/components/layout/layout-types"
@@ -48,6 +50,7 @@ export default defineComponent ({
         NoteBlock,
         PieceThumbnailBlock,
         ProjectThumbnailBlock,
+        ProjectArticleBlock,
         TextBlock,
         TitleBlock,
         YearBlock,
