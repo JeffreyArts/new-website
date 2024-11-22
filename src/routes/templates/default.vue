@@ -74,8 +74,9 @@ export default defineComponent ({
     },
     computed: {
         showFilters() {
-            if (this.Payload?.page?.data?.filter && typeof this.Payload.page.data.filter.displayFilters === "boolean") {
-                return this.Payload.page.data.filter.displayFilters
+            console.log(this.Payload.page)
+            if (this.Payload?.page?.data?.filter && typeof this.Payload.page.data.displayFilters === "boolean") {
+                return this.Payload.page.data.displayFilters
             } else {
                 return true
             }

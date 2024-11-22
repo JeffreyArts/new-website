@@ -24,6 +24,7 @@ export interface PageType {
     pageTitle: string;
     archived?: boolean;
     project?: ProjectType;
+    displayFilters?: boolean;
     filter?: FilterOptions;
     custom?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
