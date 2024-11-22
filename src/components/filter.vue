@@ -393,7 +393,7 @@ export default defineComponent({
                     query.project = this.pageDetails.id
                 }
             }
-            console.log(this.options.name)
+
             if (this.options.name.toLowerCase() === "archive") {
                 query.archived = true
             }

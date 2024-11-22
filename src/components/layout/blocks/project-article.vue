@@ -181,7 +181,6 @@ export default defineComponent ({
             
             if (title && svg) {
                 svg.classList.add("project-article-block-year")
-                console.log("title", title)
                 title.appendChild(svg)
             }
         },

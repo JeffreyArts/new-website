@@ -69,7 +69,6 @@ export default defineComponent ({
     },
     methods: {
         onLayoutChange(){
-            console.log("On layout Change")
             if (this.$el) {
                 this.maxHeight = this.$el.clientWidth
             }
