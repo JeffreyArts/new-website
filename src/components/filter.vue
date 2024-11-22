@@ -185,7 +185,6 @@ export default defineComponent({
             handler() {
                 this.reset()
                 this.setDefaults()
-                this.updateResults()
             },
             deep: true
         },
