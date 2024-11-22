@@ -7,7 +7,7 @@
             layoutGap: 40,
             id: Payload.page?.data.id,
             layoutSize: layoutSize,
-            blocks: Payload.page?.data.blocks
+            blocks: pageBlocks
         }" ref="layout"/>
         <FilterComponent v-if="Payload.page?.data?.filter?.name && showFilters" :options="Payload.page?.data?.filter" :pageDetails="Payload.page.data" ref="filter" @filterUpdated="updateFilter"/>
     </section>
@@ -26,6 +26,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue"
 import FilterComponent from "@/components/filter.vue"
 import Layout from "@/components/layout/index.vue"
 import page404 from "@/routes/error-404.vue"
+import { BlockType } from "@/components/layout/layout-types"
 
 const setMeta = (route: RouteLocationNormalizedLoaded) => {
     const meta = [] as Array<{
@@ -79,16 +80,27 @@ export default defineComponent ({
             } else {
                 return true
             }
-        }
+        },
     },
     data() {
         return {
             breakpoint: "",
             layoutSize: 8,
             is404: false,
+            pageBlocks: [] as Array<BlockType>
         }
     },
     watch: {
+        "Payload.page.data.blocks": {
+            handler() {
+                this.pageBlocks = []
+                this.$nextTick(() => {
+                    if (this.Payload.page) {
+                        this.pageBlocks = this.Payload.page.data.blocks
+                    }
+                })
+            }
+        },
         "$route.path": {
             async handler() {
                 // Remove old content

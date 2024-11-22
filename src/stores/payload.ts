@@ -99,7 +99,6 @@ export const Payload = defineStore({
     
             return this.auth.register(request)
         },
-        pageData: {} as PageType,
         async getPageByPath(path: string): Promise<PageType | undefined> {
             if (!this.page) {
                 return undefined
