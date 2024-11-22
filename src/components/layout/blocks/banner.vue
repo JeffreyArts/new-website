@@ -213,6 +213,10 @@ export default defineComponent ({
     height: 100%;
     display: block;
     background-color: #000;
+    
+    img {
+        display: block;
+    }
 }
 
 .banner-block-title {

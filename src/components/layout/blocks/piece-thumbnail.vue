@@ -7,7 +7,7 @@
 
             <section v-if="options.piece.type === 'youtube'" class="piece-thumbnail-block-youtube-wrapper">
                 <iframe 
-                :style="`aspect-ratio: ${ratio};`"
+                :style="`aspect-ratio: ${ratio}; pointer-events:none;`"
                 :src="src"
                 frameborder="0" 
                 ref="youtube"/>
