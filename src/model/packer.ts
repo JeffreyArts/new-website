@@ -72,7 +72,7 @@ export default class Packer {
         this.order = order
     }
 
-    public setBlocks(blocks: Block[]) {
+    public setBlocks(blocks: Block[], cacheLength = 8) {
         this.blocks = _.map(blocks, (block, index) => {
             if (!block.id) {
                 block.id = index
@@ -80,12 +80,13 @@ export default class Packer {
             block.position = index
             return block
         })
-        return this.updateLayout()
+
+        return this.updateLayout(cacheLength)
     }
 
-    public addBlock(block: Block) {
+    public addBlock(block: Block, cacheLength = 8) {
         this.blocks.push(block)
-        return this.updateLayout()
+        return this.updateLayout(cacheLength)
     }
 
     // cacheLength is being used in the updateLayout.getNextBlock method

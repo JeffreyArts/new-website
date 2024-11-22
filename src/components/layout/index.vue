@@ -287,7 +287,7 @@ export default defineComponent ({
                 if (!this.packerLayout) {
                     this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
                 }
-                const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks)
+                const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks, 12)
                 
                 if (sortedBlocks) {
                     _.each(sortedBlocks, (posBlock) => {
