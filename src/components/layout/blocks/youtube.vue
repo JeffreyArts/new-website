@@ -38,6 +38,7 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
+        this.setRatio()
 
         setTimeout(()=> {
             this.$emit("blockLoaded")
