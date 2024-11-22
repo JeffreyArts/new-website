@@ -243,7 +243,6 @@ export default defineComponent ({
                             duration,
                             delay,
                             onComplete: () => {
-                                this.updateBlockSizes()
                                 resolve()
                             }
                         })
@@ -251,6 +250,7 @@ export default defineComponent ({
                 })
 
                 Promise.all(promises).then(() => {
+                    this.updateBlockSizes()
                     // Reset newBlocks array
                     this.newBlocks = []
                     resolve(true)
