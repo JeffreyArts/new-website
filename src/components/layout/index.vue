@@ -10,19 +10,19 @@
             :layout-gap="options.layoutGap">
             
             <Block v-for="block,key in blocks" :key="key" @blockLoaded="blockLoaded(block)"
-            :id="`block-${block.id}`"
-            :size="block.size" 
-            :data="block.data"
-            :class="{
-                '__isLoaded' : block.loaded,
-                '__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'
-            }"
-            :style="{
-                width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
-                height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
-                top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
-                left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
-            }">
+                :id="`block-${block.id}`"
+                :size="block.size" 
+                :data="block.data"
+                :class="{
+                    '__isLoaded' : block.loaded,
+                    '__isFixed' : typeof block.y != 'undefined' && typeof block.x != 'undefined'
+                }"
+                :style="{
+                    width:   typeof block.width === 'number' ? `${block.width}px`: block.width,
+                    height:  typeof block.height === 'number' ? `${block.height}px` : block.height,
+                    top:  typeof block.y === 'number' ? `${block.y}px` : block.y,
+                    left:  typeof block.x === 'number' ? `${block.x}px` : block.x,
+                }">
             </Block>
         </section>
     </div>
@@ -187,7 +187,6 @@ export default defineComponent ({
                     })
                 })) 
             })
-            
             return await Promise.all(result)
         },
         async blockLoaded(block: BlockType) {
@@ -339,19 +338,6 @@ export default defineComponent ({
     .block {
         opacity: 0;
     }
-
-    // > div:after {
-    //     content: attr(id);
-    //     font-size: 12px;
-    //     font-family: var(--accent-font);
-    //     position: absolute;
-    //     top: 8px;
-    //     background-color: var(--contrast-color);
-    //     color: var(--bg-color);
-    //     padding: 4px 8px;
-    //     left: 12px;
-    //     opacity: 0.7;
-    // }
 }
 
 
