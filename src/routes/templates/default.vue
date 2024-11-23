@@ -18,7 +18,9 @@
 
 <script lang="ts">
 import { defineComponent, ref, nextTick } from "vue"
-import { PageType } from "@/model/payload/page"
+import gsap from "gsap"
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+
 import payloadStore from "@/stores/payload"
 import { useHead }  from "@unhead/vue"
 import { useRoute, RouteLocationNormalizedLoaded } from "vue-router"
@@ -115,6 +117,13 @@ export default defineComponent ({
                         meta: setMeta(this.$route)
                     })
                 }
+
+                // Scroll to top
+                gsap.to(window, {
+                    scrollTo: { y: 0 }, // Scroll to the top of the page
+                    duration: .4,      // Duration of the animation in seconds
+                    ease: "sine.out"  // Use the bounce easing for the effect
+                });
                 
                 // Add new content
                 this.updateLayoutSize()
@@ -126,6 +135,7 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
+        gsap.registerPlugin(ScrollToPlugin);
 
         window.addEventListener("resize", this.updateLayoutSize)
     },
