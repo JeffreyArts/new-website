@@ -201,6 +201,12 @@ export default defineComponent ({
                 this.processing = true
                 
                 await this.updateBlockSizes()
+                
+                // Double resize is required
+                this.$nextTick(async () => {
+                    await this.updateBlockSizes()
+                })
+
                 if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("layoutChange"))
                 }
@@ -250,7 +256,7 @@ export default defineComponent ({
                 })
 
                 Promise.all(promises).then(() => {
-                    this.updateBlockSizes()
+                    // this.updateBlockSizes()
                     // Reset newBlocks array
                     this.newBlocks = []
                     resolve(true)
