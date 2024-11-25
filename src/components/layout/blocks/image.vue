@@ -81,7 +81,7 @@ export default defineComponent ({
             }
 
             if (this.imageSize === "original") {
-                src += `/media/${this.options.image.filename}`
+                src += `/api/media/file/${this.options.image.filename}`
             } else {
                 src += this.options.image.sizes[this.imageSize].url
             }
@@ -180,7 +180,7 @@ export default defineComponent ({
 
 
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
-            src += `/media/${this.options.image.filename}`
+            src += `/api/media/file/${this.options.image.filename}`
             document.body.style.backgroundImage = `url(${src})`
             document.body.style.backgroundSize = "auto"
         },

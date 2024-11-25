@@ -109,7 +109,7 @@ export default defineComponent ({
             }
 
             if (this.imageSize === "original") {
-                src += `/media/${this.options.project?.thumbnail.filename}`
+                src += `/api/media/file/${this.options.project?.thumbnail.filename}`
             } else {
                 src += this.options.project?.thumbnail.sizes[this.imageSize].url
             }

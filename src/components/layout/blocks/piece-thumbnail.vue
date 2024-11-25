@@ -179,7 +179,7 @@ export default defineComponent ({
                 }
 
                 if (this.imageSize === "original") {
-                    src += `/media/${imageProperties.filename}`
+                    src += `/api/media/file/${imageProperties.filename}`
                 } else {
                     src += imageProperties.sizes[this.imageSize].url
                 }
