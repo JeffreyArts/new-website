@@ -146,7 +146,7 @@ const Filter = {
     getCategories() {
         return new Promise<FilterOptionValue[]> (async (resolve, reject) => {
             try {
-                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/categories/?depth=1&limit=128`)
+                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/categories?depth=1&limit=128`)
                 if (req.data?.docs.length < 1) {
                     throw new Error("Can not retrieve categories")
                 }
@@ -170,7 +170,7 @@ const Filter = {
     getSeries() {
         return new Promise<FilterOptionValue[]> (async (resolve, reject) => {
             try {
-                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/series/?depth=1&limit=128`)
+                const req = await axios.get(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/series?depth=1&limit=128`)
                 if (req.data?.docs.length < 1) {
                     throw new Error("Can not retrieve series")
                 }
