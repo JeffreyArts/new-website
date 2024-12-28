@@ -33,6 +33,6 @@ export type BlockType = {
     y?:number
     loaded?: boolean
     width?:number
-    height?:number | string
+    height?:number
     data: BlockTypeData
 }
