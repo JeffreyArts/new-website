@@ -78,40 +78,40 @@ export class PayloadPageModel {
         }
     }
 
-    async getProjectsPage(): Promise<Array<ProjectType>> {
-        const collection = "project-positions";
+    // async getProjectsPage(): Promise<Array<ProjectType>> {
+    //     const collection = "project-positions";
 
-        try {
-            const response = await axios.get(`${this.endpoint}/${collection}?sort=position&depth=2`);
-            const docs = response.data?.docs;
+    //     try {
+    //         const response = await axios.get(`${this.endpoint}/${collection}?sort=position&depth=2`);
+    //         const docs = response.data?.docs;
 
-            if (!docs || docs.length < 1) {
-                throw new Error("Cannot retrieve projects");
-            }
+    //         if (!docs || docs.length < 1) {
+    //             throw new Error("Cannot retrieve projects");
+    //         }
 
-            return docs.map((doc: any) => {
-                const project = doc.project;
+    //         return docs.map((doc: any) => {
+    //             const project = doc.project;
 
-                // Format year range
-                if (parseInt(project.year.from) === parseInt(project.year.to)) {
-                    project.year = project.year.from.toString();
-                } else if (isNaN(Number(project.year.to))) {
-                    project.year = `${project.year.from} - present`;
-                } else {
-                    project.year = `${project.year.from} - ${project.year.to}`;
-                }
+    //             // Format year range
+    //             if (parseInt(project.year.from) === parseInt(project.year.to)) {
+    //                 project.year = project.year.from.toString();
+    //             } else if (isNaN(Number(project.year.to))) {
+    //                 project.year = `${project.year.from} - present`;
+    //             } else {
+    //                 project.year = `${project.year.from} - ${project.year.to}`;
+    //             }
 
-                // Prefix path
-                if (!project.path.startsWith("/project")) {
-                    project.path = `/project${project.path}`;
-                }
+    //             // Prefix path
+    //             if (!project.path.startsWith("/project")) {
+    //                 project.path = `/project${project.path}`;
+    //             }
 
-                return _.pick(project, ["id", "title", "year", "thumbnail", "path", "description"]);
-            }) as Array<ProjectType>;
-        } catch (error) {
-            throw new Error(error);
-        }
-    }
+    //             return _.pick(project, ["id", "title", "year", "thumbnail", "path", "description"]);
+    //         }) as Array<ProjectType>;
+    //     } catch (error) {
+    //         throw new Error(error);
+    //     }
+    // }
 
     convertBlockToBlockType(block: { [key: string]: unknown }): BlockType {
         if (!block.size || !block.id) {

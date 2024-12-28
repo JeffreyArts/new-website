@@ -10,10 +10,11 @@ export const socketIO = defineStore({
         URL: import.meta.env.VITE_PAYLOAD_SOCKET_ENDPOINT
     }),
     actions: {
-       
         emit(event:string, data: object | string) {
             if (!this.socket) {
-                console.error("Init socket first")
+                // Init socket and try again
+                this.init()
+                this.emit(event, data)
                 return
             }
             
