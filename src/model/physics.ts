@@ -33,6 +33,12 @@ export default class Physics {
         const domEl = document.createElement("canvas")
         domEl.id = "physics"
         
+        // Parse the query string
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has("dev")) {
+            domEl.style.display = "none"
+        }
+
         document.body.appendChild(domEl)
         // Set-up the physics enginge
         this.engine = Matter.Engine.create(),
