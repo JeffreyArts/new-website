@@ -161,6 +161,7 @@ export default class Physics {
         const id = el.id.toString()
         // console.log("Add block:",block)
         if (this.blocks.find(b => b.id.toString() === id)) {
+            this.updateBlock(id, this.extractDimensionsFromElement(el))
             return
         }
         const {x,y,width,height} = this.extractDimensionsFromElement(el)
@@ -199,16 +200,18 @@ export default class Physics {
             bodyB: pointLeft,
             pointA: { x: -width/2, y: -height/2 },
             length: 1,
-            stiffness: 0.032,
+            // stiffness: 0.032,
+            stiffness: .2,
             label: "constraintLeft"
         })
-
+        
         const constraintRight = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointRight,
             pointA: { x: +width/2, y: -height/2 },
             length: 1,
-            stiffness: 0.032,
+            // stiffness: 0.032,
+            stiffness: 0.2,
             label: "constraintRight"
         })
             
@@ -246,6 +249,7 @@ export default class Physics {
 
                     Matter.Composite.remove(block.composite, constraint)
                 })
+                Matter.World.remove(this.engine.world,block.composite)
                 Matter.Composite.clear(block.composite, true)
             }
         })
