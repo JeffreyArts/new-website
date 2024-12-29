@@ -1,9 +1,7 @@
 import Physics from "@/model/physics"
 import Matter from "matter-js"
+import { Router } from 'vue-router';
 import { BlockType } from "./../components/layout/layout-types"
-
-
-
 
 interface MutationRecordWithAttributes extends MutationRecord {
     attributeName: string;
@@ -12,18 +10,38 @@ interface MutationRecordWithAttributes extends MutationRecord {
 const PhysicsService = {
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
-    start: () => {
+    observer: undefined as MutationObserver | undefined,
+    start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
         document.getElementById("physics")?.remove()
-
-
+        
+        
         if (PhysicsService.physics) {
             return 
         }
         
+        // Listen to router events
+        router.beforeEach((to, from, next) => {
+            PhysicsService.observer?.disconnect()
+            // Clean up blocks before navigating
+            PhysicsService.physics.clearBlocks()
+            
+            next();
+        });
+        
+        router.afterEach(() => {
+            // Recreate blocks after navigation
+            PhysicsService.observeChanges();
+        });
+        
+        
         PhysicsService.physics = new Physics()
-
+        PhysicsService.observeChanges()
+        PhysicsService.animationFrame()
+        
         window.addEventListener("scroll", PhysicsService.onScroll)
+    },
+    observeChanges: () => {
 
         // Select the target node to observe
         const targetNode = document.body;
@@ -85,14 +103,10 @@ const PhysicsService = {
         };
 
         // Create an instance of MutationObserver with the callback
-        const observer = new MutationObserver(callback);
+        PhysicsService.observer = new MutationObserver(callback);
 
         // Start observing the target node with the specified configuration
-        observer.observe(targetNode, config);
-
-        PhysicsService.animationFrame()
-        // To stop observing later, use:
-        // observer.disconnect();
+        PhysicsService.observer.observe(targetNode, config);
     },
     onScroll: () => {
         if (PhysicsService.physics?.blocks.length === 0) {
@@ -121,9 +135,9 @@ const PhysicsService = {
                 
                 const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
                 // console.log(body.position.y, block.y)
-                
-                block.domEl.style.transform = `translate(${body.position.x -  (block.x - window.scrollX) - block.width/2}px, ${body.position.y - (block.y - window.scrollY) - block.height/2}px) rotate(${body.angle}rad)`
-
+                if (body) {
+                    block.domEl.style.transform = `translate(${body.position.x -  (block.x - window.scrollX) - block.width/2}px, ${body.position.y - (block.y - window.scrollY) - block.height/2}px) rotate(${body.angle}rad)`   
+                }
             })
         }
         window.requestAnimationFrame(PhysicsService.animationFrame)

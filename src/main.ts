@@ -3,6 +3,7 @@ import { createApp } from "vue"
 import router from "./routes"
 import { createPinia } from "pinia"
 import { VueHeadMixin } from "@unhead/vue"
+import Physics from "./services/physics"
 
 // Locale i18n packages
 import { createI18n } from "vue-i18n"
@@ -51,6 +52,8 @@ const i18n = createI18n({
 
 const app = createApp(App)
 app.config.globalProperties.$text  = $text
+
+Physics.start(router)
 
 app.use(router)
     .use(i18n)

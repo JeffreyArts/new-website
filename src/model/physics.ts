@@ -227,6 +227,32 @@ export default class Physics {
         })
         Matter.World.add(this.engine.world, blockComposite)
     }
+    clearBlocks() {
+        this.blocks.forEach(block => {
+            if (block.composite) {
+                const bodies = block.composite.bodies
+
+                bodies.forEach(body => {
+                    if (!block.composite) {
+                        return
+                    }
+
+                    Matter.Composite.remove(block.composite, body)
+                })
+
+                const constraints = block.composite.constraints
+                constraints.forEach(constraint => {
+                    if (!block.composite) {
+                        return
+                    }
+
+                    Matter.Composite.remove(block.composite, constraint)
+                })
+                Matter.Composite.clear(block.composite, true)
+            }
+        })
+        this.blocks = []
+    }
 
 }
 

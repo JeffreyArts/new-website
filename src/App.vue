@@ -11,12 +11,10 @@ import LocalDB from "@/stores/localdb"
 import Locale from "@/stores/locale"
 import gsap from "gsap"
 // import { useRouter } from "vue-router"
-import Physics from "./services/physics"
 
 const payload = Payload()
 const locale = Locale()
 const localDB = LocalDB()
-Physics.start()
 
 if (typeof window !== "undefined") {
     locale.select(localStorage.getItem("i18n_locale") || locale.current)
