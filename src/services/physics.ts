@@ -13,6 +13,14 @@ const PhysicsService = {
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
     start: () => {
+        // Fix for multiple appenditions of the canvas cause of Vite hot reload
+        document.getElementById("physics")?.remove()
+
+        
+        if (PhysicsService.physics) {
+            return 
+        }
+        
         PhysicsService.physics = new Physics()
 
         window.addEventListener("scroll", PhysicsService.onScroll)
@@ -85,7 +93,6 @@ const PhysicsService = {
         PhysicsService.animationFrame()
         // To stop observing later, use:
         // observer.disconnect();
-
     },
     onScroll: () => {
         if (PhysicsService.physics?.blocks.length === 0) {
@@ -109,11 +116,11 @@ const PhysicsService = {
 
                 if (!block.composite || !block.domEl) {
                     return
-                }
+                } 
                 
                 
                 const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-                console.log(body.position.y, block.y)
+                // console.log(body.position.y, block.y)
                 
                 block.domEl.style.transform = `translate(${body.position.x -  (block.x - window.scrollX) - block.width/2}px, ${body.position.y - (block.y - window.scrollY) - block.height/2}px) rotate(${body.angle}rad)`
 

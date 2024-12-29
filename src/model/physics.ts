@@ -41,7 +41,8 @@ export default class Physics {
             options: {
                 width: this.layoutWidth,
                 height: this.layoutHeight,
-                wireframes: true
+                wireframes: false,
+                showCollisions: true
             }
         })
 
@@ -86,23 +87,47 @@ export default class Physics {
         const width = block.width
         const height = block.height
 
-        const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{ label: "body" })
-        const pointLeft = Matter.Bodies.circle(x , y, 1, { isStatic: true, label: "pointLeft" })
-        const pointRight = Matter.Bodies.circle(x + width, y, 1, { isStatic: true, label: "pointRight" })
+        const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{
+            label: "body",
+            mass: width * height / 1000,
+            collisionFilter: {
+                group: 1,
+                category: 1
+            }
+        })
+
+        const pointLeft = Matter.Bodies.circle(x , y, 4, { 
+            isStatic: true,
+            label: "pointLeft",
+            collisionFilter: {
+                group: 0,
+                category: 0
+            }
+        })
+        const pointRight = Matter.Bodies.circle(x + width, y, 4, {
+            isStatic: true,
+            label: "pointRight",
+            collisionFilter: {
+                group: 0,
+                category: 0
+            }
+        })
+
+        
         const constraintLeft = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointLeft,
             pointA: { x: -width/2, y: -height/2 },
-            length: 4,
-            stiffness: 0.04
+            length: 1,
+            stiffness: 0.032
         })
 
         const constraintRight = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointRight,
             pointA: { x: +width/2, y: -height/2 },
-            length: 4,
-            stiffness: 0.04
+            length: 1,
+            stiffness: 0.032
         })
             
         Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
