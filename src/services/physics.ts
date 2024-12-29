@@ -22,9 +22,9 @@ const PhysicsService = {
         
         // Listen to router events
         router.beforeEach((to, from, next) => {
-            PhysicsService.observer?.disconnect()
             // Clean up blocks before navigating
-            PhysicsService.physics.clearBlocks()
+            PhysicsService.observer?.disconnect()
+            PhysicsService.physics?.clearBlocks()
             
             next();
         });
@@ -79,25 +79,7 @@ const PhysicsService = {
                         return
                     }
 
-                    const dimension = element.getBoundingClientRect();
-                    const style = window.getComputedStyle(element)
-                    const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
-                    const y = (dimension.y + window.scrollY) + parseInt(style.paddingTop)
-                    const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
-                    const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
-                    const id = element.id.toString()
-
-                    if (PhysicsService.physics?.blocks.find(b => b.id.toString() === id)) {
-                        return
-                    }
-                    PhysicsService.physics?.addBlock({
-                        x,
-                        y,
-                        width,
-                        height,
-                        id,
-                        domEl: element,
-                    })
+                    PhysicsService.physics?.addBlock(element)
                 })
             }, 500)
         };

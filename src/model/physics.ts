@@ -84,25 +84,25 @@ export default class Physics {
                 if (block.id == "block-66d0c8016c0f5e30f361dda2") {
                     console.log("Resize", block.x, block.domEl.getBoundingClientRect().x, block.id)
                 }
-                const dimension = block.domEl.getBoundingClientRect();
-                const style = window.getComputedStyle(block.domEl)
-                const x = (dimension.x ) + parseInt(style.paddingLeft)
-                const y = (dimension.y + window.scrollY) + parseInt(style.paddingTop)
-                const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
-                const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
+                const dimensions = this.extractDimensionsFromElement(block.domEl)
 
-                this.updateBlock(block.id, {
-                    x,
-                    y,
-                    width,
-                    height
-                })
+                this.updateBlock(block.id, {...dimensions})
                 // Matter.Body.setPosition(body, )
             })
 
 
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)
-        }, 200)
+        }, 1000)
+    }
+
+    extractDimensionsFromElement(el: HTMLElement) {
+        const dimension = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el)
+        const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
+        const y = (dimension.y + window.scrollY) + parseInt(style.paddingTop)
+        const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
+        const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
+        return { x, y, width, height }
     }
 
     updateBlock(id: string, options: {x?: number, y?: number, width?: number, height?: number}) {
@@ -156,23 +156,16 @@ export default class Physics {
         }
     }
 
-    addBlock(block: PhysicsBlock) {
+    addBlock(el: HTMLElement) {
         
+        const id = el.id.toString()
         // console.log("Add block:",block)
-        if (this.blocks.find(b => b.id.toString() === block.id)) {
+        if (this.blocks.find(b => b.id.toString() === id)) {
             return
         }
-        
-        if (!block.width || !block.height) {
-            return
-        }
+        const {x,y,width,height} = this.extractDimensionsFromElement(el)
         
         const blockComposite = Matter.Composite.create()
-
-        const x = block.x 
-        const y = block.y 
-        const width = block.width
-        const height = block.height
 
         const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{
             label: "body",
@@ -222,7 +215,12 @@ export default class Physics {
         Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
 
         this.blocks.push({
-            ...block,
+            x,
+            y,
+            width,
+            height,
+            id,
+            domEl: el,
             composite: blockComposite
         })
         Matter.World.add(this.engine.world, blockComposite)
