@@ -16,7 +16,7 @@ const PhysicsService = {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
         document.getElementById("physics")?.remove()
 
-        
+
         if (PhysicsService.physics) {
             return 
         }
@@ -50,8 +50,8 @@ const PhysicsService = {
                         "iframe",
                         "pieceThumbnail",
                         "projectThumbnail",
-
                     ]
+
                     if (!blockType) {
                         return
                     }
