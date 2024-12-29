@@ -63,8 +63,8 @@ const PhysicsService = {
 
                     const dimension = element.getBoundingClientRect();
                     const style = window.getComputedStyle(element)
-                    const x = dimension.x + parseInt(style.paddingLeft)
-                    const y = dimension.y + parseInt(style.paddingTop)
+                    const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
+                    const y = (dimension.y + window.scrollY) + parseInt(style.paddingTop)
                     const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
                     const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
                     const id = element.id.toString()
