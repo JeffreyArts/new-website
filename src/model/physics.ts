@@ -79,24 +79,20 @@ export default class Physics {
 
             this.layoutWidth = window.innerWidth
             this.layoutHeight = window.innerHeight
+
             this.blocks.forEach(block => {
                 if (!block.composite || !block.domEl) {
                     return
                 }
                 
-                const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-                const pointLeft = block.composite.bodies.find(body => body.label === "pointLeft") as Matter.Body
-                const pointRight = block.composite.bodies.find(body => body.label === "pointRight") as Matter.Body
-                if (block.id == "block-66d0c8016c0f5e30f361dda2") {
-                    console.log("Resize", block.x, block.domEl.getBoundingClientRect().x, block.id)
-                }
                 const dimensions = this.extractDimensionsFromElement(block.domEl)
 
-                this.updateBlock(block.id, {...dimensions})
-                // Matter.Body.setPosition(body, )
+                if (dimensions)  {
+                    this.updateBlock(block.id, {...dimensions})
+                }
             })
 
-
+            // @ts-ignore
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)
         }, 1000)
     }
@@ -105,15 +101,15 @@ export default class Physics {
         const dimension = el.getBoundingClientRect();
         const style = window.getComputedStyle(el)
 
-            if (el.parentElement) {
-                const offsetY = el.parentElement.offsetTop + el.offsetTop
-                const y = offsetY + parseInt(style.paddingTop)
+        if (el.parentElement) {
+            const offsetY = el.parentElement.offsetTop + el.offsetTop
+            const y = offsetY + parseInt(style.paddingTop)
 
-                const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
-                const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
-                const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
-                return { x, y, width, height }
-            }
+            const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
+            const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
+            const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
+            return { x, y, width, height }
+        }
             
         return undefined
     }
@@ -170,9 +166,8 @@ export default class Physics {
     }
 
     addBlock(el: HTMLElement) {
-        
         const id = el.id.toString()
-        // console.log("Add block:",block)
+        
         if (this.blocks.find(b => b.id.toString() === id)) {
             const newDimensions = this.extractDimensionsFromElement(el)
             if (newDimensions) {
@@ -236,9 +231,8 @@ export default class Physics {
             stiffness: 0.2,
             label: "constraintRight"
         })
-            
-        Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
 
+        // Add block to the list
         this.blocks.push({
             x,
             y,
@@ -248,6 +242,11 @@ export default class Physics {
             domEl: el,
             composite: blockComposite
         })
+            
+        // Compose the composite
+        Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
+        
+        // Add the composite to the world
         Matter.World.add(this.engine.world, blockComposite)
     }
     clearBlocks() {
