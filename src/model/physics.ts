@@ -176,15 +176,14 @@ export default class Physics {
             return
         }
 
+        // Get the dimensions 
         const newDimensions = this.extractDimensionsFromElement(el)
         if (!newDimensions) {
             return
         }
-
         const {x,y,width,height} = newDimensions
-        
-        const blockComposite = Matter.Composite.create()
 
+        // Create body block
         const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{
             label: "body",
             mass: width * height / 1000,
@@ -194,6 +193,7 @@ export default class Physics {
             }
         })
 
+        // Create anchor points
         const pointLeft = Matter.Bodies.circle(x , y, 4, { 
             isStatic: true,
             label: "pointLeft",
@@ -211,7 +211,7 @@ export default class Physics {
             }
         })
 
-        
+        // Create contstaints between body and anchor points
         const constraintLeft = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointLeft,
@@ -232,6 +232,14 @@ export default class Physics {
             label: "constraintRight"
         })
 
+        
+        // Compose the composite
+        const blockComposite = Matter.Composite.create()
+        Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
+
+        // Add the composite to the world
+        Matter.World.add(this.engine.world, blockComposite)
+
         // Add block to the list
         this.blocks.push({
             x,
@@ -242,12 +250,6 @@ export default class Physics {
             domEl: el,
             composite: blockComposite
         })
-            
-        // Compose the composite
-        Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
-        
-        // Add the composite to the world
-        Matter.World.add(this.engine.world, blockComposite)
     }
     clearBlocks() {
         this.blocks.forEach(block => {
