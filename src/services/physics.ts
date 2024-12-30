@@ -1,16 +1,12 @@
 import Physics from "@/model/physics"
 import Matter from "matter-js"
 import { Router } from 'vue-router';
-import { BlockType } from "./../components/layout/layout-types"
-
-interface MutationRecordWithAttributes extends MutationRecord {
-    attributeName: string;
-}
 
 const PhysicsService = {
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
     observer: undefined as MutationObserver | undefined,
+    prevScrollY: 0,
     start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
         document.getElementById("physics")?.remove()
@@ -23,88 +19,82 @@ const PhysicsService = {
         // Listen to router events
         router.beforeEach((to, from, next) => {
             // Clean up blocks before navigating
-            PhysicsService.observer?.disconnect()
             PhysicsService.physics?.clearBlocks()
             
             next();
-        });
-        
-        router.afterEach(() => {
-            // Recreate blocks after navigation
-            PhysicsService.observeChanges();
-        });
-        
+        });        
         
         PhysicsService.physics = new Physics()
-        PhysicsService.observeChanges()
         PhysicsService.animationFrame()
         
+    
+        window.addEventListener("layoutHasChanged", PhysicsService.updateBlocks)
         window.addEventListener("scroll", PhysicsService.onScroll)
     },
-    observeChanges: () => {
+    updateBlocks: () => {
+        clearTimeout(PhysicsService.timeout)
+        PhysicsService.timeout = setTimeout(() => {
+            console.log("Doe dingen nu echt")
+            document.body.querySelectorAll(".block").forEach((element: Element) => {
+                const el = element as HTMLElement
+                const blockType = element.querySelector("[data-blocktype]")?.getAttribute("data-blocktype")
 
-        // Select the target node to observe
-        const targetNode = document.body;
+                const blockTypeList = [
+                    "projectArticle",
+                    "image",
+                    "code",
+                    "title",
+                    "iframe",
+                    "pieceThumbnail",
+                    "projectThumbnail",
+                ]
 
-        // Options for the observer (which mutations to observe)
-        const config = {
-            childList: true, // Observe additions or removals of child nodes
-            attributes: false, // Observe attribute changes
-            subtree: true, // Observe the entire subtree (descendants)
-        };
+                if (!blockType) {
+                    return
+                }
 
-        // Callback function to execute when mutations are observed
-        const callback: MutationCallback = (mutationsList: MutationRecord[], observer: MutationObserver) => {
-            clearTimeout(PhysicsService.timeout)
-            PhysicsService.timeout = setTimeout(() => {
-                document.body.querySelectorAll(".block").forEach((element: HTMLElement) => {
-                    const blockType = element.querySelector("[data-blocktype]")?.getAttribute("data-blocktype")
+                // Do not add blocks that are not in the list
+                if (!blockTypeList.includes(blockType)) {
+                    return
+                }
 
-                    const blockTypeList = [
-                        "projectArticle",
-                        "image",
-                        "code",
-                        "title",
-                        "iframe",
-                        "pieceThumbnail",
-                        "projectThumbnail",
-                    ]
-
-                    if (!blockType) {
-                        return
-                    }
-
-                    // Do not add blocks that are not in the list
-                    if (!blockTypeList.includes(blockType)) {
-                        return
-                    }
-
-                    PhysicsService.physics?.addBlock(element)
-                })
-            }, 500)
-        };
-
-        // Create an instance of MutationObserver with the callback
-        PhysicsService.observer = new MutationObserver(callback);
-
-        // Start observing the target node with the specified configuration
-        PhysicsService.observer.observe(targetNode, config);
+                PhysicsService.physics?.addBlock(el)
+            })
+        }, 500)
     },
     onScroll: () => {
         if (PhysicsService.physics?.blocks.length === 0) {
             return
         }
+        let scrollOffset = 0
+
+        if (PhysicsService.prevScrollY !== 0) {
+            scrollOffset = PhysicsService.prevScrollY - window.scrollY
+        }
+        
 
         PhysicsService.physics?.blocks.forEach(block => {
             if (block.composite) {
-                const pointLeft = block.composite.bodies.find(body => body.label === "pointLeft") as Matter.Body
-                const pointRight = block.composite.bodies.find(body => body.label === "pointRight") as Matter.Body
+                const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
+                const pointTopLeft = block.composite.bodies.find(body => body.label === "pointTopLeft") as Matter.Body
+                const pointTopRight = block.composite.bodies.find(body => body.label === "pointTopRight") as Matter.Body
+                const pointBottomLeft = block.composite.bodies.find(body => body.label === "pointBottomLeft") as Matter.Body
+                const pointBottomRight = block.composite.bodies.find(body => body.label === "pointBottomRight") as Matter.Body
                 
-                Matter.Body.setPosition(pointLeft, { x: pointLeft.position.x, y: block.y - window.scrollY });
-                Matter.Body.setPosition(pointRight, { x: pointRight.position.x, y: block.y - window.scrollY });
+                if (scrollOffset > 128) {
+                    Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 + 128 });
+                } else if (scrollOffset < -128) {
+                    Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
+                }
+                Matter.Body.setPosition(pointTopLeft, { x: block.x, y: block.y - window.scrollY });
+                Matter.Body.setPosition(pointTopRight, { x: block.x + block.width, y: block.y - window.scrollY });
+                Matter.Body.setPosition(pointBottomLeft, { x: pointBottomLeft.position.x, y: block.y - window.scrollY + block.height });
+                Matter.Body.setPosition(pointBottomRight, { x: pointBottomRight.position.x, y: block.y - window.scrollY + block.height });
 
             }
         })
+
+        PhysicsService.prevScrollY = window.scrollY
     },
     animationFrame: () => {
         if (PhysicsService.physics) {
@@ -116,9 +106,12 @@ const PhysicsService = {
                 
                 
                 const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-                // console.log(body.position.y, block.y)
                 if (body) {
-                    block.domEl.style.transform = `translate(${body.position.x -  (block.x - window.scrollX) - block.width/2}px, ${body.position.y - (block.y - window.scrollY) - block.height/2}px) rotate(${body.angle}rad)`   
+                    // Decrease decimals for improved performance (in Firefox)
+                    const x = Math.round((body.position.x -  (block.x - window.scrollX) - block.width/2) * 100) / 100
+                    const y = Math.round((body.position.y - (block.y - window.scrollY) - block.height/2) * 100) / 100
+                    const angle = Math.round((body.angle) * 1000) / 1000
+                    block.domEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`   
                 }
             })
         }

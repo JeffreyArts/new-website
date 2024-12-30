@@ -210,6 +210,7 @@ export default defineComponent ({
                 // Double resize is required, 400 miliseconds is the same amount of how long a single block takes to fade-in
                 setTimeout(async () => {
                     await this.updateBlockSizes()
+                    window.dispatchEvent(new CustomEvent("layoutHasChanged"))
                 }, 400)
                 
                 this.fadeInBlocks().then(async() => {

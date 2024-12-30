@@ -94,7 +94,7 @@ export default class Physics {
 
             // @ts-ignore
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)
-        }, 1000)
+        },50)
     }
 
     extractDimensionsFromElement(el: HTMLElement) {
@@ -134,17 +134,10 @@ export default class Physics {
         }
 
         if (block.composite) {
-            const pointLeft = block.composite.bodies.find(body => body.label === "pointLeft") as Matter.Body
-            const pointRight = block.composite.bodies.find(body => body.label === "pointRight") as Matter.Body
-
-            // Replace old body with new body
-            const constraintLeft = block.composite.constraints.find(constraint => constraint.label === "constraintLeft") as Matter.Constraint
-            const constraintRight = block.composite.constraints.find(constraint => constraint.label === "constraintRight") as Matter.Constraint
-            
             const oldBody = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-            const newBody = Matter.Bodies.rectangle(block.x + block.width/2, block.y + block.height/2, block.width, block.height, {
+            const newBody = Matter.Bodies.rectangle(block.x + block.width/2, block.y + block.height/2 - window.scrollY, block.width, block.height, {
                 label: "body",
-                mass: block.width * block.height / 10000,
+                mass: block.width * block.height / 1000,
                 collisionFilter: {
                     group: 1,
                     category: 1
@@ -153,15 +146,43 @@ export default class Physics {
 
             Matter.Composite.remove(block.composite, oldBody);
             Matter.Composite.add(block.composite, newBody);
-
-            constraintLeft.bodyA = newBody
-            constraintRight.bodyA = newBody
-            constraintLeft.pointA =  { x: -block.width/2, y: -block.height/2 }
-            constraintRight.pointA = { x: block.width/2, y: -block.height/2 },
             
+            // Update constraints
+            block.composite.constraints.forEach(constraint => { 
+                constraint.bodyA = newBody
+                switch (constraint.label) {
+                    case "constraintTopLeft":
+                        constraint.pointA = { x: -block.width/2, y: -block.height/2 }
+                        break
+                    case "constraintTopRight":
+                        constraint.pointA = { x: block.width/2, y: -block.height/2 }
+                        break
+                    case "constraintBottomLeft":
+                        constraint.pointA = { x: -block.width/2, y: block.height/2 }
+                        break
+                    case "constraintBottomRight":
+                        constraint.pointA = { x: block.width/2, y: block.height/2 }
+                        break
+                }
+            })
 
-            Matter.Body.setPosition(pointLeft, { x: block.x, y: block.y })
-            Matter.Body.setPosition(pointRight, { x: block.x + block.width, y: block.y })
+            // Update anchor points
+            block.composite.bodies.forEach(body => {
+                switch (body.label) {
+                    case "pointTopLeft":
+                        Matter.Body.setPosition(body, { x: block.x, y: block.y - window.scrollY })
+                        break
+                    case "pointTopRight":
+                        Matter.Body.setPosition(body, { x: block.x + block.width, y: block.y - window.scrollY })
+                        break
+                    case "pointBottomLeft":
+                        Matter.Body.setPosition(body, { x: block.x, y: block.y - window.scrollY + block.height })
+                        break
+                    case "pointBottomRight":
+                        Matter.Body.setPosition(body, { x: block.x + block.width, y: block.y - window.scrollY + block.height })
+                        break
+                }
+            })
         }
     }
 
@@ -184,27 +205,43 @@ export default class Physics {
         const {x,y,width,height} = newDimensions
 
         // Create body block
-        const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{
+        const body = Matter.Bodies.rectangle(x + width/2, y+height/2 - window.scrollY, width, height,{
             label: "body",
             mass: width * height / 1000,
-            collisionFilter: {
-                group: 1,
-                category: 1
-            }
-        })
-
-        // Create anchor points
-        const pointLeft = Matter.Bodies.circle(x , y, 4, { 
-            isStatic: true,
-            label: "pointLeft",
             collisionFilter: {
                 group: 0,
                 category: 0
             }
         })
-        const pointRight = Matter.Bodies.circle(x + width, y, 4, {
+
+        // Create anchor points
+        const pointTopLeft = Matter.Bodies.circle(x , y - window.scrollY, 4, { 
             isStatic: true,
-            label: "pointRight",
+            label: "pointTopLeft",
+            collisionFilter: {
+                group: 0,
+                category: 0
+            }
+        })
+        const pointBottomLeft = Matter.Bodies.circle(x , y + height - window.scrollY, 4, { 
+            isStatic: true,
+            label: "pointBottomLeft",
+            collisionFilter: {
+                group: 0,
+                category: 0
+            }
+        })
+        const pointTopRight = Matter.Bodies.circle(x + width, y - window.scrollY, 4, {
+            isStatic: true,
+            label: "pointTopRight",
+            collisionFilter: {
+                group: 0,
+                category: 0
+            }
+        })
+        const pointBottomRight = Matter.Bodies.circle(x + width, y + height - window.scrollY, 4, {
+            isStatic: true,
+            label: "pointBottomRight",
             collisionFilter: {
                 group: 0,
                 category: 0
@@ -212,30 +249,48 @@ export default class Physics {
         })
 
         // Create contstaints between body and anchor points
-        const constraintLeft = Matter.Constraint.create({
+        const constraintTopLeft = Matter.Constraint.create({
             bodyA: body,
-            bodyB: pointLeft,
+            bodyB: pointTopLeft,
             pointA: { x: -width/2, y: -height/2 },
             length: 1,
-            // stiffness: 0.032,
-            stiffness: .2,
-            label: "constraintLeft"
+            stiffness: 0.032,
+            // stiffness: .2,
+            label: "constraintTopLeft"
+        })
+        const constraintBottomLeft = Matter.Constraint.create({
+            bodyA: body,
+            bodyB: pointBottomLeft,
+            pointA: { x: -width/2, y: +height/2 },
+            length: 1,
+            stiffness: 0.032,
+            // stiffness: 0.2,
+            label: "constraintBottomLeft_REMOVED"
         })
         
-        const constraintRight = Matter.Constraint.create({
+        const constraintTopRight = Matter.Constraint.create({
             bodyA: body,
-            bodyB: pointRight,
+            bodyB: pointTopRight,
             pointA: { x: +width/2, y: -height/2 },
             length: 1,
-            // stiffness: 0.032,
-            stiffness: 0.2,
-            label: "constraintRight"
+            stiffness: 0.032,
+            // stiffness: 0.2,
+            label: "constraintTopRight"
+        })
+        const constraintBottomRight = Matter.Constraint.create({
+            bodyA: body,
+            bodyB: pointBottomRight,
+            pointA: { x: +width/2, y: +height/2 },
+            length: 1,
+            stiffness: 0.032,
+            // stiffness: 0.2,
+            label: "constraintBottomRight_REMOVED"
         })
 
         
         // Compose the composite
         const blockComposite = Matter.Composite.create()
-        Matter.Composite.add(blockComposite, [body, pointLeft, pointRight, constraintLeft, constraintRight])
+        Matter.Composite.add(blockComposite, [body, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight, constraintBottomLeft, constraintBottomRight])
 
         // Add the composite to the world
         Matter.World.add(this.engine.world, blockComposite)
