@@ -106,10 +106,7 @@ export default class Physics {
         const style = window.getComputedStyle(el)
 
             if (el.parentElement) {
-                const parentOffsetY = el.parentElement.offsetTop
-                const offsetTop = el.offsetTop
-                const offsetY = parentOffsetY + offsetTop //+ window.scrollY
-                console.log(el.id, )
+                const offsetY = el.parentElement.offsetTop + el.offsetTop
                 const y = offsetY + parseInt(style.paddingTop)
 
                 const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
@@ -188,7 +185,7 @@ export default class Physics {
         if (!newDimensions) {
             return
         }
-        
+
         const {x,y,width,height} = newDimensions
         
         const blockComposite = Matter.Composite.create()
