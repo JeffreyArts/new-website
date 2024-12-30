@@ -104,11 +104,21 @@ export default class Physics {
     extractDimensionsFromElement(el: HTMLElement) {
         const dimension = el.getBoundingClientRect();
         const style = window.getComputedStyle(el)
-        const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
-        const y = (dimension.y + window.scrollY) + parseInt(style.paddingTop)
-        const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
-        const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
-        return { x, y, width, height }
+
+            if (el.parentElement) {
+                const parentOffsetY = el.parentElement.offsetTop
+                const offsetTop = el.offsetTop
+                const offsetY = parentOffsetY + offsetTop //+ window.scrollY
+                console.log(el.id, )
+                const y = offsetY + parseInt(style.paddingTop)
+
+                const x = (dimension.x + window.scrollX) + parseInt(style.paddingLeft)
+                const width = dimension.width - parseInt(style.paddingLeft) - parseInt(style.paddingRight)
+                const height = dimension.height - parseInt(style.paddingTop) - parseInt(style.paddingBottom)
+                return { x, y, width, height }
+            }
+            
+        return undefined
     }
 
     updateBlock(id: string, options: {x?: number, y?: number, width?: number, height?: number}) {
@@ -167,16 +177,25 @@ export default class Physics {
         const id = el.id.toString()
         // console.log("Add block:",block)
         if (this.blocks.find(b => b.id.toString() === id)) {
-            this.updateBlock(id, this.extractDimensionsFromElement(el))
+            const newDimensions = this.extractDimensionsFromElement(el)
+            if (newDimensions) {
+                this.updateBlock(id, newDimensions)
+            }
             return
         }
-        const {x,y,width,height} = this.extractDimensionsFromElement(el)
+
+        const newDimensions = this.extractDimensionsFromElement(el)
+        if (!newDimensions) {
+            return
+        }
+        
+        const {x,y,width,height} = newDimensions
         
         const blockComposite = Matter.Composite.create()
 
         const body = Matter.Bodies.rectangle(x + width/2, y+height/2, width, height,{
             label: "body",
-            mass: width * height / 10000,
+            mass: width * height / 1000,
             collisionFilter: {
                 group: 1,
                 category: 1
