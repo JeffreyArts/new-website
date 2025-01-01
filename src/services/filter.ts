@@ -43,9 +43,9 @@ interface FilterOptionValue {
     value: string | number
     label: string | number
     available: boolean 
-    archived: boolean 
-    disabled: boolean
     selected: boolean
+    archived?: boolean 
+    disabled?: boolean
 }
 
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import _ from "lodash";
 
 import { BlockType } from "@/components/layout/layout-types";
-import { ProjectType } from "@/routes/projects.vue";
+import ProjectType  from "./../../types/project";
 import { FilterOptions } from "@/components/filter.vue";
 
 export interface PageType {
@@ -74,7 +74,7 @@ export class PayloadPageModel {
 
             return page;
         } catch (error) {
-            throw new Error(error);
+            throw error
         }
     }
 

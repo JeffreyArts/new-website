@@ -34,7 +34,6 @@ const PhysicsService = {
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)
         PhysicsService.timeout = setTimeout(() => {
-            console.log("Doe dingen nu echt")
             document.body.querySelectorAll(".block").forEach((element: Element) => {
                 const el = element as HTMLElement
                 const blockType = element.querySelector("[data-blocktype]")?.getAttribute("data-blocktype")

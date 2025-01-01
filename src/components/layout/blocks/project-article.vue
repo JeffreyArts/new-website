@@ -20,53 +20,11 @@ import SlateText, { SlateNode } from "@/components/slate-text.vue"
 import * as jaoIcons from "jao-icons"
 import jaoIcon from "@/components/jao-icon.vue"
 import DynamicImage from "@/components/dynamic-image.vue"
+import ProjectType  from "./../../../types/project"
 
 export type ProjectArticleBlock = {
     blockType: "projectArticle"
-    project: { 
-        path: string
-        archived: boolean
-        categories: Array<{
-            id: string
-            title: string
-        }>
-        series: Array<{
-            id: string
-            title: string
-        }>
-        year: {
-            from: string | number
-            to: string | number
-        }
-        title: string
-        description: SlateNode[]
-        thumbnail: {
-            width: number
-            height: number
-            filename: string
-            mimeType: string
-            title: string
-            description: string
-            url: string
-            sizes: {
-                image_sm: {
-                    width: number
-                    height: number
-                    url: string
-                }
-                image_md: {
-                    width: number
-                    height: number
-                    url: string
-                }
-                image_lg: {
-                    width: number
-                    height: number
-                    url: string
-                }
-            }
-        }
-    }
+    project: ProjectType
 }
 
 export default defineComponent ({

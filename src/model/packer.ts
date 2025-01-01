@@ -106,7 +106,7 @@ export default class Packer {
         }
 
         const orderByOptions = {
-            property: [] as Array<PropertyName | ListIterator<Position | undefined, unknown> | PartialShallow<Position | undefined>>,
+            property: [] as Array<PropertyName | ListIterator<Position, unknown> | PartialShallow<Position>>,
             order: [] as Array<"asc" | "desc">
         }
 
@@ -212,12 +212,12 @@ export default class Packer {
 
         this.order.forEach(opt => {
             if (opt === "parentPosition") {
-                orderByOptions.property.push((item:Position | undefined) => positionOrder[item?.parentPosition || "right"])
+                orderByOptions.property.push((item: Position) => positionOrder[item.parentPosition || "right"])
                 orderByOptions.order.push("asc")
                 return
             }
 
-            orderByOptions.property.push(opt)
+            orderByOptions.property.push(opt as PropertyName)
             orderByOptions.order.push("asc")
         })
 

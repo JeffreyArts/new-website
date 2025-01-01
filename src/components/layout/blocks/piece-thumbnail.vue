@@ -117,7 +117,7 @@ export type PieceThumbnailBlock = {
             title: string
         }>
         youtubeProperties: YoutubeProperties,
-        imageProperties: ImageProperties,
+        imageProperties: {image: ImageProperties},
         codeProperties: CodeProperties,
         iframeProperties: IframeProperties
     }
@@ -153,13 +153,8 @@ export default defineComponent ({
     },
     computed: {
         ratio() {
-            if (this.options.piece.type === "image") {
-                let imageProperties = this.options.piece.imageProperties.image ? this.options.piece.imageProperties.image : this.options.piece.imageProperties
-
-                if (imageProperties?.sizes?.image_sm) {
-                    return imageProperties.sizes.image_sm.width / imageProperties.sizes.image_sm.width
-                }
-            } else if (this.options.piece.type === "youtube") {
+           
+            if (this.options.piece.type === "youtube") {
                 const ratio = this.options.piece.youtubeProperties.ratio.split("/")
                 return Number(ratio[0])/Number(ratio[1])
             } else if (this.options.piece.type === "iframe") {
@@ -172,9 +167,9 @@ export default defineComponent ({
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
 
             if (this.options.piece.type === "image") {
-                let imageProperties = this.options.piece.imageProperties.image ? this.options.piece.imageProperties.image : this.options.piece.imageProperties
+                let imageProperties = this.options.piece.imageProperties.image //? this.options.piece.imageProperties.image : this.options.piece.imageProperties
 
-                if (imageProperties.mimeType.includes("svg")) {
+                if (imageProperties.mimeType.toString().includes("svg")) {
                     return src + imageProperties.url
                 }
 
