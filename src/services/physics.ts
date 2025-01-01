@@ -86,6 +86,8 @@ const PhysicsService = {
                 } else if (scrollOffset < -128) {
                     Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
                 }
+
+                // Update points
                 Matter.Body.setPosition(pointTopLeft, { x: block.x, y: block.y - window.scrollY });
                 Matter.Body.setPosition(pointTopRight, { x: block.x + block.width, y: block.y - window.scrollY });
                 Matter.Body.setPosition(pointBottomLeft, { x: pointBottomLeft.position.x, y: block.y - window.scrollY + block.height });
@@ -108,8 +110,8 @@ const PhysicsService = {
                 const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
                 if (body) {
                     // Decrease decimals for improved performance (in Firefox)
-                    const x = Math.round((body.position.x -  (block.x - window.scrollX) - block.width/2) * 100) / 100
-                    const y = Math.round((body.position.y - (block.y - window.scrollY) - block.height/2) * 100) / 100
+                    const x = Math.round((body.position.x -  (block.x - window.scrollX) - block.width/2) * 1000) / 1000
+                    const y = Math.round((body.position.y - (block.y - window.scrollY) - block.height/2) * 1000) / 1000
                     const angle = Math.round((body.angle) * 1000) / 1000
                     block.domEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`   
                 }

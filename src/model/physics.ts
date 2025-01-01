@@ -253,38 +253,34 @@ export default class Physics {
             bodyA: body,
             bodyB: pointTopLeft,
             pointA: { x: -width/2, y: -height/2 },
-            length: 1,
+            length: 0,
             stiffness: 0.032,
-            // stiffness: .2,
             label: "constraintTopLeft"
         })
         const constraintBottomLeft = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointBottomLeft,
             pointA: { x: -width/2, y: +height/2 },
-            length: 1,
+            length: 0,
             stiffness: 0.032,
-            // stiffness: 0.2,
-            label: "constraintBottomLeft_REMOVED"
+            label: "constraintBottomLeft"
         })
         
         const constraintTopRight = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointTopRight,
             pointA: { x: +width/2, y: -height/2 },
-            length: 1,
+            length: 0,
             stiffness: 0.032,
-            // stiffness: 0.2,
             label: "constraintTopRight"
         })
         const constraintBottomRight = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointBottomRight,
             pointA: { x: +width/2, y: +height/2 },
-            length: 1,
+            length: 0,
             stiffness: 0.032,
-            // stiffness: 0.2,
-            label: "constraintBottomRight_REMOVED"
+            label: "constraintBottomRight"
         })
 
         
