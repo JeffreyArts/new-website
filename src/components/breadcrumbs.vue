@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
-import { startCase } from "lodash"
+import { sentenceCase } from "change-case"
 import payloadStore from "@/stores/payload"
 import jaoIcon from "./jao-icon.vue"
 import gsap from "gsap"
@@ -113,39 +113,52 @@ export default defineComponent({
         updatePath() {
             const arr = this.$route.path.slice(1).split("/")
             let link = ""
+            let archived = false
             this.path = arr.map((path: string, key:number) => {
-                let name = startCase(path).toLowerCase()
+                let name = sentenceCase(path).toLowerCase()
                 name = name.charAt(0).toUpperCase() + name.slice(1)
 
-                if (this.Payload.page?.data && key == 0) {
 
+                if (this.Payload.page?.data && key == 0) {
                     if (typeof this.Payload.page.data.archived === "boolean") {
                         if (this.Payload.page.data.archived) {
-                           name = "Archive"
+                            archived = true
+                            name = "Archive"
                         }
                     }
                     if (typeof this.Payload.page.data.project?.archived === "boolean") {
                         if (this.Payload.page.data.project.archived) {
-                           name = "Archive"
+                            archived = true
+                            name = "Archive"
                         }
                     }
                 }
                 
-                if (name === "piece" && key === 0) {
-                    name = "archive"
+                if (name === "Piece" && key === 0) {
+                    name = "Archive"
                     link = link.replace("/piece","/archive")
                 }
 
                 link += `/${path}`
                 
-                return {
+                const res = {
                     id: `${key}`,
-                    link: link === '/project' ? '/projects' : link,
-                    name: name.split("").map(c => {
+                    link: link,
+                    name: name.split("").map((c: string) => {
                         if (c === " ") { c = "&nbsp;" }
                         return `<span class="char">${c}</span>`
                     }),
                 }
+
+                if (link === '/project') {
+                    res.link = "/projects"
+                }
+
+                if (archived && key === 0) {
+                    res.link = "/archive"
+                }
+
+                return res
             })
         }
     }
