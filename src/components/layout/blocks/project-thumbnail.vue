@@ -262,6 +262,10 @@ export default defineComponent ({
     .project-thumbnail-block-title {
         padding: 8px 0;
         font-size: 24px;
+
+        span {
+            padding-right: 24px;
+        }
     }
 }
 </style>
