@@ -261,6 +261,7 @@ export default defineComponent ({
                     // this.updateBlockSizes()
                     // Reset newBlocks array
                     this.newBlocks = []
+                    dispatchEvent(new Event('layoutLoaded'))
                     resolve(true)
                 })
             })

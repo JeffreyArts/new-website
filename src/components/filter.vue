@@ -193,8 +193,13 @@ export default defineComponent({
     },
     mounted() {
         this.updateLayoutSize()
-        window.addEventListener("resize", this.onResizeEvent)
+        
         document.addEventListener("scroll", this.onScrollEvent)
+        window.addEventListener("resize", this.onResizeEvent)
+        window.addEventListener("layoutLoaded", () => {
+            // This custom event is fired when all blocks have been loaded
+            setTimeout(this.onScrollEvent)
+        }) 
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
@@ -220,9 +225,10 @@ export default defineComponent({
             const layout = layoutWrapper.querySelector(".layout")
             // console.log(layout.classList)
             // Skip loading new items when the current ones have not yet been processed
-            if (!layout || !layout.classList.contains('__isLoaded')) {
+            if (!layout || layout.classList.contains('__isProcessing')) {
                 return
             }
+            
             const blocks = layout.querySelectorAll(".block")
             let lastBlock = {
                 block: undefined,
