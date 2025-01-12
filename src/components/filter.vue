@@ -119,6 +119,12 @@ export default defineComponent({
         }
     },
     watch: {
+        "$route.path": {
+            handler() {
+                // Set page back to default when route has changed
+                this.page = 1
+            }
+        },
         "options.name": {
             handler(Name: string) {
                 if (!Name) {
