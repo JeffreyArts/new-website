@@ -11,11 +11,13 @@ export class UserModel {
     public id: number
     public email: string
     public username: string
+    public defaultPassword?: string
 
     constructor(properties: {
         id?: number,
         username?: string,
         email?: string,
+        defaultPassword?: string,
         self?: boolean,
     }) {
         if (!properties) {
@@ -26,11 +28,13 @@ export class UserModel {
         this.username = properties.username || ""
         this.email = properties.email || ""
         this.self = (typeof properties.self !== "undefined") ? properties.self : false
+        if (properties.defaultPassword) {
+            this.defaultPassword = properties.defaultPassword
+        }
         
         if (this.self && (!this.id && !this.email && !this.username)) {
             this.loadFromLocalStorage()
         }
-
     }
 
     loadFromLocalStorage() {
@@ -42,7 +46,9 @@ export class UserModel {
         this.id = self.id
         this.username = self.username
         this.email = self.email
-
+        if (self.defaultPassword) {
+            this.defaultPassword = self.defaultPassword
+        }
         return self
     }
 }
