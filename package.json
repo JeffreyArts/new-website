@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@payloadcms/live-preview": "^0.2.2",
-    "@unhead/vue": "^1.10.2",
+    "@unhead/vue": "^1.11.18",
     "axios": "^1.7.4",
     "dayjs": "^1.11.12",
     "dotenv": "^16.4.5",
