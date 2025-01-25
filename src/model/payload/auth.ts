@@ -8,46 +8,43 @@ export class AuthModel {
     self: UserModel | undefined
     baseUrl: string
     refreshTimeout: number |  NodeJS.Timeout
-    refreshToken: string
+    // refreshToken: string
     authToken: string
     axios: AxiosInstance
 
-    constructor (baseUrl: string) {
+    constructor  (baseUrl: string) {
         this.baseUrl = baseUrl
         this.refreshTimeout = 0
-        this.refreshToken = localStorage.getItem("refreshToken") || ""
         this.authToken = localStorage.getItem("authToken") || ""
+
         this.axios = axios.create({
             withCredentials: true,
             baseURL: baseUrl
         })
-
-        let userAccount = undefined
-
-        if (localStorage.getItem("userAccount")) {
-            userAccount = JSON.parse(localStorage.getItem("userAccount") || "")
-            if (!userAccount) {
-                userAccount = undefined
-            }    
+        
+        if (!this.validateAuthToken(this.authToken)) {
+            localStorage.removeItem("authToken")
         }
 
-        if (!userAccount) {
-            this.createAnonymousAccount().then(() => {
-                userAccount = JSON.parse(localStorage.getItem("userAccount") || "")
-                if (!userAccount) {
-                    userAccount = undefined
-                }
-                
-                if (this.self) {
-                    this.self = new UserModel({...userAccount, self: true })
-                }
-            })
+        if (localStorage.getItem("self")) {
+            this.self = new UserModel({ ...JSON.parse(localStorage.getItem("self") || ""), self: true })
+        }
+
+        if (!this.self) {
+            this.createAnonymousAccount()
         } else {
-            if (localStorage.getItem("userAccount")) {
-                this.self = new UserModel({ ...userAccount, self: true })
+            if (this.self.defaultPassword) {
+                this.authenticate({ email: this.self.email, password: this.self.defaultPassword })
+            } else {
+                this.axios(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`).then((response) => {
+                    if (response.data.user) {
+                        this.self = new UserModel({ ...response.data.user, self: true })
+                    } else {
+                        this.self = undefined
+                    }
+                })
             }
         }
-        
     }
     
     
@@ -68,20 +65,47 @@ export class AuthModel {
         return false
     }
     
+    // refreshAuthToken() : Promise<void | AxiosResponse> {
+    //     if (!this.axios)  {
+    //         throw new Error("Missing axios instance")
+    //     }
+
+    //     return this.axios.post(`${this.baseUrl}/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/refresh-token`, {
+    //         credentials: "include"
+    //     }).then(res => {
+    //         // localStorage.setItem("authToken", res.data.refreshedToken)
+    //         // Call validateAuthToken to refresh the token based on the expiration time
+    //         this.validateAuthToken(res.data.refreshedToken)
+    //     });
+    // }
+
+
     authenticate(options: { email:string, password: string }) : Promise<AxiosResponse> {
         return new Promise(async (resolve, reject) => {
             try {
+                if (!this.axios) {
+                    throw new Error("Missing axios instance")
+                }
+                
                 const credentials = { email: options.email, password: options.password }
                 const response = await this.axios.post(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/login`, credentials)                
-                
+    
                 if (response.data) {
-                    localStorage.setItem("userAccount", JSON.stringify(_.pick(response.data.user, ["id", "username", "email"])))
-                    localStorage.setItem("authToken", response.data.token)
+                    const properties = ["id", "username", "email"]
+
+                    // Check if user is anonymous
+                    if (localStorage.getItem("self")) {
+                        const userAccount = JSON.parse(localStorage.getItem("self") || "")
+                        if (userAccount.defaultPassword) {
+                            properties.push("defaultPassword")
+                        }
+                    }
+                    const self = _.pick(response.data.user, properties)
+                    localStorage.setItem("self", JSON.stringify(self))
+                    localStorage.setItem("authToken", JSON.stringify(response.data.token))
                     
                     this.self = new UserModel({
-                        id: response.data.user.id,
-                        username: response.data.user.username,
-                        email:response.data.user.email,
+                        ...self,
                         self: true
                     })
                     return resolve(response)
@@ -115,13 +139,14 @@ export class AuthModel {
 
                 const response = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}`, request)
                 const self = _.pick(response.data.doc, ["id", "username", "email", "defaultPassword"])
-                localStorage.setItem("userAccount", JSON.stringify(self))
+                localStorage.setItem("self", JSON.stringify(self))
                 
                 this.self = new UserModel({
                     ...self,
                     self: true
                 })
-                
+                const authResponse = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`, {method: "GET"})
+                localStorage.setItem("authToken", JSON.stringify(authResponse.data.token))
                 resolve(response)
                 
             } catch (err: unknown | AxiosError) {
@@ -229,7 +254,7 @@ export class AuthModel {
     
     logout() {
         localStorage.removeItem("authToken")
-        localStorage.removeItem("userAccount")
+        localStorage.removeItem("self")
         this.self = undefined
     }
 }

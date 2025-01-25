@@ -11,6 +11,7 @@ export interface PageType {
     updatedAt: string;
     title: string;
     path: string;
+    collectionType: string;
     layout?: {
         size_xs: number;
         size_s: number;
@@ -70,7 +71,10 @@ export class PayloadPageModel {
                 delete page.filter.show;
             }
             
-            this.data = page
+            this.data = {
+                ...page,
+                collectionType: collection
+            }
 
             return page;
         } catch (error) {

@@ -24,7 +24,7 @@
     "events": "^3.3.0",
     "gsap": "^3.12.5",
     "highlight.js": "^11.10.0",
-    "jao-icons": "^1.2.4",
+    "jao-icons": "^1.2.15",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "marked": "^14.0.0",

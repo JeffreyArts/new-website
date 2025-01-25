@@ -17,6 +17,7 @@ export const Payload = defineStore({
         page: undefined as PageModel | undefined 
     }),
     actions: {
+        axios: axios.create(),
         init() {
 
             // Set url
@@ -29,6 +30,46 @@ export const Payload = defineStore({
             this.baseUrl = url
             this.auth = new AuthModel(this.baseUrl)
             this.page = new PageModel()
+            this.axios = axios.create({
+                withCredentials: true,
+                baseURL: this.baseUrl
+            })
+
+            
+
+            this.axios.interceptors.response.use((response) => {
+                  // Pass through successful responses
+                  return response;
+                },
+                async (error) => {
+                  const originalRequest = error.config;
+              
+                  // Check if error is 403 and it hasn't been retried yet
+                  if (error.response && error.response.status === 403 && !originalRequest._retry) {
+                    originalRequest._retry = true; // Mark the request to prevent infinite loops
+              
+                    try {
+                        if (this.auth?.self?.defaultPassword) {
+                            const refreshResponse =  await this.auth.authenticate({ email: this.auth.self.email, password: this.auth.self.defaultPassword })
+                            // Update the previous authToken
+                            const newAuthToken = refreshResponse.data.token; // Extract the new token
+
+                            localStorage.setItem('authToken', newAuthToken);
+                            originalRequest.headers['Authorization'] = `Bearer ${newAuthToken}`;
+                            return this.axios(originalRequest);
+                        }
+                    } catch (refreshError) {
+                      console.error('Token refresh failed:', refreshError);
+                      // Optional: Redirect to login page or handle logout
+                    //   window.location.href = '/login'; // Replace with your logout handling logic
+                      return Promise.reject(refreshError);
+                    }
+                  }
+              
+                  // For other errors, reject the promise as usual
+                  return Promise.reject(error);
+                }
+              );
         },
         GET(path: string) {
             return this.REST("GET", path)
@@ -51,10 +92,14 @@ export const Payload = defineStore({
                 "Content-Type": "application/json",
             } as PayloadHTTPHeader
             
+            if (path[0] !== "/") {
+                path = "/" + path
+            }
+
             path = this.baseUrl + path
              
             if (this.auth && this.auth.self) {
-                headers["Authorization"] = `Bearer ${localStorage.getItem("authToken")}`
+                headers["Authorization"] = `Bearer ${this.auth.authToken}`
             }
 
             const request = {
@@ -69,8 +114,7 @@ export const Payload = defineStore({
                 request.data = data
             }
             
-            
-            return axios(path, request)
+            return this.axios(path, request)
         },
         authenticateUser(email: string, password: string) {
             if (!this.auth) {

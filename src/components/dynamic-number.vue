@@ -224,22 +224,16 @@ export default defineComponent ({
             let collection = this.originalGrid
             if (effect == "shuffle") {
                 collection = _.shuffle(this.originalGrid)
-                if (!delay)  { delay = duration/2 / collection.length }
             } else if (effect == "top-to-bottom") {
                 collection = this.originalGrid
-                if (!delay)  { delay = duration/2 / collection.length }
             } else if (effect == "bottom-to-top") {
                 collection = _.reverse(this.originalGrid)
-                if (!delay)  { delay = duration/2 / collection.length }
             } else if (effect == "left-to-right") {
                 collection = _.sortBy(this.originalGrid, "x")
-                if (!delay)  { delay = duration/2 / collection.length }
             } else if (effect == "right-to-left") {
                 collection = _.reverse(_.sortBy(this.originalGrid, "x"))
-                if (!delay)  { delay = duration/2 / collection.length }
             } 
 
-            
             _.each(collection, (grid, index) => {
                 const cell = _.find(this.displayGrid, { x:grid.x, y:grid.y })
                 if (cell) {
