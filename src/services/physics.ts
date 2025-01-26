@@ -34,9 +34,10 @@ const PhysicsService = {
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)
         PhysicsService.timeout = setTimeout(() => {
-            document.body.querySelectorAll(".block").forEach((element: Element) => {
+            document.body.querySelectorAll(".block:not(.hasMatter)").forEach((element: Element) => {
                 const el = element as HTMLElement
                 const blockType = element.querySelector("[data-blocktype]")?.getAttribute("data-blocktype")
+                el.classList.add("hasMatter")
 
                 const blockTypeList = [
                     "projectArticle",
@@ -71,6 +72,7 @@ const PhysicsService = {
             scrollOffset = PhysicsService.prevScrollY - window.scrollY
         }
         
+        const anchorOffset = 8
 
         PhysicsService.physics?.blocks.forEach(block => {
             if (block.composite) {
@@ -85,12 +87,12 @@ const PhysicsService = {
                 } else if (scrollOffset < -128) {
                     Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
                 }
-
+                
                 // Update points
-                Matter.Body.setPosition(pointTopLeft, { x: block.x, y: block.y - window.scrollY });
-                Matter.Body.setPosition(pointTopRight, { x: block.x + block.width, y: block.y - window.scrollY });
-                Matter.Body.setPosition(pointBottomLeft, { x: pointBottomLeft.position.x, y: block.y - window.scrollY + block.height });
-                Matter.Body.setPosition(pointBottomRight, { x: pointBottomRight.position.x, y: block.y - window.scrollY + block.height });
+                Matter.Body.setPosition(pointTopLeft, { x: block.x - anchorOffset, y: block.y - window.scrollY - anchorOffset});
+                Matter.Body.setPosition(pointTopRight, { x: block.x + block.width + anchorOffset, y: block.y - window.scrollY - anchorOffset});
+                Matter.Body.setPosition(pointBottomLeft, { x: block.x - anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset });
+                Matter.Body.setPosition(pointBottomRight, { x: block.x + block.width + anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset});
 
             }
         })

@@ -12,6 +12,7 @@ type PhysicsBlock = {
 }
 
 export default class Physics {
+    private anchorOffset = 8
     private layoutWidth: number
     private layoutHeight: number
     public blocks: Array<PhysicsBlock>
@@ -146,6 +147,23 @@ export default class Physics {
 
             Matter.Composite.remove(block.composite, oldBody);
             Matter.Composite.add(block.composite, newBody);
+            // Update anchor points
+            block.composite.bodies.forEach(body => {
+                switch (body.label) {
+                    case "pointTopLeft":
+                        Matter.Body.setPosition(body, { x: block.x - this.anchorOffset, y: block.y - window.scrollY - this.anchorOffset })
+                        break
+                    case "pointTopRight":
+                        Matter.Body.setPosition(body, { x: block.x + block.width + this.anchorOffset, y: block.y - window.scrollY - this.anchorOffset})
+                        break
+                    case "pointBottomLeft":
+                        Matter.Body.setPosition(body, { x: block.x, y: block.y - window.scrollY + block.height })
+                        break
+                    case "pointBottomRight":
+                        Matter.Body.setPosition(body, { x: block.x + block.width, y: block.y - window.scrollY + block.height })
+                        break
+                }
+            })
             
             // Update constraints
             block.composite.constraints.forEach(constraint => { 
@@ -166,23 +184,6 @@ export default class Physics {
                 }
             })
 
-            // Update anchor points
-            block.composite.bodies.forEach(body => {
-                switch (body.label) {
-                    case "pointTopLeft":
-                        Matter.Body.setPosition(body, { x: block.x, y: block.y - window.scrollY })
-                        break
-                    case "pointTopRight":
-                        Matter.Body.setPosition(body, { x: block.x + block.width, y: block.y - window.scrollY })
-                        break
-                    case "pointBottomLeft":
-                        Matter.Body.setPosition(body, { x: block.x, y: block.y - window.scrollY + block.height })
-                        break
-                    case "pointBottomRight":
-                        Matter.Body.setPosition(body, { x: block.x + block.width, y: block.y - window.scrollY + block.height })
-                        break
-                }
-            })
         }
     }
 
@@ -215,7 +216,7 @@ export default class Physics {
         })
 
         // Create anchor points
-        const pointTopLeft = Matter.Bodies.circle(x , y - window.scrollY, 4, { 
+        const pointTopLeft = Matter.Bodies.circle(x - this.anchorOffset, y - window.scrollY - this.anchorOffset, this.anchorOffset, { 
             isStatic: true,
             label: "pointTopLeft",
             collisionFilter: {
@@ -223,7 +224,7 @@ export default class Physics {
                 category: 0
             }
         })
-        const pointBottomLeft = Matter.Bodies.circle(x , y + height - window.scrollY, 4, { 
+        const pointBottomLeft = Matter.Bodies.circle(x - this.anchorOffset , y + height - window.scrollY + this.anchorOffset, this.anchorOffset, { 
             isStatic: true,
             label: "pointBottomLeft",
             collisionFilter: {
@@ -231,7 +232,7 @@ export default class Physics {
                 category: 0
             }
         })
-        const pointTopRight = Matter.Bodies.circle(x + width, y - window.scrollY, 4, {
+        const pointTopRight = Matter.Bodies.circle(x + width + this.anchorOffset, y - window.scrollY - this.anchorOffset, this.anchorOffset, {
             isStatic: true,
             label: "pointTopRight",
             collisionFilter: {
@@ -239,7 +240,7 @@ export default class Physics {
                 category: 0
             }
         })
-        const pointBottomRight = Matter.Bodies.circle(x + width, y + height - window.scrollY, 4, {
+        const pointBottomRight = Matter.Bodies.circle(x + width + this.anchorOffset, y + height - window.scrollY + this.anchorOffset, this.anchorOffset, {
             isStatic: true,
             label: "pointBottomRight",
             collisionFilter: {
@@ -248,21 +249,25 @@ export default class Physics {
             }
         })
 
+        const constraintLength = Math.sqrt( Math.pow(this.anchorOffset, 2) + Math.pow(this.anchorOffset, 2));
+
         // Create contstaints between body and anchor points
         const constraintTopLeft = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointTopLeft,
             pointA: { x: -width/2, y: -height/2 },
-            length: 0,
-            stiffness: 0.024,
+            length: constraintLength,
+            stiffness: .024,
+            damping: 0.01,
             label: "constraintTopLeft"
         })
         const constraintBottomLeft = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointBottomLeft,
             pointA: { x: -width/2, y: +height/2 },
-            length: 0,
-            stiffness: 0.024,
+            length: constraintLength,
+            stiffness: .024 + Math.random() * .01,
+            damping: 0.01,
             label: "constraintBottomLeft"
         })
         
@@ -270,22 +275,25 @@ export default class Physics {
             bodyA: body,
             bodyB: pointTopRight,
             pointA: { x: +width/2, y: -height/2 },
-            length: 0,
-            stiffness: 0.024,
+            length: constraintLength,
+            stiffness: .024,
+            damping: 0.01,
             label: "constraintTopRight"
         })
         const constraintBottomRight = Matter.Constraint.create({
             bodyA: body,
             bodyB: pointBottomRight,
             pointA: { x: +width/2, y: +height/2 },
-            length: 0,
-            stiffness: 0.024,
+            length: constraintLength,
+            stiffness: .024 + Math.random() * .01,
+            damping: 0.01,
             label: "constraintBottomRight"
         })
 
         
         // Compose the composite
         const blockComposite = Matter.Composite.create()
+        // Matter.Composite.add(blockComposite, [body, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight])
         Matter.Composite.add(blockComposite, [body, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight, constraintBottomLeft, constraintBottomRight])
 
         // Add the composite to the world
