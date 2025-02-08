@@ -4,6 +4,7 @@
         <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"                  :data-blocktype="data.blockType"/>
         <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"                  :data-blocktype="data.blockType"/>
         <IframeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'iframe'"              :data-blocktype="data.blockType"/>
+        <Model3DBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'model3D'"            :data-blocktype="data.blockType"/>
         <ImageBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'image'"                :data-blocktype="data.blockType"/>
         <LineBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'line'"                  :data-blocktype="data.blockType"/>
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"              :data-blocktype="data.blockType"/>
@@ -31,6 +32,7 @@ import NoteBlock from "./note.vue"
 import TextBlock from "./text.vue"
 import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
+import Model3DBlock from "./model-3d.vue"
 import FavoriteBlock from "./favorite.vue"
 import PieceThumbnailBlock from "./piece-thumbnail.vue"
 import ProjectThumbnailBlock from "./project-thumbnail.vue"
@@ -50,6 +52,7 @@ export default defineComponent ({
         LineBlock,
         NewsletterBlock,
         NoteBlock,
+        Model3DBlock,
         FavoriteBlock,
         PieceThumbnailBlock,
         ProjectThumbnailBlock,

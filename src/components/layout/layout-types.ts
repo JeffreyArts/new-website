@@ -3,6 +3,7 @@ import { BannerBlock } from "./blocks/banner.vue"
 import { CodeBlock } from "./blocks/code.vue"
 import { GlitchBlock } from "./blocks/glitch.vue"
 import { IframeBlock } from "./blocks/iframe.vue"
+import { Model3DBlock } from "./blocks/model-3d.vue"
 import { ImageBlock } from "./blocks/image.vue"
 import { LineBlock } from "./blocks/line.vue"
 import { NewsletterBlock } from "./blocks/newsletter.vue"
@@ -23,7 +24,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | TextBlock | FavoriteBlock | PieceThumbnailBlock | ProjectThumbnailBlock | ProjectArticleBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
+export type BlockTypeData = TitleBlock | TextBlock | FavoriteBlock | Model3DBlock | PieceThumbnailBlock | ProjectThumbnailBlock | ProjectArticleBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
 
 export type BlockType = {
     size: number
