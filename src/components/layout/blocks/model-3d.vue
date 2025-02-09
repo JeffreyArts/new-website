@@ -12,7 +12,7 @@
 import { defineComponent, PropType } from "vue"
 import jaoIcon from "./../../jao-icon.vue"
 
-export type model3DBlock = {
+export type Model3DBlock = {
     blockType: "model3D"
     size: number
     id: string
@@ -32,7 +32,7 @@ export default defineComponent ({
     }, 
     props: {
         options: {
-            type: Object as PropType<model3DBlock>,
+            type: Object as PropType<Model3DBlock>,
             required: true
         },
     },
