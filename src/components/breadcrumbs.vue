@@ -84,6 +84,12 @@ export default defineComponent({
                 gsap.killTweensOf(this.animation)
             }
 
+            const elements = document.querySelectorAll(".site-breadcrumbs-route .char, .site-breadcrumbs-chevron")
+            if (elements.length <= 0) {
+                this.updatePath()
+                return
+            }
+
             this.animation = gsap.to(".site-breadcrumbs-route .char, .site-breadcrumbs-chevron", {
                 opacity: 0,
                 scale: 0,
