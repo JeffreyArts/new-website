@@ -50,16 +50,20 @@ export class AuthModel {
     
     validateAuthToken(token:string) : boolean {
         if (token) {
-            const authData = jwtDecode(token) as {
-                exp: number,
-                iat: number,
-                id: number
-            }
-            
-            if (authData) {
-                // get difference in minutes
-                const expiration = authData.exp -  Math.floor(Date.now() / 1000)
-                return expiration > 0
+            try {
+                const authData = jwtDecode(token) as {
+                    exp: number,
+                    iat: number,
+                    id: number
+                }
+                
+                if (authData) {
+                    // get difference in minutes
+                    const expiration = authData.exp -  Math.floor(Date.now() / 1000)
+                    return expiration > 0
+                }
+            } catch (err) {
+                return false
             }
         }
         return false
