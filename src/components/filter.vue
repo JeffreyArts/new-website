@@ -95,6 +95,7 @@ export default defineComponent({
             required: false
         },
     },
+    emits: ["filterUpdated"],
     data() {
         return {
             blocks: [] as Array<BlockType>,
