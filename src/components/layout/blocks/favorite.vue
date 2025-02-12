@@ -38,7 +38,8 @@ export default defineComponent ({
     data: () => {
         return {
             favs: 0,
-            selfLove: false
+            selfLove: false,
+            blocked: false
         }
     },
     computed: {
@@ -146,6 +147,9 @@ export default defineComponent ({
             })
         },
         async toggleLike() {
+            if (this.blocked) {
+                return
+            }
 
             if (!this.payload.page || !this.payload.auth?.self) {
                 return
@@ -181,22 +185,35 @@ export default defineComponent ({
                     query += `where[${key}][equals]=${value}&`
                 }
             }
-            
+
+            if (this.selfLove)  {
+                this.selfLove = false
+                this.favs--
+            } else {
+                this.selfLove = true
+                this.favs++
+            }
+            this.blocked = true
             // Get Favorite from DB and add/remove it depending on the result
             this.payload.GET("favorites" + query).then(response => {
                 if (response.data?.docs.length == 0) {
-                    this.payload.POST("favorites", request).then(response => {
+                    this.payload.POST("favorites", request).then((response: any) => {
                         this.selfLove = true
-                        this.favs++
+                        this.blocked = false
+                    }).catch(error => {
+                        this.favs--
+                        this.blocked = false
                     })
                 } else {
                     response.data.docs.forEach((doc: { id: string }) => {
                         this.payload.DELETE(`favorites/${doc.id}`).then((response: any) => {
                             this.selfLove = false
+                            this.blocked = false
+                        }).catch(error => {
                             this.favs--
+                            this.blocked = false
                         })
                     })
-
                 }
             }).catch(error => {
                 console.error("error", error)
