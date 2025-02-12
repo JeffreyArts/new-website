@@ -108,6 +108,7 @@ export type PieceThumbnailBlock = {
         path: string
         title: string
         year: string
+        favs: number
         categories?: Array<{
             id: string
             title: string
