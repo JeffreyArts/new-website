@@ -257,7 +257,7 @@ export default class Physics {
             bodyB: pointTopLeft,
             pointA: { x: -width/2, y: -height/2 },
             length: constraintLength,
-            stiffness: .024,
+            stiffness: .32,
             damping: 0.01,
             label: "constraintTopLeft"
         })
@@ -266,7 +266,7 @@ export default class Physics {
             bodyB: pointBottomLeft,
             pointA: { x: -width/2, y: +height/2 },
             length: constraintLength,
-            stiffness: .024 + Math.random() * .01,
+            stiffness: .32 + Math.random() * .01,
             damping: 0.01,
             label: "constraintBottomLeft"
         })
@@ -276,7 +276,7 @@ export default class Physics {
             bodyB: pointTopRight,
             pointA: { x: +width/2, y: -height/2 },
             length: constraintLength,
-            stiffness: .024,
+            stiffness: .32,
             damping: 0.01,
             label: "constraintTopRight"
         })
@@ -285,7 +285,7 @@ export default class Physics {
             bodyB: pointBottomRight,
             pointA: { x: +width/2, y: +height/2 },
             length: constraintLength,
-            stiffness: .024 + Math.random() * .01,
+            stiffness: .32 + Math.random() * .01,
             damping: 0.01,
             label: "constraintBottomRight"
         })
