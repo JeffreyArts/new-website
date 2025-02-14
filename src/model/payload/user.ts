@@ -1,3 +1,4 @@
+import type { CatterpillarOptions } from "../catterpillar"
 export interface UserOptions {
     id: number
     username: string
@@ -12,6 +13,7 @@ export class UserModel {
     public email: string
     public username: string
     public defaultPassword?: string
+    public catterpillar?: CatterpillarOptions
 
     constructor(properties: {
         id?: number,
@@ -19,6 +21,7 @@ export class UserModel {
         email?: string,
         defaultPassword?: string,
         self?: boolean,
+        catterpillar?: CatterpillarOptions
     }) {
         if (!properties) {
             throw new Error("Missing options for UserModel")
@@ -27,6 +30,7 @@ export class UserModel {
         this.id = properties.id || 0
         this.username = properties.username || ""
         this.email = properties.email || ""
+        this.catterpillar = properties.catterpillar || undefined
         this.self = (typeof properties.self !== "undefined") ? properties.self : false
         if (properties.defaultPassword) {
             this.defaultPassword = properties.defaultPassword

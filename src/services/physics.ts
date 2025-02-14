@@ -1,5 +1,7 @@
 import Physics from "@/model/physics"
+import { add } from "lodash";
 import Matter from "matter-js"
+import Paper from "paper"
 import { Router } from 'vue-router';
 
 const PhysicsService = {
@@ -10,7 +12,7 @@ const PhysicsService = {
     start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
         document.getElementById("physics")?.remove()
-        
+
         
         if (PhysicsService.physics) {
             return 
@@ -25,11 +27,23 @@ const PhysicsService = {
         });        
         
         PhysicsService.physics = new Physics()
-        PhysicsService.animationFrame()
-        
+        PhysicsService.animationFrame()        
     
+        window.addEventListener("addCatterpillar", PhysicsService.addCatterpillar)
         window.addEventListener("layoutHasChanged", PhysicsService.updateBlocks)
         window.addEventListener("scroll", PhysicsService.onScroll)
+    },
+    addCatterpillar: (event: CustomEvent) => {
+        if (PhysicsService.physics && event.detail) {
+            
+            setTimeout(() => {
+                if (PhysicsService.physics) {
+                    Matter.Composite.add(PhysicsService.physics.engine.world, [
+                        event.detail.composite
+                    ])
+                }
+            }, 4000)
+        }
     },
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)

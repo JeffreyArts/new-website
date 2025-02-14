@@ -1,5 +1,7 @@
 import { jwtDecode } from "jwt-decode"
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig, AxiosInstance } from "axios"
+import PhysicsService from "@/services/physics"
+import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
 import UserModel from "./user"
 import _ from "lodash"
 
@@ -7,6 +9,7 @@ import _ from "lodash"
 export class AuthModel {
     self: UserModel | undefined
     baseUrl: string
+    catterpillar: Catterpillar | undefined
     refreshTimeout: number |  NodeJS.Timeout
     // refreshToken: string
     authToken: string
@@ -27,7 +30,7 @@ export class AuthModel {
         }
 
         if (localStorage.getItem("self")) {
-            this.setSelf()
+            this.setSelf(JSON.parse(localStorage.getItem("self") || ""))
             // this.self = new UserModel({ ...JSON.parse(localStorage.getItem("self") || ""), self: true })
         }
 
@@ -64,14 +67,15 @@ export class AuthModel {
             }
         }
 
+        
         if (defaultPassword) {
             properties.push("defaultPassword")
         }
-
+        
         if (!userData) {
             throw new Error("Missing user data")
         }
-
+        
         const self = _.pick(userData, properties)
         localStorage.setItem("self", JSON.stringify(self))
         
@@ -80,10 +84,18 @@ export class AuthModel {
             self: true
         })
 
-    }
+        if (PhysicsService.physics) {
+            let options = {x: document.body.clientWidth/2, y: 8, autoBlink: true} as CatterpillarOptions
+            if (this.self?.catterpillar) {
+                options = {...options, ...this.self.catterpillar }
+            }
+            this.catterpillar = new Catterpillar(PhysicsService.physics.engine.world, options)
 
-            // console.log('rups', rups)
-            
+            // Emit event to update the catterpillar
+            const event = new CustomEvent("addCatterpillar", { detail: this.catterpillar })
+            window.dispatchEvent(event)
+        }
+    }
     
     
     validateAuthToken(token:string) : boolean {

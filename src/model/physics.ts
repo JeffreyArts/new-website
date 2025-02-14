@@ -1,4 +1,5 @@
 import Matter from "matter-js"
+import Paper from "paper"
 import { BlockType } from "./../components/layout/layout-types"
 
 type PhysicsBlock = {
@@ -18,7 +19,7 @@ export default class Physics {
     public blocks: Array<PhysicsBlock>
     private floor: Matter.Body
     private catterpillars: Array<Matter.Composite>
-    private engine: Matter.Engine
+    public engine: Matter.Engine
     private render: Matter.Render
     private runner: Matter.Runner
     private resizeTimeout: NodeJS.Timeout | null = null
@@ -33,14 +34,24 @@ export default class Physics {
 
         const domEl = document.createElement("canvas")
         domEl.id = "physics"
-        
+
+        const paperEl = document.createElement("canvas")
+        paperEl.id = "paper"
+        paperEl.width = window.innerWidth
+        paperEl.height = window.innerHeight
+
+        // Paper.view.viewSize.width = width
+        Paper.setup(paperEl)
+
         // Parse the query string
         const urlParams = new URLSearchParams(window.location.search);
+
         if (!urlParams.has("dev")) {
             domEl.style.display = "none"
         }
 
         document.body.appendChild(domEl)
+        document.body.appendChild(paperEl)
         // Set-up the physics enginge
         this.engine = Matter.Engine.create(),
         this.render = Matter.Render.create({
@@ -95,6 +106,9 @@ export default class Physics {
 
             // @ts-ignore
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)
+
+            Paper.view.viewSize.width = window.innerWidth
+            Paper.view.viewSize.height = window.innerHeight
         },50)
     }
 

@@ -4,3 +4,10 @@
     pointer-events: none;
     opacity: 0.8;
 }
+
+#paper {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+}
