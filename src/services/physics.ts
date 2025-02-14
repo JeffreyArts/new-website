@@ -76,16 +76,16 @@ const PhysicsService = {
 
         PhysicsService.physics?.blocks.forEach(block => {
             if (block.composite) {
-                const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-                const pointTopLeft = block.composite.bodies.find(body => body.label === "pointTopLeft") as Matter.Body
-                const pointTopRight = block.composite.bodies.find(body => body.label === "pointTopRight") as Matter.Body
-                const pointBottomLeft = block.composite.bodies.find(body => body.label === "pointBottomLeft") as Matter.Body
-                const pointBottomRight = block.composite.bodies.find(body => body.label === "pointBottomRight") as Matter.Body
+                const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
+                const pointTopLeft = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointTopLeft") as Matter.Body
+                const pointTopRight = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointTopRight") as Matter.Body
+                const pointBottomLeft = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointBottomLeft") as Matter.Body
+                const pointBottomRight = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointBottomRight") as Matter.Body
                 
                 if (scrollOffset > 128) {
-                    Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 + 128 });
+                    Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 + 128 });
                 } else if (scrollOffset < -128) {
-                    Matter.Body.setPosition(body, { x: body.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
+                    Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
                 }
                 
                 // Update points
@@ -108,12 +108,12 @@ const PhysicsService = {
                 } 
                 
                 
-                const body = block.composite.bodies.find(body => body.label === "body") as Matter.Body
-                if (body) {
+                const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
+                if (bodyBlock) {
                     // Decrease decimals for improved performance (in Firefox)
-                    const x = Math.round((body.position.x -  (block.x - window.scrollX) - block.width/2) * 1000) / 1000
-                    const y = Math.round((body.position.y - (block.y - window.scrollY) - block.height/2) * 1000) / 1000
-                    const angle = Math.round((body.angle) * 1000) / 1000
+                    const x = Math.round((bodyBlock.position.x -  (block.x - window.scrollX) - block.width/2) * 1000) / 1000
+                    const y = Math.round((bodyBlock.position.y - (block.y - window.scrollY) - block.height/2) * 1000) / 1000
+                    const angle = Math.round((bodyBlock.angle) * 1000) / 1000
                     block.domEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`   
                 }
             })
