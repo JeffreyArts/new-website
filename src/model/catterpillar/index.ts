@@ -188,7 +188,7 @@ class Catterpillar  {
         this.eye.right.y = this.head.position.y - this.eye["right"].height/2
            
         this.mouth.x = this.head.position.x + maxOffset/2 + maxOffset * offsetPerc - maxOffset
-        this.mouth.y = this.head.position.y + this.bodyPart.size * .25
+        this.mouth.y = this.head.position.y + this.bodyPart.size * .25 + this.mouth.offset.y
         
         requestAnimationFrame(() => this.#draw())
     }

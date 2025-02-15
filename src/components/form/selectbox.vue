@@ -214,7 +214,8 @@ export default defineComponent({
     position: absolute;
     z-index: 2024;
     display: none;
-    left: 0;
+    right: 0;
+    min-width: 240px;
     max-height: 240px;
     overflow: auto;
     width: calc(100% - 24px);
