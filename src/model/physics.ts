@@ -17,7 +17,7 @@ export default class Physics {
     private layoutWidth: number
     private layoutHeight: number
     public blocks: Array<PhysicsBlock>
-    private floor: Matter.Body
+    private ground: Matter.Body
     private catterpillars: Array<Matter.Composite>
     public engine: Matter.Engine
     private render: Matter.Render
@@ -73,8 +73,16 @@ export default class Physics {
         // run the engine
         Matter.Runner.run(this.runner, this.engine);
      
-        // Add floor for test
-        this.floor = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight - 20, this.layoutWidth, 40, {isStatic: true})
+        // Add ground
+        this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 32, this.layoutWidth, 80, {
+            isStatic: true,
+            label: "ground",
+            collisionFilter: {
+                category: 0x0003,
+                mask: 0x0002
+            }
+        })
+        Matter.World.add(this.engine.world, this.ground)
         window.addEventListener("resize", this.onResize.bind(this))
     }
 
@@ -154,8 +162,8 @@ export default class Physics {
                 label: "block",
                 mass: block.width * block.height / 1000,
                 collisionFilter: {
-                    group: 1,
-                    category: 1
+                    category: 0x0001,
+                    mask: 0x0001
                 }
             })
 
@@ -224,8 +232,8 @@ export default class Physics {
             label: "block",
             mass: width * height / 1000,
             collisionFilter: {
-                group: 0,
-                category: 0
+                category: 0x0001,
+                mask: 0x0001 | 0x0002
             }
         })
 
@@ -234,32 +242,32 @@ export default class Physics {
             isStatic: true,
             label: "pointTopLeft",
             collisionFilter: {
-                group: 0,
-                category: 0
+                category: 0x0010,
+                mask: 0x0010
             }
         })
         const pointBottomLeft = Matter.Bodies.circle(x - this.anchorOffset , y + height - window.scrollY + this.anchorOffset, this.anchorOffset, { 
             isStatic: true,
             label: "pointBottomLeft",
             collisionFilter: {
-                group: 0,
-                category: 0
+                category: 0x0010,
+                mask: 0x0010
             }
         })
         const pointTopRight = Matter.Bodies.circle(x + width + this.anchorOffset, y - window.scrollY - this.anchorOffset, this.anchorOffset, {
             isStatic: true,
             label: "pointTopRight",
             collisionFilter: {
-                group: 0,
-                category: 0
+                category: 0x0010,
+                mask: 0x0010
             }
         })
         const pointBottomRight = Matter.Bodies.circle(x + width + this.anchorOffset, y + height - window.scrollY + this.anchorOffset, this.anchorOffset, {
             isStatic: true,
             label: "pointBottomRight",
             collisionFilter: {
-                group: 0,
-                category: 0
+                category: 0x0010,
+                mask: 0x0010
             }
         })
 

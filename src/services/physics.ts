@@ -42,7 +42,7 @@ const PhysicsService = {
                         event.detail.composite
                     ])
                 }
-            }, 4000)
+            }, 0)
         }
     },
     updateBlocks: () => {

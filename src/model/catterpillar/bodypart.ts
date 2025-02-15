@@ -80,7 +80,10 @@ class BodyPart {
         }
         
         this.body = Matter.Bodies.circle(this.x, this.y, this.radius/2, { 
-            collisionFilter: { group: 1 }, 
+            collisionFilter: { 
+                category: 0x0002,
+            }, 
+            mass: 1,
             restitution: this.options.restitution,
             slop: this.options.slop ? this.options.slop : this.radius/5,
             label: this.section
