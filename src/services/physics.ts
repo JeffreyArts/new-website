@@ -87,11 +87,11 @@ const PhysicsService = {
                 el.classList.add("hasMatter")
 
                 const blockTypeList = [
-                    "projectArticle",
+                    // "projectArticle",
                     "image",
                     "code",
-                    "title",
                     "iframe",
+                    "favorite",
                     "pieceThumbnail",
                     "projectThumbnail",
                 ]
