@@ -165,7 +165,7 @@ const PhysicsService = {
         // Reset position existing catterpillar
         if (catterpillar) {
             catterpillar.composite.bodies.forEach(body => {
-                Matter.Body.setPosition(body, { x: window.innerWidth/2, y: window.scrollY})
+                Matter.Body.setPosition(body, { x: window.innerWidth/2, y: 8})
                 // Change velocity direction
                 Matter.Body.setVelocity(body, { x: 0, y: 0})
             })

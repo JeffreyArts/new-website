@@ -84,7 +84,7 @@ export default class Physics {
             }
         })
         // Add ceiling
-        this.ceiling = Matter.Bodies.rectangle(this.layoutWidth/2, -400, this.layoutWidth, 400, {
+        this.ceiling = Matter.Bodies.rectangle(this.layoutWidth/2, -600, this.layoutWidth, 400, {
             isStatic: true,
             label: "ceilng",
             collisionFilter: {
