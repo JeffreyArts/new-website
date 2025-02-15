@@ -2,11 +2,16 @@ import Physics from "@/model/physics"
 import Matter from "matter-js"
 import { Router } from 'vue-router';
 import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
+import mousePosition from "@/services/mouse-position"
 
 type CatterpillarOptionsWithId = CatterpillarOptions & { id: string }
 
 
 const PhysicsService = {
+    mouseDown: false,
+    mousePos: { x: 0, y: 0},
+    mouseTarget: undefined as Matter.Body | undefined,
+    activeCatterpillar: undefined as Catterpillar | undefined,
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
     observer: undefined as MutationObserver | undefined,
@@ -36,6 +41,13 @@ const PhysicsService = {
         window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
         window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
         window.addEventListener("scroll", PhysicsService.onScroll)
+        window.addEventListener("mouseup", PhysicsService.cancelMouseDown)
+        document.body.addEventListener("mousedown", PhysicsService.mouseDownEvent);
+        document.body.addEventListener("touchstart", PhysicsService.mouseDownEvent);
+        document.body.addEventListener("touchend", PhysicsService.touchEndEvent);
+        // document.body.addEventListener("click", PhysicsService.mouseClickEvent);
+        document.body.addEventListener("mousemove", PhysicsService.mouseMoveEvent);
+        document.body.addEventListener("touchmove", PhysicsService.mouseMoveEvent);
     },
     addCatterpillarEvent: (event: CustomEvent) => {
         if (event.detail) {
@@ -174,6 +186,65 @@ const PhysicsService = {
             return
         }
     },
+    mouseDownEvent(e:MouseEvent | TouchEvent) {
+        e.stopPropagation() 
+        if (!PhysicsService.physics) {
+            return
+        }
+
+        PhysicsService.catterpillars.forEach(catterpillar => {
+            let range = catterpillar.bodyPart.size
+
+            if (!range) {
+                console.error("Missing bodypart.size")
+                return
+            }
+            
+            PhysicsService.mouseDown = true
+            PhysicsService.mousePos = mousePosition.xy(e)
+            catterpillar.composite.bodies.forEach(body => {
+                if (!range) {
+                    return
+                }
+                if ((PhysicsService.mousePos.x > (body.position.x - range) - range / 2) &&
+                (PhysicsService.mousePos.x < (body.position.x + range) + range / 2) &&
+                (PhysicsService.mousePos.y > (body.position.y - range) - range / 2) &&
+                (PhysicsService.mousePos.y < (body.position.y + range) + range / 2)) {
+                    PhysicsService.mouseTarget = body
+                }
+            })
+            
+            if (PhysicsService.mouseTarget) {
+                PhysicsService.activeCatterpillar = catterpillar
+                catterpillar.isMoving = false
+                e.preventDefault()
+            }
+        })
+    },
+    cancelMouseDown() {
+        if (!PhysicsService.activeCatterpillar) {
+            return
+        }
+        
+        PhysicsService.mouseDown = false
+        PhysicsService.mouseTarget = undefined
+        PhysicsService.activeCatterpillar.isMoving = false
+
+        PhysicsService.activeCatterpillar.composite.bodies.forEach( body => {
+            Matter.Body.setAngularSpeed(body, 0)
+            Matter.Body.setAngularVelocity(body, 0)
+        })
+    },
+    touchEndEvent(e: TouchEvent) {
+        PhysicsService.mouseDown = false
+        PhysicsService.mouseTarget = undefined
+    },
+    mouseMoveEvent(e:MouseEvent | TouchEvent) {
+        if (!PhysicsService.mouseDown) {
+            return
+        }
+        PhysicsService.mousePos = mousePosition.xy(e)
+    },
     animationFrame: () => {
         if (PhysicsService.physics) {
             PhysicsService.physics.blocks.forEach(block => {
@@ -206,6 +277,14 @@ const PhysicsService = {
                     PhysicsService.resetCatterpillar(catterpillar)
                 } 
             })
+
+            // Make catterpillar dragable
+            if (PhysicsService.mouseDown && PhysicsService.mouseTarget) {
+                Matter.Body.setVelocity( PhysicsService.mouseTarget, {
+                    x: PhysicsService.mousePos.x - PhysicsService.mouseTarget.position.x,
+                    y: PhysicsService.mousePos.y - PhysicsService.mouseTarget.position.y,
+                })
+            }
         }
         window.requestAnimationFrame(PhysicsService.animationFrame)
     }
