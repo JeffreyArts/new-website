@@ -314,7 +314,7 @@ export default class Physics {
 
         
         // Compose the composite
-        const blockComposite = Matter.Composite.create()
+        const blockComposite = Matter.Composite.create({label: "block"})
         // Matter.Composite.add(blockComposite, [block, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight])
         Matter.Composite.add(blockComposite, [block, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight, constraintBottomLeft, constraintBottomRight])
 

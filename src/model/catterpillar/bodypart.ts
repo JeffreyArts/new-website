@@ -84,6 +84,8 @@ class BodyPart {
                 category: 0x0002,
             }, 
             mass: 1,
+            density: .2,
+            friction: .1,
             restitution: this.options.restitution,
             slop: this.options.slop ? this.options.slop : this.radius/5,
             label: this.section

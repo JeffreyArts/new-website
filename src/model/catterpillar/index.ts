@@ -421,11 +421,20 @@ class Catterpillar  {
             
             const solidObjects = [] as Array<Matter.Body>
             _.each (this.world.bodies, mBody => {
-                if (mBody.label === "ground" || mBody.label === "block") {
+                if (mBody.label === "ground") {
                     solidObjects.push(mBody)
                 }
             })
-
+            
+            _.each (this.world.composites, mComposite => {
+                if (mComposite.label === "block") {
+                    const blockBody = mComposite.bodies.find(body => body.label === "block")
+                    if (blockBody) {
+                        solidObjects.push(blockBody)
+                    }
+                }
+            })
+            
             // Check if the catterpillar collides with the ground, and exit when it does not
             let collision: undefined | Matter.Body
             _.map(this.composite.bodies, body => {

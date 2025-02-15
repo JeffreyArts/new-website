@@ -34,7 +34,7 @@ const PhysicsService = {
         PhysicsService.physics = new Physics()
         PhysicsService.animationFrame()        
     
-        window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent)
+        window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
         window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
         window.addEventListener("scroll", PhysicsService.onScroll)
     },
@@ -133,6 +133,13 @@ const PhysicsService = {
                 Matter.Body.setPosition(pointBottomLeft, { x: block.x - anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset });
                 Matter.Body.setPosition(pointBottomRight, { x: block.x + block.width + anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset});
 
+                if (block.y < window.scrollY) {
+                    bodyBlock.render.fillStyle = "#000000FF"
+                    bodyBlock.collisionFilter.mask = 0x0001
+                } else {
+                    bodyBlock.collisionFilter.mask = 0x0001 | 0x0002
+                    bodyBlock.render.fillStyle = "#FF0000FF"
+                }
             }
         })
 
