@@ -3,7 +3,6 @@ import Matter from "matter-js"
 import { Router } from 'vue-router';
 import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
 
-type CatterpillarWithId = Catterpillar & { id: string }
 type CatterpillarOptionsWithId = CatterpillarOptions & { id: string }
 
 
@@ -12,7 +11,7 @@ const PhysicsService = {
     timeout: undefined as NodeJS.Timeout | undefined,
     observer: undefined as MutationObserver | undefined,
     cache: [] as CatterpillarOptionsWithId[],
-    catterpillars: [] as CatterpillarWithId[],
+    catterpillars: [] as Catterpillar[],
     prevScrollY: 0,
     start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
@@ -52,17 +51,14 @@ const PhysicsService = {
         }
     },
     layoutHasChangedEvent: () => {
-
         if (PhysicsService.cache.length > 0) {
             PhysicsService.cache.forEach(catterpillarOptions => {
                 if (PhysicsService.physics) {
-                    // Add catterpillar to the world    
-                    const catterpillar = new Catterpillar(PhysicsService.physics.engine.world, catterpillarOptions) as CatterpillarWithId
-                    Matter.Composite.add(PhysicsService.physics.engine.world, [catterpillar.composite])
+                    // Add catterpillar to the world 
+                    const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
                     // Remove catterpillar from cache
                     PhysicsService.cache = PhysicsService.cache.filter(c => c.id !== catterpillarOptions.id)
                     // Add catterpillar to the list
-                    catterpillar.id = catterpillarOptions.id
                     PhysicsService.catterpillars.push(catterpillar)
                 }
             })
@@ -142,8 +138,41 @@ const PhysicsService = {
                 }
             }
         })
+        //  Not happy with this solution, it should be optimized I think, in essence it is meant to move the catterpillar along while scrolling
+        // PhysicsService.catterpillars.forEach(catterpillar => {
+        //     catterpillar.composite.bodies.forEach(body => {
+        //         Matter.Body.setVelocity(body, { x: 0, y: scrollOffset*1})
+        //     })
+        // })
 
         PhysicsService.prevScrollY = window.scrollY
+    },
+    addCatterpillar: (catterpillarOptions: CatterpillarOptions) => {
+        if (!PhysicsService.physics)  {
+            throw new Error("Missing physics")
+        }
+
+        const catterpillar = new Catterpillar(PhysicsService.physics.engine.world, catterpillarOptions)
+        Matter.Composite.add(PhysicsService.physics.engine.world, [catterpillar.composite])
+        return catterpillar
+    },
+    resetCatterpillar(catterpillar: Catterpillar) {
+        if (!PhysicsService.physics) {
+            return
+        }
+        const world = PhysicsService.physics.engine.world
+
+        // Reset position existing catterpillar
+        if (catterpillar) {
+            catterpillar.composite.bodies.forEach(body => {
+                Matter.Body.setPosition(body, { x: window.innerWidth/2, y: window.scrollY})
+                // Change velocity direction
+                Matter.Body.setVelocity(body, { x: 0, y: 0})
+            })
+        } else {
+            console.error("No catterpillar set to be removed")
+            return
+        }
     },
     animationFrame: () => {
         if (PhysicsService.physics) {
@@ -162,6 +191,20 @@ const PhysicsService = {
                     const angle = Math.round((bodyBlock.angle) * 1000) / 1000
                     block.domEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`   
                 }
+            })
+
+            // Reset catterpillar when it is off screen
+            PhysicsService.catterpillars.forEach(catterpillar => {
+                const head = catterpillar.head
+                const butt = catterpillar.butt
+                
+                if ((head.position.x > window.innerWidth && butt.position.x > window.innerWidth) ||
+                (head.position.x <= 0 && butt.position.x < 0) ||
+                (head.position.y > window.innerHeight + 100 && butt.position.y > window.innerHeight + 100) ||
+                (head.position.y <= -400 && butt.position.y < -400)
+                ) {
+                    PhysicsService.resetCatterpillar(catterpillar)
+                } 
             })
         }
         window.requestAnimationFrame(PhysicsService.animationFrame)

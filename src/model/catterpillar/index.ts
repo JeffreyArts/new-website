@@ -8,6 +8,7 @@ import BodyPart from "./bodypart"
 import { BodyPartOptions } from "./bodypart"
 
 export type CatterpillarOptions = {
+    id?: string
     x?: number
     y?: number
     color?: string
@@ -33,6 +34,7 @@ interface Catterpillar {
         left: Eye,
         right: Eye,
     }
+    id: string
     mouth: Mouth
     color: string
     blinkInterval?: number
@@ -291,6 +293,7 @@ class Catterpillar  {
             floppiness: .5,
             restitution: .8,
             autoBlink: true,
+            id: undefined,
             bodyPart: {
                 slop: 2,
                 size: 8,
@@ -314,6 +317,7 @@ class Catterpillar  {
         this.switchVelocity = 0
         this.x              = options.x             ? options.x : 0
         this.y              = options.y             ? options.y : 0
+        this.id             = options.id            ? options.id : Math.random().toString(36).substring(7)
         this.color          = options.color         ? options.color : "#58f208"
         this.bodyLength     = options.length        ? options.length : 8
         this.stiffness      = options.stiffness     ? options.stiffness : .8

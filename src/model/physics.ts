@@ -17,6 +17,7 @@ export default class Physics {
     private layoutWidth: number
     private layoutHeight: number
     public blocks: Array<PhysicsBlock>
+    private ceiling: Matter.Body
     private ground: Matter.Body
     private catterpillars: Array<Matter.Composite>
     public engine: Matter.Engine
@@ -82,7 +83,16 @@ export default class Physics {
                 mask: 0x0002
             }
         })
-        Matter.World.add(this.engine.world, this.ground)
+        // Add ceiling
+        this.ceiling = Matter.Bodies.rectangle(this.layoutWidth/2, -400, this.layoutWidth, 400, {
+            isStatic: true,
+            label: "ceilng",
+            collisionFilter: {
+                category: 0x0003,
+                mask: 0x0002
+            }
+        })
+        Matter.World.add(this.engine.world, [this.ground, this.ceiling])
         window.addEventListener("resize", this.onResize.bind(this))
     }
 
