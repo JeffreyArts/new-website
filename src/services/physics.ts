@@ -47,7 +47,7 @@ const PhysicsService = {
         document.body.addEventListener("touchend", PhysicsService.touchEndEvent);
         // document.body.addEventListener("click", PhysicsService.mouseClickEvent);
         document.body.addEventListener("mousemove", PhysicsService.mouseMoveEvent);
-        document.body.addEventListener("touchmove", PhysicsService.mouseMoveEvent);
+        document.body.addEventListener("touchmove", PhysicsService.mouseMoveEvent, { passive: false });
     },
     addCatterpillarEvent: (event: CustomEvent) => {
         if (event.detail) {
@@ -234,12 +234,18 @@ const PhysicsService = {
             Matter.Body.setAngularSpeed(body, 0)
             Matter.Body.setAngularVelocity(body, 0)
         })
+        PhysicsService.activeCatterpillar = undefined
     },
     touchEndEvent(e: TouchEvent) {
         PhysicsService.mouseDown = false
         PhysicsService.mouseTarget = undefined
+        PhysicsService.activeCatterpillar = undefined
     },
     mouseMoveEvent(e:MouseEvent | TouchEvent) {
+        if (PhysicsService.activeCatterpillar) {
+            e.preventDefault()
+        }
+
         if (!PhysicsService.mouseDown) {
             return
         }
