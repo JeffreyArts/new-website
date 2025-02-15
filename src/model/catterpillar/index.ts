@@ -336,6 +336,28 @@ class Catterpillar  {
         } else {
             this.autoBlink = true
         }
+
+        const eyeOptions = {
+            x: this.x,
+            y: this.y,
+            width: 8,
+            height: 8,
+            autoBlink: this.autoBlink
+        }
+
+        const mouthOptions = {
+            size: this.bodyPart.size * 1.25,
+            scale: 1,
+            offset: {x: 0, y: 0},
+        }
+
+        if (window.innerWidth < 768) {
+            this.bodyPart.size = this.bodyPart.size*.75
+            eyeOptions.width = eyeOptions.width/2
+            eyeOptions.height = eyeOptions.height/2
+            mouthOptions.scale = .5
+            mouthOptions.offset.y = 1
+        }
         
         // All options set, now call the helper functions to create the catterpillar
         const t = this.#createBodyParts()
@@ -351,21 +373,14 @@ class Catterpillar  {
         
         this.spine = this.#createBodyConstraint()
         Matter.Composite.add(this.composite, this.spine)
-        
-        const eyeOptions = {
-            x: this.x,
-            y: this.y,
-            width: 8,
-            height: 8,
-            autoBlink: this.autoBlink
-        }
+
         
         this.eye = {
             left: new Eye(eyeOptions),
             right: new Eye(eyeOptions)
         }
 
-        this.mouth = new Mouth({size: this.bodyPart.size * 1.25})
+        this.mouth = new Mouth(mouthOptions)
         
         this.#draw.bind(this)
         this.#draw()

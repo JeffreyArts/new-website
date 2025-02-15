@@ -68,12 +68,12 @@ const PhysicsService = {
                 if (PhysicsService.physics) {
                     // Add catterpillar to the world 
                     const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
-                    // Remove catterpillar from cache
-                    PhysicsService.cache = PhysicsService.cache.filter(c => c.id !== catterpillarOptions.id)
                     // Add catterpillar to the list
                     PhysicsService.catterpillars.push(catterpillar)
                 }
             })
+            // Empty catterpillars from cache
+            PhysicsService.cache = []
         }
 
         PhysicsService.updateBlocks()

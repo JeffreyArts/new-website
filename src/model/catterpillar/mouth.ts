@@ -3,6 +3,10 @@ import Paper from "paper"
 import gsap from "gsap"
 
 export type MouthOptions = {
+    offset?: {
+        x: number,
+        y: number
+    },
     size?: number,
     scale?: number
 }
@@ -71,9 +75,22 @@ class Mouth  {
     ) {
         this.x = 0
         this.y = 0
+        this.offset = {
+            x: 0,
+            y: 0
+        }
         this.size = options.size ? options.size : 16
         this.scale = options.scale ? options.scale : 1
         this.inTransition = false
+
+
+        if (typeof options.offset?.x === "number") {
+            this.offset.x = options.offset.x
+        }
+        
+        if (typeof options.offset?.y === "number") {
+            this.offset.y = options.offset.y
+        }
 
         this.state = "🙂"
 
