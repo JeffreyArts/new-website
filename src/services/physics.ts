@@ -1,13 +1,18 @@
 import Physics from "@/model/physics"
-import { add } from "lodash";
 import Matter from "matter-js"
-import Paper from "paper"
 import { Router } from 'vue-router';
+import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
+
+type CatterpillarWithId = Catterpillar & { id: string }
+type CatterpillarOptionsWithId = CatterpillarOptions & { id: string }
+
 
 const PhysicsService = {
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
     observer: undefined as MutationObserver | undefined,
+    cache: [] as CatterpillarOptionsWithId[],
+    catterpillars: [] as CatterpillarWithId[],
     prevScrollY: 0,
     start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
@@ -29,21 +34,41 @@ const PhysicsService = {
         PhysicsService.physics = new Physics()
         PhysicsService.animationFrame()        
     
-        window.addEventListener("addCatterpillar", PhysicsService.addCatterpillar)
-        window.addEventListener("layoutHasChanged", PhysicsService.updateBlocks)
+        window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent)
+        window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
         window.addEventListener("scroll", PhysicsService.onScroll)
     },
-    addCatterpillar: (event: CustomEvent) => {
-        if (PhysicsService.physics && event.detail) {
+    addCatterpillarEvent: (event: CustomEvent) => {
+        if (event.detail) {
+            const id = event.detail.id
+            if (!id) {
+                throw new Error("Catterpillar is missing `id`")
+            }
+
             
-            setTimeout(() => {
-                if (PhysicsService.physics) {
-                    Matter.Composite.add(PhysicsService.physics.engine.world, [
-                        event.detail.composite
-                    ])
-                }
-            }, 0)
+            if (!PhysicsService.cache.find(catterpillar => catterpillar.id === id)) {
+                PhysicsService.cache.push(event.detail)
+            }
         }
+    },
+    layoutHasChangedEvent: () => {
+
+        if (PhysicsService.cache.length > 0) {
+            PhysicsService.cache.forEach(catterpillarOptions => {
+                if (PhysicsService.physics) {
+                    // Add catterpillar to the world    
+                    const catterpillar = new Catterpillar(PhysicsService.physics.engine.world, catterpillarOptions) as CatterpillarWithId
+                    Matter.Composite.add(PhysicsService.physics.engine.world, [catterpillar.composite])
+                    // Remove catterpillar from cache
+                    PhysicsService.cache = PhysicsService.cache.filter(c => c.id !== catterpillarOptions.id)
+                    // Add catterpillar to the list
+                    catterpillar.id = catterpillarOptions.id
+                    PhysicsService.catterpillars.push(catterpillar)
+                }
+            })
+        }
+
+        PhysicsService.updateBlocks()
     },
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)

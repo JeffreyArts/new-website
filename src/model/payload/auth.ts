@@ -9,7 +9,6 @@ import _ from "lodash"
 export class AuthModel {
     self: UserModel | undefined
     baseUrl: string
-    catterpillar: Catterpillar | undefined
     refreshTimeout: number |  NodeJS.Timeout
     // refreshToken: string
     authToken: string
@@ -85,14 +84,13 @@ export class AuthModel {
         })
 
         if (PhysicsService.physics) {
-            let options = {x: document.body.clientWidth/2, y: 8, autoBlink: true} as CatterpillarOptions
+            let catterpillarOptions = {x: document.body.clientWidth/2, y: 8, autoBlink: true} as CatterpillarOptions
             if (this.self?.catterpillar) {
-                options = {...options, ...this.self.catterpillar }
+                catterpillarOptions = {...catterpillarOptions, ...this.self.catterpillar }
             }
-            this.catterpillar = new Catterpillar(PhysicsService.physics.engine.world, options)
 
             // Emit event to update the catterpillar
-            const event = new CustomEvent("addCatterpillar", { detail: this.catterpillar })
+            const event = new CustomEvent("addCatterpillar", { detail: {...catterpillarOptions, id: this.self.id} })
             window.dispatchEvent(event)
         }
     }
