@@ -120,6 +120,7 @@ export default class Physics {
                     this.updateBlock(block.id, {...dimensions})
                 }
             })
+            Matter.Body.setPosition(this.ground, { x: this.layoutWidth/2, y: this.layoutHeight + 192 })
 
             // @ts-ignore
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)

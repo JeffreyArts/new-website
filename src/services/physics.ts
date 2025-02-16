@@ -40,7 +40,7 @@ const PhysicsService = {
     
         window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
         window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
-        window.addEventListener("scroll", PhysicsService.onScroll)
+        // window.addEventListener("scroll", PhysicsService.onScroll, { passive: true })
         window.addEventListener("mouseup", PhysicsService.cancelMouseDown)
         document.body.addEventListener("mousedown", PhysicsService.mouseDownEvent);
         document.body.addEventListener("touchstart", PhysicsService.mouseDownEvent);
@@ -113,45 +113,15 @@ const PhysicsService = {
     },
     // Throttle Scroll Event using requestAnimationFrame
 
-    onScroll: () => {
-        if (PhysicsService.physics?.blocks.length === 0) {
-            return
-        }
+    // onScroll: () => {
+    //     if (PhysicsService.physics?.blocks.length === 0) {
+    //         return
+    //     }
 
-        PhysicsService.physics?.blocks.forEach(block => {
-            const isAboveScreen = block.y + block.height < window.scrollY;
-            const isBelowScreen = block.y > window.scrollY + window.innerHeight + 200;
-            const isOffscreen = isAboveScreen || isBelowScreen;
-
-            if (block.composite && PhysicsService.physics) {
-                if (isOffscreen) {
-                    // Remove block only if it hasn't been removed already
-                    if (!PhysicsService.removedBlocks.has(block)) {
-                        Matter.World.remove(PhysicsService.physics.engine.world, block.composite);
-                        PhysicsService.removedBlocks.add(block); // Track removed block
-                    }
-                } else {
-                    // Re-add block only if it was previously removed
-                    if (PhysicsService.removedBlocks.has(block)) {
-                        Matter.World.add(PhysicsService.physics.engine.world, block.composite);
-                        PhysicsService.removedBlocks.delete(block); // Mark as active again
-                    }
-                }
-            
-
-                const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
-                Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 });
-
-                if (block.y < window.scrollY) {
-                    bodyBlock.render.fillStyle = "#000000FF"
-                    bodyBlock.collisionFilter.mask = 0x0001
-                } else {
-                    bodyBlock.collisionFilter.mask = 0x0001 | 0x0002
-                    bodyBlock.render.fillStyle = "#FF0000FF"
-                }
-            }
-        })
-    },
+    //     PhysicsService.physics?.blocks.forEach(block => {
+          
+    //     })
+    // },
     addCatterpillar: (catterpillarOptions: CatterpillarOptions) => {
         if (!PhysicsService.physics)  {
             throw new Error("Missing physics")
@@ -250,17 +220,52 @@ const PhysicsService = {
 
                 if (!block.composite || !block.domEl) {
                     return
-                } 
-                
-                
+                }   
+
+                const isAboveScreen = block.y + block.height < window.scrollY;
+                const isBelowScreen = block.y > window.scrollY + window.innerHeight + 200;
+                const isOffscreen = isAboveScreen || isBelowScreen;
                 const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
+                
                 if (bodyBlock) {
-                    // Decrease decimals for improved performance (in Firefox)
-                    const x = Math.round((bodyBlock.position.x -  (block.x - window.scrollX) - block.width/2) * 1000) / 1000
-                    const y = Math.round((bodyBlock.position.y - (block.y - window.scrollY) - block.height/2) * 1000) / 1000
-                    const angle = Math.round((bodyBlock.angle) * 1000) / 1000
-                    block.domEl.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`   
+                    const x = bodyBlock.position.x -  (block.x - window.scrollX) - block.width/2
+                    const y = bodyBlock.position.y - (block.y - window.scrollY) - block.height/2
+                    block.domEl.style.transform = `translate(${x}px, ${y}px)` 
+
+
+                    // Update block position
+                    if (block.composite && PhysicsService.physics) {
+                        if (isOffscreen) {
+                            // Remove block only if it hasn't been removed already
+                            if (!PhysicsService.removedBlocks.has(block)) {
+                                Matter.World.remove(PhysicsService.physics.engine.world, block.composite);
+                                PhysicsService.removedBlocks.add(block); // Track removed block
+                            }
+                        } else {
+                            // Re-add block only if it was previously removed
+                            if (PhysicsService.removedBlocks.has(block)) {
+                                Matter.World.add(PhysicsService.physics.engine.world, block.composite);
+                                PhysicsService.removedBlocks.delete(block); // Mark as active again
+                            }
+                        }
+        
+                        const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
+                        Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 });
+                        console.log(window.scrollY)
+                        if (block.y < window.scrollY) {
+                            bodyBlock.render.fillStyle = "#000000FF"
+                            bodyBlock.collisionFilter.mask = 0x0001
+                        } else {
+                            bodyBlock.collisionFilter.mask = 0x0001 | 0x0002
+                            bodyBlock.render.fillStyle = "#FF0000FF"
+                        }
+                    }
                 }
+
+
+
+
+
             })
 
             // Reset catterpillar when it is off screen

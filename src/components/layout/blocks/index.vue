@@ -100,6 +100,10 @@ export default defineComponent ({
 
 .block {
     padding: 20px;
+
+    // This will make GPU handle the transformations, instead of the CPU
+    will-change: transform;
+    transform: translateZ(0);
     
     &.__isFixed {
         position: absolute;
