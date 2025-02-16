@@ -251,7 +251,7 @@ const PhysicsService = {
         
                         const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
                         Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 });
-                        console.log(window.scrollY)
+
                         if (block.y < window.scrollY) {
                             bodyBlock.render.fillStyle = "#000000FF"
                             bodyBlock.collisionFilter.mask = 0x0001
