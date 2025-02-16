@@ -234,6 +234,10 @@ export default defineComponent ({
     color: #333
 }
 
+.favorite-block-heart {
+    width: 100%;
+}
+
 .favorite-block-amount {
     display: flex;
     align-items: flex-end;

@@ -169,6 +169,7 @@ export default class Physics {
             const oldBody = block.composite.bodies.find(body => body.label === "block") as Matter.Body
             const newBody = Matter.Bodies.rectangle(block.x + block.width/2, block.y + block.height/2 - window.scrollY, block.width, block.height, {
                 label: "block",
+                isStatic: true,
                 mass: block.width * block.height / 1000,
                 collisionFilter: {
                     category: 0x0001,
