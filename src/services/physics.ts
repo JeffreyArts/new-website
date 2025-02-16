@@ -261,11 +261,6 @@ const PhysicsService = {
                         }
                     }
                 }
-
-
-
-
-
             })
 
             // Reset catterpillar when it is off screen

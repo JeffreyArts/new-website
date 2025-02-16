@@ -104,6 +104,8 @@ export default defineComponent ({
     // This will make GPU handle the transformations, instead of the CPU
     will-change: transform;
     transform: translateZ(0);
+
+    transition: all .1s linear;
     
     &.__isFixed {
         position: absolute;
