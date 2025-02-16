@@ -349,7 +349,8 @@ export default defineComponent ({
     line-height: 1em;
     align-items: center;
     transition: var(--transition-default);
-
+    word-wrap: anywhere;
+    
     svg {
         height: 10px;
     }

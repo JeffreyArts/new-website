@@ -25,6 +25,7 @@ body {
     background-size: var(--bg-size) var(--bg-size);
     color: var(--contrast-color);
     background-position: top left;
+    overflow-x: hidden;
 }
 
 * {
