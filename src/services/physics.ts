@@ -66,10 +66,11 @@ const PhysicsService = {
         if (PhysicsService.cache.length > 0) {
             PhysicsService.cache.forEach(catterpillarOptions => {
                 if (PhysicsService.physics) {
-                    // Add catterpillar to the world 
-                    const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
-                    // Add catterpillar to the list
-                    PhysicsService.catterpillars.push(catterpillar)
+                    if (!PhysicsService.catterpillars.find(catterpillar => catterpillar.id === catterpillarOptions.id)) {
+                        // Add catterpillar if it is not already there
+                        const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
+                        PhysicsService.catterpillars.push(catterpillar)
+                    }
                 }
             })
             // Empty catterpillars from cache
