@@ -93,6 +93,7 @@ const PhysicsService = {
                     "code",
                     "iframe",
                     "favorite",
+                    "banner",
                     "pieceThumbnail",
                     "projectThumbnail",
                 ]

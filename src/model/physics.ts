@@ -1,6 +1,5 @@
 import Matter from "matter-js"
 import Paper from "paper"
-import { BlockType } from "./../components/layout/layout-types"
 
 export type PhysicsBlock = {
     x: number,
