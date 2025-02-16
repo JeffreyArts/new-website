@@ -1,4 +1,4 @@
-import Physics from "@/model/physics"
+import Physics, {PhysicsBlock} from "@/model/physics"
 import Matter from "matter-js"
 import { Router } from 'vue-router';
 import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
@@ -17,7 +17,7 @@ const PhysicsService = {
     observer: undefined as MutationObserver | undefined,
     cache: [] as CatterpillarOptionsWithId[],
     catterpillars: [] as Catterpillar[],
-    prevScrollY: 0,
+    removedBlocks: new Set(),
     start: (router: Router) => {
         // Fix for multiple appenditions of the canvas cause of Vite hot reload
         document.getElementById("physics")?.remove()
@@ -47,7 +47,7 @@ const PhysicsService = {
         document.body.addEventListener("touchend", PhysicsService.touchEndEvent);
         // document.body.addEventListener("click", PhysicsService.mouseClickEvent);
         document.body.addEventListener("mousemove", PhysicsService.mouseMoveEvent);
-        document.body.addEventListener("touchmove", PhysicsService.mouseMoveEvent, { passive: false });
+        document.body.addEventListener("touchmove", PhysicsService.mouseMoveEvent, { passive: false });        
     },
     addCatterpillarEvent: (event: CustomEvent) => {
         if (event.detail) {
@@ -110,37 +110,36 @@ const PhysicsService = {
             })
         }, 500)
     },
+    // Throttle Scroll Event using requestAnimationFrame
+
     onScroll: () => {
         if (PhysicsService.physics?.blocks.length === 0) {
             return
         }
-        let scrollOffset = 0
-
-        if (PhysicsService.prevScrollY !== 0) {
-            scrollOffset = PhysicsService.prevScrollY - window.scrollY
-        }
-        
-        const anchorOffset = 8
 
         PhysicsService.physics?.blocks.forEach(block => {
-            if (block.composite) {
-                const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
-                const pointTopLeft = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointTopLeft") as Matter.Body
-                const pointTopRight = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointTopRight") as Matter.Body
-                const pointBottomLeft = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointBottomLeft") as Matter.Body
-                const pointBottomRight = block.composite.bodies.find(bodyBlock => bodyBlock.label === "pointBottomRight") as Matter.Body
-                
-                if (scrollOffset > 128) {
-                    Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 + 128 });
-                } else if (scrollOffset < -128) {
-                    Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 - 128 });
+            const isAboveScreen = block.y + block.height < window.scrollY;
+            const isBelowScreen = block.y > window.scrollY + window.innerHeight + 200;
+            const isOffscreen = isAboveScreen || isBelowScreen;
+
+            if (block.composite && PhysicsService.physics) {
+                if (isOffscreen) {
+                    // Remove block only if it hasn't been removed already
+                    if (!PhysicsService.removedBlocks.has(block)) {
+                        Matter.World.remove(PhysicsService.physics.engine.world, block.composite);
+                        PhysicsService.removedBlocks.add(block); // Track removed block
+                    }
+                } else {
+                    // Re-add block only if it was previously removed
+                    if (PhysicsService.removedBlocks.has(block)) {
+                        Matter.World.add(PhysicsService.physics.engine.world, block.composite);
+                        PhysicsService.removedBlocks.delete(block); // Mark as active again
+                    }
                 }
-                
-                // Update points
-                Matter.Body.setPosition(pointTopLeft, { x: block.x - anchorOffset, y: block.y - window.scrollY - anchorOffset});
-                Matter.Body.setPosition(pointTopRight, { x: block.x + block.width + anchorOffset, y: block.y - window.scrollY - anchorOffset});
-                Matter.Body.setPosition(pointBottomLeft, { x: block.x - anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset });
-                Matter.Body.setPosition(pointBottomRight, { x: block.x + block.width + anchorOffset, y: block.y - window.scrollY + block.height + anchorOffset});
+            
+
+                const bodyBlock = block.composite.bodies.find(bodyBlock => bodyBlock.label === "block") as Matter.Body
+                Matter.Body.setPosition(bodyBlock, { x: bodyBlock.position.x, y: block.y - window.scrollY + block.height/2 });
 
                 if (block.y < window.scrollY) {
                     bodyBlock.render.fillStyle = "#000000FF"
@@ -151,14 +150,6 @@ const PhysicsService = {
                 }
             }
         })
-        //  Not happy with this solution, it should be optimized I think, in essence it is meant to move the catterpillar along while scrolling
-        // PhysicsService.catterpillars.forEach(catterpillar => {
-        //     catterpillar.composite.bodies.forEach(body => {
-        //         Matter.Body.setVelocity(body, { x: 0, y: scrollOffset*1})
-        //     })
-        // })
-
-        PhysicsService.prevScrollY = window.scrollY
     },
     addCatterpillar: (catterpillarOptions: CatterpillarOptions) => {
         if (!PhysicsService.physics)  {
