@@ -180,7 +180,7 @@ class Eye  {
         }
     }
 
-    blink() {
+    blink(delay = 0) {
         if (this.isBlinking) {
             return
         }
@@ -213,6 +213,7 @@ class Eye  {
 
                 gsap.to(end, {
                     perc: 1,
+                    delay,
                     duration: .32,
                     ease: "power3.out",
                     onUpdate: () => { this.blinkOpening(end.perc) },

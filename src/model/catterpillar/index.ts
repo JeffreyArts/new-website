@@ -198,6 +198,11 @@ class Catterpillar  {
         if (this.bodyLength <= 0) {
             return
         }
+
+        // update x & y position of the catterpillar
+        
+        this.x = (this.head.position.x + this.butt.position.x) / 2
+        this.y = (this.head.position.y + this.butt.position.y) / 2
         
         const velocity = Math.abs(this.head.velocity.x) + Math.abs(this.head.velocity.y) 
 
@@ -209,23 +214,31 @@ class Catterpillar  {
             }
         })
         
-        _.each (this.world.composites, mComposite => {
-            if (mComposite.label === "block") {
-                const blockBody = mComposite.bodies.find(body => body.label === "block")
-                if (blockBody) {
-                    solidObjects.push(blockBody)
-                }
-            }
-        })
+        // _.each (this.world.composites, mComposite => {
+        //     if (mComposite.label === "block") {
+        //         const blockBody = mComposite.bodies.find(body => body.label === "block")
+        //         if (blockBody) {
+        //             solidObjects.push(blockBody)
+        //         }
+        //     }
+        // })
         
         // Check if the catterpillar collides with the ground, and exit when it does not
         this.isMovable = undefined
         _.map(this.composite.bodies, body => {
-            _.each(solidObjects, solidObject => {
-                if ( Matter.Collision.collides(body, solidObject) !== null) {
-                    this.isMovable = solidObject
+            _.each(solidObjects, (solidObject) => {
+                const bodyFilter = body.collisionFilter;
+                const solidFilter = solidObject.collisionFilter;
+            
+                const canCollide = 
+                    (bodyFilter.mask != undefined && solidFilter.category != undefined && bodyFilter.mask & solidFilter.category) !== 0 &&
+                    (solidFilter.mask != undefined && bodyFilter.category != undefined && solidFilter.mask & bodyFilter.category) !== 0;
+                console.log(canCollide)
+                if (canCollide && Matter.Collision.collides(body, solidObject) !== null) {
+                    this.isMovable = solidObject;
                 }
-            })
+            });
+            
         })
 
         if (this.switchingPosition) {

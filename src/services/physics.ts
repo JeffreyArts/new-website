@@ -36,7 +36,8 @@ const PhysicsService = {
         });        
         
         PhysicsService.physics = new Physics()
-        PhysicsService.animationFrame()        
+        PhysicsService.animationFrame()                
+        PhysicsService.walkLoop()                
     
         window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
         window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
@@ -78,6 +79,32 @@ const PhysicsService = {
         }
 
         PhysicsService.updateBlocks()
+    },
+    walkLoop: () => {
+        if (!PhysicsService.mouseDown) {
+            const catterpillar = PhysicsService.catterpillars[0]
+            if (catterpillar?.isMovable && !catterpillar.isMoving) {
+                if (catterpillar.x + catterpillar.bodyLength < PhysicsService.mousePos.x) {
+                    catterpillar.moveRight()
+                } else if (catterpillar.x - catterpillar.bodyLength > PhysicsService.mousePos.x) {            
+                    catterpillar.moveLeft()
+                } else if (Math.random() <= .1) {
+                    let eye = catterpillar.eye.left
+                    if (catterpillar.head.position.x > catterpillar.butt.position.x) {
+                        eye = catterpillar.eye.right
+                    }
+                    
+                    catterpillar.mouth.switchState("😙")
+                    if (!eye.isBlinking) {
+                        eye.blink(.8)
+                    }
+                }
+            }
+        }
+
+        setTimeout(() => {
+            PhysicsService.walkLoop()
+        }, Math.random() * 4000)
     },
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)
@@ -208,10 +235,7 @@ const PhysicsService = {
         if (PhysicsService.activeCatterpillar) {
             e.preventDefault()
         }
-
-        if (!PhysicsService.mouseDown) {
-            return
-        }
+        
         PhysicsService.mousePos = mousePosition.xy(e)
     },
     animationFrame: () => {
