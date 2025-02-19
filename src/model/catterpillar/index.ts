@@ -58,6 +58,7 @@ interface Catterpillar {
     spine: Matter.Constraint
     switchingPosition: boolean | ((value: boolean | PromiseLike<boolean>) => void)
     isMoving: boolean
+    isMovable: undefined | Matter.Body
     mouthRecovering: boolean
     switchVelocity: number
     scared: number | NodeJS.Timeout
@@ -200,6 +201,33 @@ class Catterpillar  {
         
         const velocity = Math.abs(this.head.velocity.x) + Math.abs(this.head.velocity.y) 
 
+
+        const solidObjects = [] as Array<Matter.Body>
+        _.each (this.world.bodies, mBody => {
+            if (mBody.label === "ground") {
+                solidObjects.push(mBody)
+            }
+        })
+        
+        _.each (this.world.composites, mComposite => {
+            if (mComposite.label === "block") {
+                const blockBody = mComposite.bodies.find(body => body.label === "block")
+                if (blockBody) {
+                    solidObjects.push(blockBody)
+                }
+            }
+        })
+        
+        // Check if the catterpillar collides with the ground, and exit when it does not
+        this.isMovable = undefined
+        _.map(this.composite.bodies, body => {
+            _.each(solidObjects, solidObject => {
+                if ( Matter.Collision.collides(body, solidObject) !== null) {
+                    this.isMovable = solidObject
+                }
+            })
+        })
+
         if (this.switchingPosition) {
             this.switchVelocity += 0.01
             const bellyConstraint = _.find(this.world.constraints, (constraint) => {
@@ -311,6 +339,7 @@ class Catterpillar  {
         
         this.world = world
         this.bodyParts = []
+        this.isMovable = undefined
         this.isMoving = false
         this.switchingPosition = false
         this.direction      = ""
@@ -438,41 +467,16 @@ class Catterpillar  {
                 return reject(new Error("Missing required variables mWorld | ground | catterPillar.composite"))
             }
             
-            const solidObjects = [] as Array<Matter.Body>
-            _.each (this.world.bodies, mBody => {
-                if (mBody.label === "ground") {
-                    solidObjects.push(mBody)
-                }
-            })
             
-            _.each (this.world.composites, mComposite => {
-                if (mComposite.label === "block") {
-                    const blockBody = mComposite.bodies.find(body => body.label === "block")
-                    if (blockBody) {
-                        solidObjects.push(blockBody)
-                    }
-                }
-            })
-            
-            // Check if the catterpillar collides with the ground, and exit when it does not
-            let collision: undefined | Matter.Body
-            _.map(this.composite.bodies, body => {
-                _.each(solidObjects, solidObject => {
-                    if ( Matter.Collision.collides(body, solidObject) !== null) {
-                        collision = solidObject
-                    }
-                })
-            })
-            
-            
-            if (!collision) {
+            if (!this.isMovable) {
                 this.isMoving = false
                 return resolve(false)
             }
             
             const head = this.head
             const butt = this.butt
-            
+            const collision = this.isMovable as Matter.Body
+
             const duration = .8
             const newLength = (this.bodyLength * this.bodyPart.size)*.8
             const yOffset = (collision.bounds.max.y - collision.bounds.min.y) / 2
