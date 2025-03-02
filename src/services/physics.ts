@@ -83,7 +83,8 @@ const PhysicsService = {
     walkLoop: () => {
         if (!PhysicsService.mouseDown) {
             const catterpillar = PhysicsService.catterpillars[0]
-            if (catterpillar?.isMovable && !catterpillar.isMoving) {
+            
+            if (catterpillar?.isMovable && !catterpillar.isMoving && (catterpillar.head.position.y + catterpillar.bodyPart.size > catterpillar.butt.position.y && catterpillar.head.position.y - catterpillar.bodyPart.size < catterpillar.butt.position.y)) {
                 if (catterpillar.x + catterpillar.bodyLength < PhysicsService.mousePos.x) {
                     catterpillar.moveRight()
                 } else if (catterpillar.x - catterpillar.bodyLength > PhysicsService.mousePos.x) {            
