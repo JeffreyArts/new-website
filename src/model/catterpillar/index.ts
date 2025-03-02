@@ -230,10 +230,9 @@ class Catterpillar  {
                 const bodyFilter = body.collisionFilter;
                 const solidFilter = solidObject.collisionFilter;
             
-                const canCollide = 
-                    (bodyFilter.mask != undefined && solidFilter.category != undefined && bodyFilter.mask & solidFilter.category) !== 0 &&
-                    (solidFilter.mask != undefined && bodyFilter.category != undefined && solidFilter.mask & bodyFilter.category) !== 0;
-                console.log(canCollide)
+                const canCollide = (bodyFilter.mask != undefined && solidFilter.category != undefined && bodyFilter.mask & solidFilter.category) !== 0 &&
+                                   (solidFilter.mask != undefined && bodyFilter.category != undefined && solidFilter.mask & bodyFilter.category) !== 0;
+
                 if (canCollide && Matter.Collision.collides(body, solidObject) !== null) {
                     this.isMovable = solidObject;
                 }
@@ -279,7 +278,7 @@ class Catterpillar  {
                         Matter.Composite.remove(this.world,[bellyConstraint, buttConstraint])
                         this.isMoving = false
                         if (typeof this.switchingPosition === "function") {
-                            this.switchingPosition(true)
+                            this.switchingPosition = true
                         }
                         this.switchingPosition = false
                     },300)
