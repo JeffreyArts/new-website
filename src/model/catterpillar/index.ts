@@ -57,6 +57,7 @@ interface Catterpillar {
     composite: Matter.Composite
     spine: Matter.Constraint
     switchingPosition: boolean | ((value: boolean | PromiseLike<boolean>) => void)
+    switchTimer: number 
     isMoving: boolean
     isMovable: undefined | Matter.Body
     mouthRecovering: boolean
@@ -245,6 +246,21 @@ class Catterpillar  {
             const bellyConstraint = _.find(this.world.constraints, (constraint) => {
                 return constraint.label === "bellyConstraint"
             })
+
+            const buttConstraint = _.find(this.world.constraints, (constraint) => {
+                return constraint.label === "buttConstraint"
+            })
+
+            // Cancel switching position after 3 seconds
+            if (new Date().getTime() - this.switchTimer > 3000 && this.switchTimer > 0 && this.world && bellyConstraint && buttConstraint) {
+                Matter.Composite.remove(this.world,[bellyConstraint, buttConstraint])
+                this.isMoving = false
+                if (typeof this.switchingPosition === "function") {
+                    this.switchingPosition(false)
+                }
+                this.switchingPosition = false
+                this.switchTimer = 0
+            }
             
             // const xVelocity = 8 + this.switchVelocity
             // const centerPointY = (this.bodyLength * this.bodyPart.size)
@@ -252,6 +268,9 @@ class Catterpillar  {
             const angle = this.switchVelocity + 100
             const xVelocity = centerPointX + ( centerPointX * Math.cos(angle * Math.PI/180)) * 6.4
             const yVelocity = 4 + this.bodyPart.size * .5
+
+
+            
             // const xVelocity = center.y + (radius * Math.sin(angle*i*Math.PI/180)) * this.options.size/100
             Matter.Body.setVelocity( this.head, {
                 // x: (this.head.position.x - this.butt.position.x),
@@ -261,12 +280,9 @@ class Catterpillar  {
             if ((this.direction === "right" && this.head.position.x > this.belly.position.x + this.bodyPart.size * 3) ||
                 this.direction === "left" && this.head.position.x < this.belly.position.x - this.bodyPart.size * 3) {
                 
-                const buttConstraint = _.find(this.world.constraints, (constraint) => {
-                    return constraint.label === "buttConstraint"
-                })
+                
 
                 if (this.world && bellyConstraint && buttConstraint) {
-
                     Matter.Composite.remove(this.world, bellyConstraint)
                     Matter.Body.setVelocity( this.head, {
                         x: this.direction === "right" ? - xVelocity * 1 : xVelocity * 1,
@@ -278,7 +294,7 @@ class Catterpillar  {
                         Matter.Composite.remove(this.world,[bellyConstraint, buttConstraint])
                         this.isMoving = false
                         if (typeof this.switchingPosition === "function") {
-                            this.switchingPosition = true
+                            this.switchingPosition(true)
                         }
                         this.switchingPosition = false
                     },300)
@@ -354,6 +370,7 @@ class Catterpillar  {
         this.isMovable = undefined
         this.isMoving = false
         this.switchingPosition = false
+        this.switchTimer = 0
         this.direction      = ""
         this.switchVelocity = 0
         this.x              = options.x             ? options.x : 0
@@ -474,7 +491,7 @@ class Catterpillar  {
     move(direction: "left" | "right") : Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.direction = direction
-        
+            this.switchTimer = new Date().getTime()
             if (!this.world) {
                 return reject(new Error("Missing required variables mWorld | ground | catterPillar.composite"))
             }
