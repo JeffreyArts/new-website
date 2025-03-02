@@ -97,7 +97,7 @@ class Catterpillar  {
         butt: Matter.Body
         } {
 
-        const bodyParts = Matter.Composites.stack(this.x, this.y, this.bodyLength, 1, this.bodyPart.size + 1, 0, (x:number, y:number) => {
+        const bodyParts = Matter.Composites.stack(this.x, this.y, this.bodyLength, 1, this.bodyPart.size + 2, 0, (x:number, y:number) => {
             const bodyPart = this.#createBodyPart()
             bodyPart.body.mass = 10
 
@@ -126,7 +126,7 @@ class Catterpillar  {
                         bodyB: prev,
                         pointA: {x: this.bodyPart.size/2, y:0},
                         pointB: {x: 0, y:0},
-                        length: this.bodyPart.size * this.floppiness,
+                        length: (this.bodyPart.size + 2) * this.floppiness,
                         stiffness: this.bodyPart.stiffness,
                         label: "bodyPartConnection",
                         render: {
