@@ -1,26 +1,33 @@
 <template>
     <div class="model3D-block">
         <iframe :src="url" frameborder="0" allow="fullscreen" allowfullscreen ref="model3D" class="model3D-iframe" />
-
-        <span @click="setFullscreen" class="model3D-block-fullscreen-button">
-            <jaoIcon name="fullscreen" size="medium" />
-        </span>
+        <div class="model3D-icons">
+            <span v-if="options.downloadable" class="action" @click="downloadModel">
+                <jaoIcon name="download" size="medium" />
+            </span>
+            <span @click="setFullscreen" class="action">
+                <jaoIcon name="fullscreen" size="medium" />
+            </span>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import jaoIcon from "./../../jao-icon.vue"
+import { saveAs } from 'file-saver';
 
 export type Model3DBlock = {
     blockType: "model3D"
     size: number
     id: string
     color: string
+    downloadable: boolean
     source: {
         id: string
         mimeType: string
         url: string
+        filename: string
         thumbnailURL: string
     }
 }
@@ -71,6 +78,10 @@ export default defineComponent ({
             const model3D = this.$refs["model3D"] as HTMLIFrameElement
             model3D.requestFullscreen()
         },
+        downloadModel() {
+            const url = `${import.meta.env.VITE_PAYLOAD_ENDPOINT}/${this.options.source.url}`
+            saveAs(url, this.options.source.filename)
+        }
     },
 })
 
@@ -89,26 +100,36 @@ export default defineComponent ({
     aspect-ratio: 1;
 }
 
-.model3D-block-fullscreen-button {
-    display: inline-block;
-    transition: var(--transition-default);
+.model3D-icons {
+    display: flex;
+    gap: 8px;
     padding: 8px 4px 4px 8px;
     position: absolute;
     bottom: 0;
     right: 0;
+    height: 26px;
 
-    &:hover,
-    &:focus {
-        background: rgba(255,255,255,.8);
+    .action {
+        transition: var(--transition-default);
+        display: inline-block;
+        
+
+        &:hover,
+        &:focus {
+            background: rgba(255,255,255,.8);
+            svg {
+                translate: 0 -26px;
+                height: 52px;
+            }
+        }
         svg {
-            height: 52px;
+            transition: var(--transition-default);
+            height: 26px;
+            color: #111;
         }
     }
-    svg {
-        transition: var(--transition-default);
-        height: 26px;
-        color: #111;
-    }
 }
+
+
 
 </style>
