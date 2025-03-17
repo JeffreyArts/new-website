@@ -6,6 +6,9 @@
         <span v-if="!link">
             <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent"/>
         </span>
+        <span class="image-block-title" v-if="options.title">
+            {{options.title}}
+        </span>
     </figure>
 </template>
 
@@ -16,6 +19,7 @@ import gsap from "gsap"
 export type ImageBlock = {
     blockType: "image"
     link: string
+    title: string
     description: string
     image: {
         width: number
@@ -251,11 +255,26 @@ export default defineComponent ({
 @use "./../../../assets/scss/variables.scss";
 .image-block {
     margin: 0;
+    position: relative;
     
     img {
         width: 100%;
         object-fit: cover;
+        display: block;
     }
+}
+
+.image-block-title {
+    display: inline-block;
+    background-color: var(--contrast-color);
+    color: var(--bg-color);
+    position: absolute;
+    bottom: -8px;
+    left: -10px;
+    padding: 8px;
+    font-size: 14px;
+    font-family: 'Fixedsys';
+    max-width: 80%;
 }
 
 </style>

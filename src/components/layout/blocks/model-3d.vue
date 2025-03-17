@@ -9,6 +9,9 @@
                 <jaoIcon name="fullscreen" size="medium" />
             </span>
         </div>
+        <span class="model3D-block-title" v-if="options.title">
+            {{options.title}}
+        </span>
     </div>
 </template>
 
@@ -23,6 +26,7 @@ export type Model3DBlock = {
     id: string
     color: string
     downloadable: boolean
+    title: string
     source: {
         id: string
         mimeType: string
@@ -105,7 +109,7 @@ export default defineComponent ({
     gap: 8px;
     padding: 8px 4px 4px 8px;
     position: absolute;
-    bottom: 0;
+    bottom: 2px;
     right: 0;
     height: 26px;
 
@@ -131,5 +135,17 @@ export default defineComponent ({
 }
 
 
+.model3D-block-title {
+    display: inline-block;
+    background-color: var(--contrast-color);
+    color: var(--bg-color);
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    padding: 8px;
+    font-size: 14px;
+    font-family: 'Fixedsys';
+    max-width: calc(100% - 64px);
+}
 
 </style>
