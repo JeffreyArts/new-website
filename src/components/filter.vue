@@ -61,6 +61,11 @@ import { BlockType } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
 import { map, filter, find } from "lodash"
 import { PageType } from "@/model/payload/page"
+import ScrollTrigger from "gsap/ScrollTrigger"
+import gsap from "gsap"
+
+// Registreer ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger)
 
 type TargetCollections = "projects" | "pieces"
 
@@ -201,66 +206,49 @@ export default defineComponent({
     mounted() {
         this.updateLayoutSize()
         
-        document.addEventListener("scroll", this.onScrollEvent)
         window.addEventListener("resize", this.onResizeEvent)
         window.addEventListener("layoutLoaded", () => {
             // This custom event is fired when all blocks have been loaded
-            setTimeout(this.onScrollEvent)
+            setTimeout(() => this.setupScrollTrigger())
         }) 
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
+        // Cleanup ScrollTrigger
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     },
     methods: {
         onResizeEvent() {
             this.updateLayoutSize()
         },
-        onScrollEvent() {
-            if (this.updating) {
-                return
-            }
-
-            if (!this.hasNextPage) {
-                return
-            }
-
-            const htmlEl = document.querySelector("html") as HTMLElement
+        setupScrollTrigger() {
             const layoutWrapper = document.getElementById("filterLayout")
-            if (!layoutWrapper) {
-                return
-            }
-            const layout = layoutWrapper.querySelector(".layout")
-            // console.log(layout.classList)
-            // Skip loading new items when the current ones have not yet been processed
-            if (!layout || layout.classList.contains('__isProcessing')) {
-                return
-            }
-            
-            const blocks = layout.querySelectorAll(".block")
-            let lastBlock = {
-                block: undefined,
-                y: 0
-            } as {
-                block: undefined | HTMLElement,
-                y: number
-            }
-            
-            blocks.forEach(Block => {
-                const block = Block as HTMLElement
-                if (block.offsetTop + block.clientHeight > lastBlock.y) {
-                    lastBlock =  {
-                        block,
-                        y: block.offsetTop 
-                    }
+            if (!layoutWrapper) return
+
+           
+
+            ScrollTrigger.create({
+                trigger: layoutWrapper,
+                start: "bottom bottom+=100%",
+                end: "bottom bottom",
+                // markers: {
+                //     startColor: "green",
+                //     endColor: "red"
+                // },
+                onUpdate: (self) => {
+                    // debugText.textContent = `Scroll: ${Math.round(self.progress * 100)}%`
+                },
+                onEnter: () => {
+                    if (this.updating || !this.hasNextPage) return
+                    
+                    const layout = layoutWrapper.querySelector(".layout")
+                    if (!layout || layout.classList.contains('__isProcessing')) return
+
+                    // console.log('%cTriggering new page load', 'background: #4CAF50; color: white; padding: 4px 8px;')
+                    this.page = this.page + 1
+                    this.updateResults(this.page)
                 }
             })
-
-            const scrollOffset = htmlEl.scrollTop - layoutWrapper.offsetTop + window.innerHeight
-            const endOffScroll = document.body.clientHeight  - layoutWrapper.offsetTop
-            if (scrollOffset > endOffScroll - window.innerHeight * .5) {
-                this.page = this.page + 1
-                this.updateResults(this.page)
-            }
         },
         setDefaults() {
             // Process filter prefils
@@ -471,49 +459,11 @@ export default defineComponent({
                     console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
                     this.updating = false
                 })
-                
-                // nextTick(() => {
-                //     const refLayout = this.$refs.layout
-                    
-                //     if (!refLayout) {
-                //         return
-                //     }
-
-                //     if (this.firstLoad) {
-                //         refLayout.fadeInNewBlocks().then(() => {
-                //             refLayout.updateBlockSizes()
-                //             setTimeout(()=>{
-
-                //                 nextTick(refLayout.updateLayout())
-                //             })
-                //         }).catch(console.error)
-                //     } else {
-                //         this.updateLayout()
-                //     }
-                // })
             }).catch(err => {
                 console.error(err)
                 this.updating = false
             })
         },
-        // updateLayout() {
-        //     if (this.firstLoad) {
-        //         return
-        //     }
-            
-        //     this.firstLoad = true
-        //     const refLayout = this.$refs.layout
-            
-        //     if (!refLayout) {
-        //         return
-        //     }
-        //     refLayout.fadeInAllBlocks()
-            
-        //     nextTick(() => {
-        //         refLayout.updateBlockSizes()
-        //         nextTick(refLayout.updateLayout())
-        //     })
-        // },
     }
 })
 </script>
