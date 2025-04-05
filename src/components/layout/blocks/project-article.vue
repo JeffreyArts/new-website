@@ -40,6 +40,14 @@ export default defineComponent ({
             required: true,
         },
     },
+    watch: {
+        "options.project.thumbnail": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+        }
+    },
     data: function() {
         return {
             hoverEvent: undefined as undefined | gsap.core.Tween,
@@ -73,8 +81,6 @@ export default defineComponent ({
             }
             return src
         }
-    },
-    watch: {
     },
     mounted() {
         if (typeof window === "undefined") {

@@ -1,14 +1,13 @@
 <template>
     <section class="default-template" v-if="!is404">
-
         <Breadcrumbs />
-        
-        <Layout v-if="Payload?.page?.data?.layout" :options="{
+
+        <Layout v-if="Payload?.page?.data?.layout" id="default-layout" ref="default-layout" :options="{
             layoutGap: 40,
             id: Payload.page?.data.id,
             layoutSize: layoutSize,
             blocks: pageBlocks
-        }" ref="layout"/>
+        }"/>
         <FilterComponent v-if="Payload.page?.data?.filter?.name && showFilters" :options="Payload.page?.data?.filter" :pageDetails="Payload.page.data" ref="filter" @filterUpdated="updateFilter"/>
     </section>
 
@@ -17,7 +16,7 @@
 
 
 <script lang="ts">
-import { defineComponent, ref, nextTick } from "vue"
+import { defineComponent } from "vue"
 import gsap from "gsap"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
@@ -89,23 +88,50 @@ export default defineComponent ({
             breakpoint: "",
             layoutSize: 8,
             is404: false,
-            pageBlocks: [] as Array<BlockType>
+            fadeOutCompleted: false,
+            pageBlocks: [] as Array<BlockType>,
+            tempPageBlocks: [] as Array<BlockType>
         }
     },
     watch: {
-        "Payload.page.data.blocks": {
-            handler() {
-                this.pageBlocks = []
-                this.$nextTick(() => {
-                    if (this.Payload.page) {
-                        this.pageBlocks = this.Payload.page.data.blocks
-                    }
-                })
-            }
-        },
         "$route.path": {
             async handler() {
-                // Remove old content
+                this.fadeOutCompleted = false
+                const blokElements = document.querySelectorAll("#default-layout .block")
+                if (blokElements.length > 0) {
+                    for (let index = 0; index < blokElements.length; index++) {
+                        const element = blokElements[index];
+                        const elementBottom = (element as HTMLElement).offsetTop + (element as HTMLElement).offsetHeight;
+                        const viewportHeight = window.innerHeight;
+                        let onCompleteAdded = false
+
+                        gsap.to(element, {
+                            opacity: 0,
+                            duration: .24,
+                            delay: index * .1,
+                            ease: "sine.out",
+                            onComplete: () => {
+                                if ((elementBottom > viewportHeight || index === blokElements.length - 1)  && !onCompleteAdded) {
+                                    setTimeout(() => {
+                                        this.fadeOutCompleted = true
+                                        onCompleteAdded = true
+                                    }, 240)
+                                }
+                            }
+                        })
+                    }
+                } else {
+                    this.fadeOutCompleted = true
+                }
+                // this.fadeOutCompleted = true
+
+                // Scroll to top
+                gsap.to(window, {
+                    scrollTo: { y: 0 }, // Scroll to the top of the page
+                    duration: .8,      // Duration of the animation in seconds
+                    ease: "sine.out"  // Use the bounce easing for the effect
+                });
+                
                 await this.loadPage()
                 if (typeof window === "undefined") {
                     return
@@ -118,12 +144,6 @@ export default defineComponent ({
                     })
                 }
 
-                // Scroll to top
-                gsap.to(window, {
-                    scrollTo: { y: 0 }, // Scroll to the top of the page
-                    duration: .4,      // Duration of the animation in seconds
-                    ease: "sine.out"  // Use the bounce easing for the effect
-                });
                 
                 // Add new content
                 this.updateLayoutSize()
@@ -147,11 +167,52 @@ export default defineComponent ({
             try {
                 const res = await this.Payload.getPageByPath(this.$route.path)
                 // this.Payload.page?.data = res as PageType
-
+                if (!res) {
+                    this.is404 = true
+                    return
+                }
+                this.tempPageBlocks = res.blocks
+                setTimeout(() => {
+                    this.updatePageBlocks()
+                }, 0)
             } catch (error) {
                 console.error("Error loading page:", error)
                 this.is404 = true
                 // this.$router.push("/404")
+            }
+        },
+        updatePageBlocks() {
+            if (!this.fadeOutCompleted) {
+                // Repeat this function until fadeOutCompleted is true
+                setTimeout(() => {
+                    this.updatePageBlocks()
+                }, 100)
+                return
+            }
+
+            if (this.Payload.page) {
+                if (this.$refs["default-layout"]) {
+                    this.$refs["default-layout"].blocks = []
+                }
+                console.log("route changed", this.Payload.page.data)
+                this.pageBlocks = this.Payload.page.data.blocks
+                this.tempPageBlocks = []
+
+                setTimeout(() => {
+                    const blokElements = document.querySelectorAll("#default-layout .block")
+                    if (blokElements.length > 0) {
+                        for (let index = 0; index < blokElements.length; index++) {
+                            const element = blokElements[index];
+
+                            gsap.fromTo(element, { opacity: 0 },{
+                                opacity: 1,
+                                duration: .24,
+                                delay: .1 + index * .1,
+                                ease: "sine.out"
+                            })
+                        }
+                    }
+                }, 0)
             }
         },
         updateLayoutSize() {

@@ -47,16 +47,18 @@ export default defineComponent ({
             required: true
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data() {
         return {
         }
-    },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
-        }
-        console.log("3d model block loaded", this.options)
-        this.$emit("blockLoaded")
     },
     computed: {
         url() {

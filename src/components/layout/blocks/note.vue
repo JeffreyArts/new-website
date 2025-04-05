@@ -26,18 +26,18 @@ export default defineComponent ({
             required: true
         },
     },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
         }
     },
     methods: {
         textLoaded() {
-            // console.log("text loaded", this.$el.clientWidth, this.$el.clientHeight, this.$el.innerHTML)
-            setTimeout(()=> {
-                // Needs rework 
-                this.$emit("blockLoaded")
-            })
+            this.$emit("blockLoaded")
         }
     }
 })

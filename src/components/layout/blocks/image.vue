@@ -108,6 +108,13 @@ export default defineComponent ({
                 }
             },
             immediate: true
+        },
+        "options.image": {
+            handler() {
+                setTimeout(() => {
+                    this.$emit("blockLoaded")
+                })
+            }
         }
     },
     mounted() {

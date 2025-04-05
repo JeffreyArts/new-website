@@ -27,19 +27,20 @@ export default defineComponent ({
             required: true
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data() {
         return {
             fontSize: 24,
         }
-    },
-    watch: {
-        "options.text": {
-            handler() {
-                this.$emit("blockLoaded")
-            },
-            immediate: true
-        }
-    },
+    }
 })
 
 </script>

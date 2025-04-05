@@ -34,10 +34,12 @@ export default defineComponent ({
     computed: {
     },
     watch:{
-        "options.year": {
+        "options": {
             handler() {
                 this.updateSVG()
+                this.$emit("blockLoaded")
             },
+            deep: true,
             immediate: true
         }
     },
@@ -109,7 +111,6 @@ export default defineComponent ({
                         }
                     })
                 })
-                this.$emit("blockLoaded")
             })
         }
     }

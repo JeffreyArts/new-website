@@ -65,18 +65,6 @@ export default defineComponent ({
     computed: {
     },
     watch:{
-        "options.id": {
-            handler() {
-                this.blocks = []
-                this.loaded = false
-                if (this.$el) {
-                    gsap.set(this.$el.querySelectorAll(".block"), {
-                        opacity: 0
-                    })
-                }
-            }, 
-            immediate: true
-        },
         "options.blocks": {
             handler(blocks) {
                 if (blocks.length <= 0) {
@@ -97,10 +85,11 @@ export default defineComponent ({
         }
     },
     mounted() {
-        // this.fadeInAllBlocks()
         if (typeof window !== "undefined") {
             window.addEventListener("resize", this.__onResizeEvent)
         }
+        this.newBlocks = []
+        dispatchEvent(new Event('layoutLoaded'))
     },
     unmounted() {
         window.removeEventListener("resize", this.__onResizeEvent)
@@ -213,11 +202,13 @@ export default defineComponent ({
                     window.dispatchEvent(new CustomEvent("layoutHasChanged"))
                 }, 400)
                 
-                this.fadeInBlocks().then(async() => {
+                setTimeout(() => {
                     this.loaded = true
                     this.processing = false
+                    this.newBlocks = []
+                    dispatchEvent(new Event('layoutLoaded'))
                     this.updateLayout()
-                })
+                }, 0)
             }
         },
         updateLayout() {
@@ -228,43 +219,6 @@ export default defineComponent ({
             this.layoutWidth = this.$el.clientWidth
             this.widthRatio = (this.layoutWidth) / this.options.layoutSize
             this.__updateLayoutHeight()
-        },
-        fadeInBlocks() {
-            return new Promise(async(resolve, reject) => {
-
-                const promises = [] as Promise<void>[]
-                this.newBlocks = _.sortBy(this.newBlocks,["y", "x"])
-                this.newBlocks.forEach((newBlock, newBlockIndex) => {
-                    const blockElement = this.$el.querySelector(`#block-${newBlock.id}`)
-                    let delay = 2.4 / this.newBlocks.length * newBlockIndex
-                    let duration = 2.4 / this.newBlocks.length
-                    if (duration < .4) {
-                        duration = .4
-                    }
-
-                    promises.push(new Promise((resolve)=> {
-                        gsap.fromTo(blockElement, {
-                            opacity: 0
-                        },{
-                            opacity: 1,
-                            ease:"circ.in",
-                            duration,
-                            delay,
-                            onComplete: () => {
-                                resolve()
-                            }
-                        })
-                    }))
-                })
-
-                Promise.all(promises).then(() => {
-                    // this.updateBlockSizes()
-                    // Reset newBlocks array
-                    this.newBlocks = []
-                    dispatchEvent(new Event('layoutLoaded'))
-                    resolve(true)
-                })
-            })
         },
         updateBlockSizes() {
             return new Promise(async (resolve) => {

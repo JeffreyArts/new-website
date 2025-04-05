@@ -23,14 +23,18 @@ export default defineComponent ({
             required: true
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data() {
         return {
         }
-    },
-    mounted() {        
-        setTimeout(() => {
-            this.$emit("blockLoaded")
-        })
     }
 })
 

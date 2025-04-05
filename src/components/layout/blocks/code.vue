@@ -49,6 +49,15 @@ export default defineComponent ({
             required: true
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data() {
         return {
             maxHeight: undefined as undefined | number
@@ -58,9 +67,6 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
-        setTimeout(()=> {
-            this.$emit("blockLoaded")
-        })
 
         window.addEventListener("layoutChange", this.onLayoutChange)
     },

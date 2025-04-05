@@ -35,6 +35,15 @@ export default defineComponent ({
             payload
         }
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            immediate: true,
+            deep: true
+        }
+    },
     data: () => {
         return {
             favs: 0,
@@ -68,7 +77,6 @@ export default defineComponent ({
             return
         }
         
-        this.$emit("blockLoaded")
     },
     methods: {
         async setSelfLove() {

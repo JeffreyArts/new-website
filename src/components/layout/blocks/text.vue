@@ -20,23 +20,24 @@ export default defineComponent ({
     components: {
         SlateText
     }, 
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     props: {
         options: {
             type: Object as PropType<TextBlock>,
             required: true
         },
     },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
-        }
-    },
     methods: {
         textLoaded() {
-            setTimeout(()=> {
-                // Needs rework 
-                this.$emit("blockLoaded")
-            })
+            this.$emit("blockLoaded")
         }
     }
 })

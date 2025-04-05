@@ -64,6 +64,15 @@ export default defineComponent ({
             required: true
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data() {
         return {
             scale: 1,
@@ -82,7 +91,6 @@ export default defineComponent ({
         this.onLayoutChange()
         this.setTitle()
 
-        this.$emit("blockLoaded")
         window.addEventListener("layoutChange", this.onLayoutChange)
     },
     unmounted() {

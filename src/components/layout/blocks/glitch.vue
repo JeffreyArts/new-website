@@ -44,9 +44,6 @@ export default defineComponent ({
             },
         }
     },
-    computed: {
-
-    },
     watch:{
         "options": {
             handler(val) {
@@ -72,19 +69,11 @@ export default defineComponent ({
                 if (val.fontSize) {
                     this.fontSize = val.fontSize
                 }
+                this.$emit("blockLoaded")
             },
             deep: true,
             immediate: true
         }
-    },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
-        }
-        
-        setTimeout(() => {
-            this.$emit("blockLoaded")
-        })
     }
 })
 

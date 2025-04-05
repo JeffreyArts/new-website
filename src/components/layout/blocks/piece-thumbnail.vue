@@ -189,6 +189,12 @@ export default defineComponent ({
         }
     },
     watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true
+        }
     },
     mounted() {
         if (typeof window === "undefined") {

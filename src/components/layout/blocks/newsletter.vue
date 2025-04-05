@@ -26,6 +26,15 @@ export default defineComponent ({
             required: true,
         },
     },
+    watch: {
+        "options": {
+            handler() {
+                this.$emit("blockLoaded")
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     data: function() {
         return {
             email: "",
@@ -37,8 +46,6 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
-        
-        this.$emit("blockLoaded")
 
         window.addEventListener("layoutChange", this.updateLayoutChange)
     },
