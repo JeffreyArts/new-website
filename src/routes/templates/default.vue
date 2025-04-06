@@ -141,10 +141,6 @@ export default defineComponent ({
                         meta: setMeta(this.$route)
                     })
                 }
-
-                
-                // Add new content
-                this.updateLayoutSize()
             }, 
             immediate: true
         }
@@ -191,6 +187,9 @@ export default defineComponent ({
             }
 
             if (this.Payload.page) {
+                // Add new content
+                this.updateLayoutSize()
+
                 if (this.$refs["default-layout"]) {
                     const defaultLayout = this.$refs["default-layout"] as InstanceType<typeof Layout>
                     defaultLayout.blocks = []
@@ -213,7 +212,7 @@ export default defineComponent ({
                             })
                         }
                     }
-                }, 0)
+                })
             }
         },
         updateLayoutSize() {
