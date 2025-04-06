@@ -1,53 +1,55 @@
 <template>
-    <header class="site-filter">
-        <div class="site-filter-left">
-            <jaoIcon :name="filterIcon" size="large" :transit-effect="{duration: 1, delay:0.02, effect: 'shuffle'}" class="site-filter-icon"/>
-            <h4 class="site-filter-name">{{ filterName }}</h4>
-        </div>
-        
-        <div class="site-filter-right">
-            <template v-for="filter,k in options.displayFilters" :key="k">
-                <checkBox :style="`order: ${k}`"
-                    v-if="filter == 'onlyFavorites'"
-                    class="site-filter-section"
-                    name="Only favorites"
-                    v-model="filterVal.onlyFavorites"
-                    :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
-                    
-                <selectBox :style="`order: ${k}`"
-                    v-if="filter == 'year'"
-                    class="site-filter-section"
-                    name="Year"
-                    @change="updateYear"
-                    :options="filterOptions.year"
-                    />
-
-                <selectBox :style="`order: ${k}`"
-                    v-if="filter == 'series'"
-                    class="site-filter-section"
-                    @change="updateSeries"
-                    name="Series"
-                    :options="filterOptions.series"
-                    />
-                    
-                <selectBox :style="`order: ${k}`"
-                    v-if="filter == 'categories'"
-                    class="site-filter-section"
-                    @change="updateCategories"
-                    name="Categories"
-                    :options="filterOptions.categories"
-                    />
-            </template>
-        </div>
+    <div class="site-filter-container">
+        <header class="site-filter">
+            <div class="site-filter-left">
+                <jaoIcon :name="filterIcon" size="large" :transit-effect="{duration: 1, delay:0.02, effect: 'shuffle'}" class="site-filter-icon"/>
+                <h4 class="site-filter-name">{{ filterName }}</h4>
+            </div>
             
-    </header>
-    <Layout v-if="blocks.length > 0" id="filterLayout" :options="{
-            layoutGap: 40,
-            id: 'filter',
-            layoutSize: layoutSize,
-            blocks: blocks
-        }"
-        ref="layout"/>
+            <div class="site-filter-right">
+                <template v-for="filter,k in options.displayFilters" :key="k">
+                    <checkBox :style="`order: ${k}`"
+                        v-if="filter == 'onlyFavorites'"
+                        class="site-filter-section"
+                        name="Only favorites"
+                        v-model="filterVal.onlyFavorites"
+                        :class="[filterVal.onlyFavorites ? '__isSelected' : '']" />
+                        
+                    <selectBox :style="`order: ${k}`"
+                        v-if="filter == 'year'"
+                        class="site-filter-section"
+                        name="Year"
+                        @change="updateYear"
+                        :options="filterOptions.year"
+                        />
+
+                    <selectBox :style="`order: ${k}`"
+                        v-if="filter == 'series'"
+                        class="site-filter-section"
+                        @change="updateSeries"
+                        name="Series"
+                        :options="filterOptions.series"
+                        />
+                        
+                    <selectBox :style="`order: ${k}`"
+                        v-if="filter == 'categories'"
+                        class="site-filter-section"
+                        @change="updateCategories"
+                        name="Categories"
+                        :options="filterOptions.categories"
+                        />
+                </template>
+            </div>
+                
+        </header>
+        <Layout v-if="blocks.length > 0" id="filter-layout" :options="{
+                layoutGap: 40,
+                id: 'filter',
+                layoutSize: layoutSize,
+                blocks: blocks
+            }"
+            ref="layout"/>
+    </div>
 </template>
 
 
@@ -129,7 +131,10 @@ export default defineComponent({
             handler() {
                 // Set page back to default when route has changed
                 this.page = 1
-            }
+                this.blocks = []
+                this.updateLayoutSize()
+            },
+            immediate: true
         },
         "options.name": {
             handler(Name: string) {
@@ -204,12 +209,10 @@ export default defineComponent({
     beforeCreate() {
     },
     mounted() {
-        this.updateLayoutSize()
-        
         window.addEventListener("resize", this.onResizeEvent)
         window.addEventListener("layoutLoaded", () => {
             // This custom event is fired when all blocks have been loaded
-            setTimeout(() => this.setupScrollTrigger())
+            setTimeout(this.setupScrollTrigger)
         }) 
     },
     unmounted() {
@@ -222,11 +225,11 @@ export default defineComponent({
             this.updateLayoutSize()
         },
         setupScrollTrigger() {
-            const layoutWrapper = document.getElementById("filterLayout")
+            const layoutWrapper = document.getElementById("filter-layout")
             if (!layoutWrapper) return
 
            
-
+            
             ScrollTrigger.create({
                 trigger: layoutWrapper,
                 start: "bottom bottom+=100%",
@@ -235,9 +238,6 @@ export default defineComponent({
                 //     startColor: "green",
                 //     endColor: "red"
                 // },
-                onUpdate: (self) => {
-                    // debugText.textContent = `Scroll: ${Math.round(self.progress * 100)}%`
-                },
                 onEnter: () => {
                     if (this.updating || !this.hasNextPage) return
                     
@@ -420,9 +420,9 @@ export default defineComponent({
 
             Filter.query(this.options.targetCollection, query).then((data) => {
                 this.hasNextPage = data.hasNextPage
-                
+                let blocks = [] as Array<BlockType>
                 if (this.options.targetCollection === "projects") {                    
-                    const blocks = map(data.docs, (doc) => {
+                    blocks = map(data.docs, (doc) => {
                         const block = {
                             size: 3,
                             id: doc.id,
@@ -439,7 +439,7 @@ export default defineComponent({
                     })
                     this.blocks = [...this.blocks, ...blocks]
                 } else if (this.options.targetCollection === "pieces") {                    
-                    const blocks = map(data.docs, (doc) => {
+                    blocks = map(data.docs, (doc) => {
                         const block = {
                             size: 3,
                             id: doc.id,
@@ -454,12 +454,32 @@ export default defineComponent({
                     this.blocks = [...this.blocks, ...blocks]
                 }  
 
+                setTimeout(() => {
+                    const filterLayout = document.getElementById("filter-layout")
+                    if (!filterLayout) return
+
+                    for (let i=0; i < blocks.length; i++) {
+                        const block = blocks[i]
+                        const blockElement = filterLayout.querySelector(`#block-${block.id}`)
+                        if (blockElement) {
+                            gsap.fromTo(blockElement, {
+                                opacity: 0
+                            }, {
+                                opacity: 1,
+                                duration: .8,
+                                delay: 0.1*i
+                            })
+                        }
+                    }
+                }, 1000)
+                
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
                     console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
                     this.updating = false
                 })
             }).catch(err => {
+                this.$emit("filterUpdated")
                 console.error(err)
                 this.updating = false
             })
@@ -558,6 +578,10 @@ export default defineComponent({
     &.__isHidden {
         display: none;
     }
+}
+
+.site-filter-container {
+    min-height: 512px;
 }
 
 

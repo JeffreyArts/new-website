@@ -90,18 +90,21 @@ export default defineComponent ({
             is404: false,
             fadeOutCompleted: false,
             pageBlocks: [] as Array<BlockType>,
-            tempPageBlocks: [] as Array<BlockType>
+            tempPageBlocks: [] as Array<BlockType>,
+            abortController: null as AbortController | null
         }
     },
     watch: {
         "$route.path": {
             async handler() {
                 this.fadeOutCompleted = false
-                const blokElements = document.querySelectorAll("#default-layout .block")
+                this.loadPage()
+
+                const blokElements = Array.from(document.querySelectorAll("#default-layout .block"))
+                    .sort((a, b) => (a as HTMLElement).offsetTop - (b as HTMLElement).offsetTop);
                 if (blokElements.length > 0) {
                     for (let index = 0; index < blokElements.length; index++) {
-                        const element = blokElements[index];
-                        const elementBottom = (element as HTMLElement).offsetTop + (element as HTMLElement).offsetHeight;
+                        const element = blokElements[index] as HTMLElement;
                         const viewportHeight = window.innerHeight;
                         let onCompleteAdded = false
 
@@ -111,7 +114,7 @@ export default defineComponent ({
                             delay: index * .1,
                             ease: "sine.out",
                             onComplete: () => {
-                                if ((elementBottom > viewportHeight || index === blokElements.length - 1)  && !onCompleteAdded) {
+                                if ((element.offsetTop > viewportHeight || index === blokElements.length - 1)  && !onCompleteAdded) {
                                     setTimeout(() => {
                                         this.fadeOutCompleted = true
                                         onCompleteAdded = true
@@ -123,7 +126,6 @@ export default defineComponent ({
                 } else {
                     this.fadeOutCompleted = true
                 }
-                // this.fadeOutCompleted = true
 
                 // Scroll to top
                 gsap.to(window, {
@@ -131,11 +133,6 @@ export default defineComponent ({
                     duration: .8,      // Duration of the animation in seconds
                     ease: "sine.out"  // Use the bounce easing for the effect
                 });
-                
-                await this.loadPage()
-                if (typeof window === "undefined") {
-                    return
-                }
 
                 if (this.head) {
                     this.head.patch({
@@ -192,9 +189,10 @@ export default defineComponent ({
 
             if (this.Payload.page) {
                 if (this.$refs["default-layout"]) {
-                    this.$refs["default-layout"].blocks = []
+                    const defaultLayout = this.$refs["default-layout"] as InstanceType<typeof Layout>
+                    defaultLayout.blocks = []
                 }
-                console.log("route changed", this.Payload.page.data)
+
                 this.pageBlocks = this.Payload.page.data.blocks
                 this.tempPageBlocks = []
 
@@ -241,7 +239,9 @@ export default defineComponent ({
             this.layoutSize = this.Payload.page?.data.layout[size]
         },
         updateFilter() {
-            // Do stuff if you'd wish
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("layoutHasChanged"))
+            })
         }
     }
 })

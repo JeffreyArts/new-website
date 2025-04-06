@@ -120,7 +120,20 @@ export default class Physics {
                     this.updateBlock(block.id, {...dimensions})
                 }
             })
-            Matter.Body.setPosition(this.ground, { x: this.layoutWidth/2, y: this.layoutHeight + 192 })
+
+            // Verwijder oude ground
+            Matter.World.remove(this.engine.world, this.ground)
+            
+            // Voeg nieuwe ground toe
+            this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 192, this.layoutWidth, 400, {
+                isStatic: true,
+                label: "ground",
+                collisionFilter: {
+                    category: 0x0003,
+                    mask: 0x0002
+                }
+            })
+            Matter.World.add(this.engine.world, this.ground)
 
             // @ts-ignore
             Matter.Render.setSize(this.render, this.layoutWidth, this.layoutHeight)
