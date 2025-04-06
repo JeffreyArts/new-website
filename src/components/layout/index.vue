@@ -184,7 +184,7 @@ export default defineComponent ({
             }   
             block.loaded = true
             this.newBlocks.push(block)
-            
+            this.updateBlockSizes()
             if (_.every(_.map(this.blocks, block => block.loaded))) {
                 this.loaded = false
                 this.processing = true
