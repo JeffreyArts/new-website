@@ -1,7 +1,7 @@
 <template>
     <div class="project-article-block">
         <router-link class="project-article-block-wrapper" :to="options.project.path">
-            <h2 class="project-article-title" ref="title">
+            <h2 class="project-article-title" :class="[options.project.title.length > 16 ? '__isSmall' : '']" ref="title">
                 {{ options.project.title }}
             </h2>
             <figure class="project-article-block-image-wrapper">
@@ -212,6 +212,13 @@ export default defineComponent ({
     left: 16px;
     font-family: var(--accent-font);
     max-width: calc(100% - 60px);
+    @media (max-width: 640px) {
+        font-size: 16px;
+        
+        &.__isSmall {
+            font-size: 14px;
+        }
+    }
 }
 
 .project-article-button {

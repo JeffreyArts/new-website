@@ -197,6 +197,7 @@ export default defineComponent ({
         },
         mouseEnterZoom(target: HTMLElement) {
             const img = target.querySelector("img") 
+            const title = this.$el.querySelector(".image-block-title") 
             if (!img) {
                 return
             }
@@ -207,7 +208,14 @@ export default defineComponent ({
 
             this.hoverEvent = gsap.to(img, {
                 scale: (img.clientWidth + 40) / img.clientWidth,
-                boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.16)`,
+                // boxShadow: `0 0 ${img.clientWidth/16}px rgba(0,0,0,.16)`,
+                duration: .64,
+                zIndex: 1,
+                ease: "bounce.out"
+            })
+
+            gsap.to(title, {
+                bottom: -20,
                 duration: .64,
                 zIndex: 1,
                 ease: "bounce.out"
@@ -231,6 +239,7 @@ export default defineComponent ({
         mouseLeaveZoom(target: HTMLElement) {
             
             const img = target.querySelector("img") 
+            const title = this.$el.querySelector(".image-block-title") 
             if (!img) {
                 return
             }
@@ -241,7 +250,13 @@ export default defineComponent ({
 
             this.hoverEvent = gsap.to(img, {
                 scale: 1,
-                boxShadow: "0 0 0px rgba(0,0,0,0)",
+                // boxShadow: "0 0 0px rgba(0,0,0,0)",
+                duration: .8,
+                ease: "power3.out"
+            })
+
+            gsap.to(title, {
+                bottom: -8,
                 duration: .8,
                 ease: "power3.out"
             })
@@ -281,7 +296,7 @@ export default defineComponent ({
     padding: 8px;
     font-size: 14px;
     font-family: 'Fixedsys';
-    max-width: 80%;
+    max-width: calc(100% + 16px);
 }
 
 </style>
