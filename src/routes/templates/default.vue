@@ -89,6 +89,7 @@ export default defineComponent ({
             layoutSize: 8,
             is404: false,
             fadeOutCompleted: false,
+            pageIsLoading: 0,
             pageBlocks: [] as Array<BlockType>,
             tempPageBlocks: [] as Array<BlockType>,
             abortController: null as AbortController | null
@@ -162,28 +163,30 @@ export default defineComponent ({
     methods: {
         async loadPage() {
             try {
+                this.pageIsLoading++
                 const res = await this.Payload.getPageByPath(this.$route.path)
+                
                 // this.Payload.page?.data = res as PageType
                 if (!res) {
                     this.is404 = true
                     return
                 }
                 this.tempPageBlocks = res.blocks
-                setTimeout(() => {
-                    this.updatePageBlocks()
-                }, 0)
+                this.updatePageBlocks(this.pageIsLoading)
             } catch (error) {
                 console.error("Error loading page:", error)
                 this.is404 = true
-                // this.$router.push("/404")
             }
         },
-        updatePageBlocks() {
+        updatePageBlocks(index: number) {
+            if (index !== this.pageIsLoading) {
+                return
+            }
             if (!this.fadeOutCompleted) {
                 // Repeat this function until fadeOutCompleted is true
                 setTimeout(() => {
-                    this.updatePageBlocks()
-                }, 100)
+                    this.updatePageBlocks(index)
+                }, 50)
                 return
             }
 
