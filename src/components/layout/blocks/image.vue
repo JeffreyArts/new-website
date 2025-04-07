@@ -111,41 +111,25 @@ export default defineComponent ({
         },
         "options.image": {
             handler() {
-                setTimeout(() => {
-                    this.$emit("blockLoaded")
-                })
+                const img = this.$refs["image"] as HTMLImageElement;
+                if (img) {
+                    // Reset de afbeelding eerst
+                    img.src = '';
+                }
+                // Wacht een tick zodat Vue de DOM kan updaten
+                this.$nextTick(() => {
+                    this.loadImage();
+                });
             }
         }
     },
     mounted() {
         if (typeof window === "undefined") {
-            return
+            return;
         }
         
-        const img = this.$refs["image"] as HTMLImageElement
-
-        if (!img) {
-            this.$emit("blockLoaded")
-        }
-        
-        new Promise<void>((resolve) => {
-            if (img.complete) {
-                resolve()
-            } else {
-                img.addEventListener("load", () => {
-                    setTimeout(() => {
-                        resolve()
-                    })
-                })
-            }
-        }).then(() => {
-            this.$emit("blockLoaded")
-        }).catch((err) => {
-            console.error(err)
-            this.$emit("blockLoaded")
-        })
-
-        window.addEventListener("layoutChange", this.updateLayoutChange)
+        this.loadImage();
+        window.addEventListener("layoutChange", this.updateLayoutChange);
     },
     unmounted() {
         window.removeEventListener("layoutChange", this.updateLayoutChange)
@@ -266,6 +250,27 @@ export default defineComponent ({
             document.body.style.backgroundImage = this.bgImageCache
             this.bgSizeCache = ""
             this.bgImageCache = ""
+        },
+        loadImage() {
+            const img = this.$refs["image"] as HTMLImageElement;
+            
+            if (!img) {
+                this.$emit("blockLoaded");
+                return;
+            }
+
+            img.addEventListener("load", () => {
+                this.$emit("blockLoaded");
+            });
+            
+            if (img.complete) {
+                this.$emit("blockLoaded");
+                return;
+            }
+
+            img.addEventListener("error", () => {
+                this.$emit("blockLoaded");
+            });
         },
     }
 })
