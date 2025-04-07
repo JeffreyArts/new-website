@@ -50,7 +50,7 @@ export default defineComponent ({
     },
     data() {
         return {
-            resizeDelay: undefined as undefined | NodeJS.Timeout,
+            timeoutDelay: undefined as undefined | NodeJS.Timeout,
             gap: 40,
             animations: [] as gsap.core.Tween[],
             layoutWidth: 0 as number,
@@ -97,10 +97,13 @@ export default defineComponent ({
     methods: {
 
         __onResizeEvent() { 
-            clearTimeout(this.resizeDelay)
+            if (this.timeoutDelay) {
+                clearTimeout(this.timeoutDelay)
+            }
+
             this.updateLayout()
             this.packerLayout = undefined
-            this.resizeDelay = setTimeout(this.updateBlockSizes, 24)
+            this.timeoutDelay = setTimeout(this.updateBlockSizes, 24)
         },
 
         __addBlocks(newBlocks: BlockType[]){
@@ -184,7 +187,16 @@ export default defineComponent ({
             }   
             block.loaded = true
             this.newBlocks.push(block)
-            this.updateBlockSizes()
+            
+
+            // Delay the updateBlockSizes to prevent it from being called on every block loaded
+            if (this.timeoutDelay) {
+                clearTimeout(this.timeoutDelay)
+            }
+            this.timeoutDelay = setTimeout(this.updateBlockSizes, 240)
+            
+            
+            // Update layout when all blocks are loaded
             if (_.every(_.map(this.blocks, block => block.loaded))) {
                 this.loaded = false
                 this.processing = true

@@ -385,6 +385,5 @@ export default class Physics {
         })
         this.blocks = []
     }
-
 }
 

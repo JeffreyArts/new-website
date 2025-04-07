@@ -123,7 +123,8 @@ export default defineComponent({
                 series: [] as SelectBoxOptions[],
             },
             filterName: "",
-            filterIcon: "empty"
+            filterIcon: "empty",
+            scrollTrigger: null as ScrollTrigger | null
         }
     },
     watch: {
@@ -210,10 +211,7 @@ export default defineComponent({
     },
     mounted() {
         window.addEventListener("resize", this.onResizeEvent)
-        window.addEventListener("layoutLoaded", () => {
-            // This custom event is fired when all blocks have been loaded
-            setTimeout(this.setupScrollTrigger)
-        }) 
+        window.addEventListener("layoutLoaded", this.setupScrollTrigger) 
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
@@ -227,10 +225,11 @@ export default defineComponent({
         setupScrollTrigger() {
             const layoutWrapper = document.getElementById("filter-layout")
             if (!layoutWrapper) return
-
+            if (this.scrollTrigger) {
+                this.scrollTrigger.kill()
+            }
            
-            
-            ScrollTrigger.create({
+            this.scrollTrigger = ScrollTrigger.create({
                 trigger: layoutWrapper,
                 start: "bottom bottom+=100%",
                 end: "bottom bottom",
@@ -458,24 +457,20 @@ export default defineComponent({
                     const filterLayout = document.getElementById("filter-layout")
                     if (!filterLayout) return
 
-                    for (let i=0; i < blocks.length; i++) {
-                        const block = blocks[i]
-                        const blockElement = filterLayout.querySelector(`#block-${block.id}`)
-                        if (blockElement) {
-                            gsap.fromTo(blockElement, {
-                                opacity: 0
-                            }, {
-                                opacity: 1,
-                                duration: .8,
-                                delay: 0.1*i
-                            })
+                    const blockElements = blocks.map(block => filterLayout.querySelector(`#block-${block.id}`)).filter(Boolean);
+                    gsap.fromTo(blockElements, 
+                        { opacity: 0 },
+                        { 
+                            opacity: 1,
+                            duration: 0.8,
+                            stagger: 0.08
                         }
-                    }
-                }, 1000)
+                    );
+                }, 50)
                 
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
-                    console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
+                    // console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
                     this.updating = false
                 })
             }).catch(err => {

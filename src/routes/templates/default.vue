@@ -241,9 +241,7 @@ export default defineComponent ({
             this.layoutSize = this.Payload.page?.data.layout[size]
         },
         updateFilter() {
-            setTimeout(() => {
-                window.dispatchEvent(new CustomEvent("layoutHasChanged"))
-            })
+            // Doe dingen ?
         }
     }
 })
