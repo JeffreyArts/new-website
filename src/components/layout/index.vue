@@ -206,7 +206,6 @@ export default defineComponent ({
                 
                 if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("layoutChange"))
-                    window.dispatchEvent(new CustomEvent("layoutHasChanged"))
                 }
 
                 // Double resize is required, 400 miliseconds is the same amount of how long a single block takes to fade-in
