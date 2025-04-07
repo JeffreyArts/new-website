@@ -395,7 +395,8 @@ export default defineComponent({
             }
 
             if (this.options.name.toLowerCase() === "archive") {
-                query.archived = true
+                // Archive mag ook niet archived projecten tonen
+                // query.archived = true
             }
             
             if (this.options.name.toLowerCase() === "projects") {
