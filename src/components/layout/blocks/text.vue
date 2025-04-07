@@ -54,9 +54,9 @@ export default defineComponent ({
     flex-flow: column;
 
     a {
-        color: var(--blue);
+        color: var(--orange);
         [v="1"] {
-            fill: var(--blue);
+            fill: var(--orange);
             transition: var(--transition-default);
         }
 
@@ -71,11 +71,14 @@ export default defineComponent ({
         }
 
         &:visited {
-            color: var(--pink);
+            color: var(--purple);
             [v="1"] {
-                fill: var(--pink);
+                fill: var(--purple);
             }
         }
+    }
+    li + li {
+        margin-top: 8px;
     }
 }
 
