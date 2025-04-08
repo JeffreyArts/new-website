@@ -210,6 +210,7 @@ export default defineComponent ({
     transition: var(--transition-default);
     opacity: 0.9;
     filter: saturate(.9);
+    width: 100%;
     
     &:hover,
     &:focus {
