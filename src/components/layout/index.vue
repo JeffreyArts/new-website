@@ -208,18 +208,15 @@ export default defineComponent ({
                     window.dispatchEvent(new CustomEvent("layoutChange"))
                 }
 
-                // Double resize is required, 400 miliseconds is the same amount of how long a single block takes to fade-in
-                setTimeout(async () => {
-                    await this.updateBlockSizes()
-                    window.dispatchEvent(new CustomEvent("layoutHasChanged"))
-                }, 400)
                 
-                setTimeout(() => {
+                setTimeout(async () => {
                     this.loaded = true
                     this.processing = false
                     this.newBlocks = []
-                    dispatchEvent(new Event('layoutLoaded'))
                     this.updateLayout()
+                    dispatchEvent(new Event('layoutLoaded'))
+                    dispatchEvent(new CustomEvent("layoutHasChanged"))
+                    setTimeout(this.updateBlockSizes)
                 }, 0)
             }
         },
@@ -262,7 +259,7 @@ export default defineComponent ({
                 if (!this.packerLayout) {
                     this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
                 }
-                const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks, 20)
+                const sortedBlocks = this.packerLayout.setBlocks(convertedBlocks, 8)
                 
                 if (sortedBlocks) {
                     _.each(sortedBlocks, (posBlock) => {
@@ -283,9 +280,9 @@ export default defineComponent ({
                     this.__updateLayoutHeight()
                 }
 
+                requestAnimationFrame(resolve)
                 this.$nextTick(() => {
                     setTimeout(() => {
-                        requestAnimationFrame(resolve)
                     })
                 })
             })
