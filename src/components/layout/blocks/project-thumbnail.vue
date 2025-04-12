@@ -75,8 +75,17 @@ export default defineComponent ({
         "options": {
             handler() {
                 this.$emit("blockLoaded")
+                const img = this.$refs["image"] as HTMLImageElement;
+                if (img) {
+                    // Reset de afbeelding eerst
+                    img.src = '';
+                }
+                // Wacht een tick zodat Vue de DOM kan updaten
+                this.$nextTick(() => {
+                    this.loadImage();
+                });
             },
-            deep: true,
+            deep: true
         }
     },
     data: function() {
@@ -124,6 +133,7 @@ export default defineComponent ({
 
         if (!img) {
             this.$emit("blockLoaded")
+            return
         }
         
         new Promise<void>((resolve) => {
@@ -137,7 +147,9 @@ export default defineComponent ({
                 })
             }
         }).then(() => {
-            this.$emit("blockLoaded")
+            setTimeout(() => {
+                this.$emit("blockLoaded")
+            }, 0)
         }).catch((err) => {
             console.error(err)
             this.$emit("blockLoaded")
@@ -172,6 +184,31 @@ export default defineComponent ({
             }
 
             return this.imageSize = "original"
+        },
+        loadImage() {
+            const img = this.$refs["image"] as HTMLImageElement;
+            
+            if (!img) {
+                this.$emit("blockLoaded");
+                return;
+            }
+
+            img.addEventListener("load", () => {
+                setTimeout(() => {
+                    this.$emit("blockLoaded");
+                }, 0)
+            });
+            
+            if (img.complete) {
+                setTimeout(() => {
+                    this.$emit("blockLoaded");
+                }, 0)
+                return;
+            }
+
+            img.addEventListener("error", () => {
+                this.$emit("blockLoaded");
+            });
         },
         goToCategory(categoryId: string) {
             this.$router.push({
