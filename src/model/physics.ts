@@ -109,17 +109,17 @@ export default class Physics {
             this.layoutWidth = window.innerWidth
             this.layoutHeight = window.innerHeight
 
-            this.blocks.forEach(block => {
-                if (!block.composite || !block.domEl) {
-                    return
-                }
+            // this.blocks.forEach(block => {
+            //     if (!block.composite || !block.domEl) {
+            //         return
+            //     }
                 
-                const dimensions = this.extractDimensionsFromElement(block.domEl)
+            //     const dimensions = this.extractDimensionsFromElement(block.domEl)
 
-                if (dimensions)  {
-                    this.updateBlock(block.id, {...dimensions})
-                }
-            })
+            //     if (dimensions)  {
+            //         this.updateBlock(block.id, {...dimensions})
+            //     }
+            // })
 
             // Verwijder oude ground
             Matter.World.remove(this.engine.world, this.ground)
@@ -262,88 +262,11 @@ export default class Physics {
             }
         })
 
-        // // Create anchor points
-        // const pointTopLeft = Matter.Bodies.circle(x - this.anchorOffset, y - window.scrollY - this.anchorOffset, this.anchorOffset, { 
-        //     isStatic: true,
-        //     label: "pointTopLeft",
-        //     collisionFilter: {
-        //         category: 0x0010,
-        //         mask: 0x0010
-        //     }
-        // })
-        // const pointBottomLeft = Matter.Bodies.circle(x - this.anchorOffset , y + height - window.scrollY + this.anchorOffset, this.anchorOffset, { 
-        //     isStatic: true,
-        //     label: "pointBottomLeft",
-        //     collisionFilter: {
-        //         category: 0x0010,
-        //         mask: 0x0010
-        //     }
-        // })
-        // const pointTopRight = Matter.Bodies.circle(x + width + this.anchorOffset, y - window.scrollY - this.anchorOffset, this.anchorOffset, {
-        //     isStatic: true,
-        //     label: "pointTopRight",
-        //     collisionFilter: {
-        //         category: 0x0010,
-        //         mask: 0x0010
-        //     }
-        // })
-        // const pointBottomRight = Matter.Bodies.circle(x + width + this.anchorOffset, y + height - window.scrollY + this.anchorOffset, this.anchorOffset, {
-        //     isStatic: true,
-        //     label: "pointBottomRight",
-        //     collisionFilter: {
-        //         category: 0x0010,
-        //         mask: 0x0010
-        //     }
-        // })
-
-        // const constraintLength = Math.sqrt( Math.pow(this.anchorOffset, 2) + Math.pow(this.anchorOffset, 2));
-
-        // // Create contstaints between block and anchor points
-        // const constraintTopLeft = Matter.Constraint.create({
-        //     bodyA: block,
-        //     bodyB: pointTopLeft,
-        //     pointA: { x: -width/2, y: -height/2 },
-        //     length: constraintLength,
-        //     stiffness: 1,
-        //     damping: 0.01,
-        //     label: "constraintTopLeft"
-        // })
-        // const constraintBottomLeft = Matter.Constraint.create({
-        //     bodyA: block,
-        //     bodyB: pointBottomLeft,
-        //     pointA: { x: -width/2, y: +height/2 },
-        //     length: constraintLength,
-        //     stiffness: 1, //+ Math.random() * .01,
-        //     damping: 1,
-        //     label: "constraintBottomLeft"
-        // })
-        
-        // const constraintTopRight = Matter.Constraint.create({
-        //     bodyA: block,
-        //     bodyB: pointTopRight,
-        //     pointA: { x: +width/2, y: -height/2 },
-        //     length: constraintLength,
-        //     stiffness: 1,
-        //     damping: 0.01,
-        //     label: "constraintTopRight"
-        // })
-        // const constraintBottomRight = Matter.Constraint.create({
-        //     bodyA: block,
-        //     bodyB: pointBottomRight,
-        //     pointA: { x: +width/2, y: +height/2 },
-        //     length: constraintLength,
-        //     stiffness: 1, //+ Math.random() * .01,
-        //     damping: 1,
-        //     label: "constraintBottomRight"
-        // })
-
         
         // Compose the composite
         const blockComposite = Matter.Composite.create({label: "block"})
         Matter.Composite.add(blockComposite, [block])
-        // Matter.Composite.add(blockComposite, [block, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight])
-        // Matter.Composite.add(blockComposite, [block, pointTopLeft, pointTopRight, constraintTopLeft, constraintTopRight, pointBottomLeft, pointBottomRight, constraintBottomLeft, constraintBottomRight])
-
+        
         // Add the composite to the world
         Matter.World.add(this.engine.world, blockComposite)
 

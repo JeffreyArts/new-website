@@ -110,10 +110,11 @@ const PhysicsService = {
     updateBlocks: () => {
         clearTimeout(PhysicsService.timeout)
         PhysicsService.timeout = setTimeout(() => {
-            document.body.querySelectorAll(".block:not(.hasMatter)").forEach((element: Element) => {
+            const elements = document.body.querySelectorAll(".block")
+
+            elements.forEach((element: Element) => {
                 const el = element as HTMLElement
                 const blockType = element.querySelector("[data-blocktype]")?.getAttribute("data-blocktype")
-                el.classList.add("hasMatter")
 
                 const blockTypeList = [
                     // "projectArticle",
@@ -135,7 +136,19 @@ const PhysicsService = {
                     return
                 }
 
-                PhysicsService.physics?.addBlock(el)
+                if (element.classList.contains("hasMatter")) {
+                    // updateBlock
+                    const newDimensions = PhysicsService.physics?.extractDimensionsFromElement(el)
+                    PhysicsService.physics?.updateBlock(el.id, {
+                        x: newDimensions?.x,
+                        y: newDimensions?.y,
+                        width: newDimensions?.width,
+                        height: newDimensions?.height
+                    })
+                } else {
+                    el.classList.add("hasMatter")
+                    PhysicsService.physics?.addBlock(el)
+                }
             })
         }, 500)
     },
