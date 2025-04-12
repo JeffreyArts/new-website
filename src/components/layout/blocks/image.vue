@@ -129,9 +129,11 @@ export default defineComponent ({
         }
         
         this.loadImage();
+        window.addEventListener("resize", this.updateLayoutChange);
         window.addEventListener("layoutChange", this.updateLayoutChange);
     },
     unmounted() {
+        window.removeEventListener("resize", this.updateLayoutChange)
         window.removeEventListener("layoutChange", this.updateLayoutChange)
     },
     methods: {
@@ -260,11 +262,15 @@ export default defineComponent ({
             }
 
             img.addEventListener("load", () => {
-                this.$emit("blockLoaded");
+                setTimeout(() => {
+                    this.$emit("blockLoaded");
+                }, 0)
             });
             
             if (img.complete) {
-                this.$emit("blockLoaded");
+                setTimeout(() => {
+                    this.$emit("blockLoaded");
+                }, 0)
                 return;
             }
 
