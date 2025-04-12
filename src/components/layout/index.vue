@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, nextTick } from "vue"
-import _ from "lodash"
+import _, { set } from "lodash"
 import Packer, { Position, Block } from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"
@@ -58,22 +58,9 @@ export default defineComponent ({
             packerLayout: undefined as Packer | undefined,
             loaded: false,
             processing: false,
-            newBlocks: [] as Block[],
+            newBlocks: [] as BlockType[],
             blocks: [] as BlockType[],
             sortedBlocks: [] as Position[],
-            consoleColors: [
-                '#FF0000', // Rood
-                '#FF7F00', // Oranje
-                '#FFFF00', // Geel
-                '#00FF00', // Groen
-                '#0000FF', // Blauw
-                '#4B0082', // Indigo
-                '#9400D3', // Violet
-                '#FF1493', // Roze
-                '#00FFFF', // Cyaan
-                '#FFD700'  // Goud
-            ],
-            consoleIndex: 0
         }
     },
     computed: {
@@ -103,22 +90,24 @@ export default defineComponent ({
             window.addEventListener("resize", this.__onResizeEvent)
         }
         this.newBlocks = []
+        dispatchEvent(new Event('layoutLoaded'))
+
         this.updateLayout()
         this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-        dispatchEvent(new Event('layoutLoaded'))
     },
     unmounted() {
         window.removeEventListener("resize", this.__onResizeEvent)
     },
     methods: {
 
+        
         __onResizeEvent() { 
-            if (this.timeoutDelay) {
-                clearTimeout(this.timeoutDelay)
-            }
-
-            this.updateLayout()
-            this.timeoutDelay = setTimeout(this.updateBlockSizes, 24)
+            clearTimeout(this.timeoutDelay)
+            this.timeoutDelay = setTimeout(() => {
+                this.updateLayout()
+                this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+                this.updateBlockSizes()
+            }, 80)
         },
 
         __addBlocks(newBlocks: BlockType[]){
@@ -134,6 +123,9 @@ export default defineComponent ({
             }), _.isNil))
 
             this.blocks = [...this.blocks, ...blocks]
+            _.each(this.blocks, (block, index) => {
+                block.position = index
+            })
         },
         __findBlock(blockId: string | number, targetBlocks: BlockType[]) {
             if (!blockId)  throw new Error("Missing id in posBlock")
@@ -163,6 +155,9 @@ export default defineComponent ({
             }
              
             layout.style.height = `${Number(lastBlock.height) + Number(lastBlock.y)}px`
+
+            dispatchEvent(new CustomEvent("layoutHasChanged"))
+            dispatchEvent(new Event('layoutLoaded'))
         },
         async __setBlockDimensions(blocks: Array<BlockType>){
             const result = [] as Array<Promise<void>>
@@ -198,25 +193,21 @@ export default defineComponent ({
             await Promise.all(result)
             return blocks
         },
-        async addNewBlock() {
+        async addNewBlocks() {
             this.processing = true
             this.updateLayout()
-            console.log("Adding new block")
             setTimeout(async () => {
                 this.updateLayout();
                 if (!this.packerLayout) { return }
                 const block = this.newBlocks[0]
-                console.log("block", block, block.height, block.width)
                 const newBlock = {  
                     width: block.width || 0,
                     height: parseInt(block.height?.toString() || "0"),
                     position: this.blocks.length,
                     id: block.id
                 }
-
                 
-                
-                const result = await this.packerLayout.addBlock(newBlock);
+                const result = await this.packerLayout.addBlock(newBlock, 12);
                 
                 if (result) {
                     this.newBlocks = this.newBlocks.filter(b => b.id !== block.id)
@@ -232,37 +223,15 @@ export default defineComponent ({
                         }
                     }
                 }
-                console.log("👻 result", result)
-                
-                if (this.newBlocks.length > 0) {
-                    // console.log("Adding new block again", this.blocks)
-                    return this.addNewBlock()
-                }
 
+                if (this.newBlocks.length > 0) {
+                    return this.addNewBlocks()
+                }
+                
                 this.__updateLayoutHeight()
-                dispatchEvent(new Event('layoutLoaded'))
-                dispatchEvent(new CustomEvent("layoutHasChanged"))
                 this.processing = false
                 this.loaded = true
-                // try {
-                // } catch (error) {
-                //     console.error("Error processing block:", error);
-                //     // Als er een fout optreedt, probeer het blok later opnieuw
-                //     this.newBlocks.unshift(block);
-                //     this.processing = false;
-                //     return;
-                // }
-                
-                // // Als er nog blokken in de wachtrij zitten, verwerk het volgende blok
-                // if (this.newBlocks.length > 0) {
-                //     const nextBlock = this.newBlocks[0];
-                //     this.newBlocks.shift();
-                //     await this.addNewBlock(nextBlock);
-                // } else {
-                // this.processing = false;
-                // this.loaded = true;
-                // }
-            }, 10)
+            }, 1)
         },
         async blockLoaded(block: BlockType) {
             if (block.loaded) {
@@ -270,29 +239,25 @@ export default defineComponent ({
             }   
             this.loaded = false
             block.loaded = true
-        
+            
             const res = await this.__setBlockDimensions([block])
-            console.log("res", res)
+            const newBlock = {...block, ...res[0]}
+            this.newBlocks.push(newBlock)
+            
             if (!this.packerLayout) { return }
+            if (_.every(_.map(this.blocks, block => block.loaded))) {
+                // this.updateLayout()
 
-            const existingBlock = this.packerLayout.blocks.find((b: Block) => b.id === block.id)
-            if (!existingBlock) {
-                const newBlock = {  
-                    id: block.id,
-                    width: block.width || 0,
-                    height: block.height || 0,
-                    position: block.position || this.blocks.length + this.newBlocks.length,
-                } as Block
+                this.newBlocks = await this.__setBlockDimensions(this.newBlocks)
+                this.newBlocks = _.orderBy(
+                    this.newBlocks,
+                    [ "position", "y", "x" ],
+                    ["asc", "asc", "asc"]
+                );
 
-                console.log("newBlock", newBlock)
-                
-                // Voeg het blok toe aan de wachtrij
-                this.newBlocks.push(newBlock)
-                
-                // Start verwerking als we nog niet aan het verwerken zijn
-                if (!this.processing) {
-                    this.addNewBlock();
-                }
+                dispatchEvent(new CustomEvent("layoutChange"))
+                dispatchEvent(new CustomEvent("layoutHasChanged"))
+                this.addNewBlocks();
             }
         },
         updateLayout() {
@@ -308,51 +273,61 @@ export default defineComponent ({
         updateBlockSizes() {
             return new Promise(async (resolve) => {
                     
-                this.updateLayout()
+                // // this.packerLayout = undefined
+                // this.updateLayout()
             
                 const blocks = this.blocks
                 await this.__setBlockDimensions(blocks)
-                
-                // Convert height(:auto) to number to match setBlocks
-                // Re-position blocks according their default order to unshuffle setBlocks result
-                const convertedBlocks = _.orderBy(blocks.map(block => {
-                    if (typeof block.height === "undefined") {
-                        block.height = 0
-                    }
-                    
-                    if (typeof block.height === "string") {
-                        block.height = parseFloat(block.height)
-                    }
-                    
-                    return {
-                        id: block.id,
-                        position: block.position,
-                        width: block.width || 0,
-                        height: block.height
-                    }
-                }), "position")
-                
-                this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-                this.sortedBlocks = this.packerLayout.setBlocks(convertedBlocks, 8)
-                
-                if (this.sortedBlocks) {
-                    _.each(this.sortedBlocks, (posBlock) => {
-                        const blockId = posBlock.id as string | number
-                        let block = this.__findBlock(blockId, blocks)
+                setTimeout(async () => {
+                    // await this.__setBlockDimensions(blocks)
 
-                        if (!block) {
-                            throw new Error("Invalid blockId ")
+                    // Convert height(:auto) to number to match setBlocks
+                    // Re-position blocks according their default order to unshuffle setBlocks result
+                    const convertedBlocks = _.orderBy(blocks.map(block => {
+                        if (typeof block.height === "undefined") {
+                            block.height = 0
                         }
-                        block.width = posBlock.width
-                        block.height = posBlock.height
-                        block.y = posBlock.y
-                        block.x = posBlock.x
-                    })
-                }   
+                        
+                        if (typeof block.height === "string") {
+                            block.height = parseFloat(block.height)
+                        }
+                        
+                        return {
+                            id: block.id,
+                            position: block.position,
+                            width: block.width || 0,
+                            height: block.height
+                        }
+                    }), "position")
+                    
+                    
+                    if (!this.packerLayout) {
+                        this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+                    }
+                    this.sortedBlocks = this.packerLayout.setBlocks(convertedBlocks, 20)
+                    
+                    
+                    if (this.sortedBlocks) {
+                        _.each(this.sortedBlocks, (posBlock) => {
+                            const blockId = posBlock.id as string | number
+                            let block = this.__findBlock(blockId, blocks)
 
-                this.__updateLayoutHeight()
+                            if (!block) {
+                                throw new Error("Invalid blockId ")
+                            }
+                            block.width = posBlock.width
+                            block.height = posBlock.height
+                            block.y = posBlock.y
+                            block.x = posBlock.x
+                        })
+                    }   
 
-                requestAnimationFrame(resolve)
+                    this.__updateLayoutHeight()
+                    setTimeout(() => {
+                    }, 0)
+
+                    requestAnimationFrame(resolve)
+                }, 100)
             })
         },
     }

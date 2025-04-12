@@ -21,7 +21,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
-import gsap from "gsap"
 import jaoIcon from "@/components/jao-icon.vue"
 
 export type ProjectThumbnailBlock = {

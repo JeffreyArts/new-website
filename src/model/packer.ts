@@ -80,7 +80,7 @@ export default class Packer {
     }
 
     private setOrder(order?: Order | undefined) {
-        const defaultOrder = ["position", "y","x"]
+        const defaultOrder = ["position", "y", "parentPosition", "x"]
         
         if (!order) {
             this.order = defaultOrder
@@ -88,7 +88,7 @@ export default class Packer {
         }
 
         // Validate input value
-        const possibleValues = ["position", "y","x"]
+        const possibleValues = ["position", "y", "parentPosition","x"]
 
         order.forEach(value => {
             if (!possibleValues.includes(value)) {
@@ -110,76 +110,64 @@ export default class Packer {
 
         return this.updateLayout(cacheLength)
     }
+    public sort(positions: Position[]) {
+        this.resultPositions = positions
 
-    public async addBlock(block: Block, cacheLength = 8) {
+    }
+    public addBlock(block: Block, cacheLength = 8) {
         if (!block.id) {
             throw new Error("Block has no id")
         }
         // if block is already in the blocks array, return
         if (this.blocks.find(b => b.id === block.id)) {
-            return
+            throw new Error("Block is already in the blocks array")
         }
 
         block.position = this.blocks.length
         this.blocks.push(block)
-        let options = [] as Position[]
+
+        // Gebruik dezelfde logica als updateLayout
+        const nextBlock = this.getNextBlock(this.resultPositions, [block], cacheLength)
+
+        if (nextBlock) {
+            this.resultPositions.push(nextBlock)
+            return nextBlock
+        }
+
+        // Als er geen volgende blok gevonden wordt, plaats het onderaan
+        const lowestBlock = _.reverse(_.sortBy(this.resultPositions, block => block.y + block.height))[0]
         
-        // Sorteer op Y + height en neem de eerste 8
-        const positions = _.orderBy(
-            this.resultPositions,
-            [pos => pos.y + pos.height],
-            ['desc']
-        ).slice(0, cacheLength)
-
-        positions.forEach(position => {
-            const data = this.getOptions(position, [block])
-
-            // Sort positions by y and by custom parent position order
-            const sortedData = _.orderBy(
-                data,
-                [ "y", item => this.positionOrder[item?.parentPosition || "right"]],
-                ["asc", "asc"]
-            );
-        
-            // Adjust positions to avoid overlaps
-            for (const tempPos of sortedData) {
-                for (const pos of positions.sort((a, b) => a.y - b.y)) {
-                    if (this.blocksOverlap(tempPos, pos)) {
-                        tempPos.y = pos.y + pos.height;
-                    }
-                }
-                options.push(tempPos);
-            }
-        })
-        console.log("nextBlocks:", this.blocks)
-
-
-        const nextBlocks = _(options)
-            .flatten()
-            .compact() // Removes undefined values
-            .orderBy(this.orderByOptions.property, this.orderByOptions.order)
-            .take(1)
-            .value() as Array<Position>
-
-        if (nextBlocks.length === 1)  {
-            const result = nextBlocks[0]
-            this.resultPositions.push(result)
-            return result
-        } 
-
-
-        if (this.resultPositions.length === 0) {
-            this.resultPositions.push({
+        if (!lowestBlock) {
+            // Als er geen bestaande blokken zijn, plaats het op (0,0)
+            const newPosition = {
                 width: block.width,
                 height: block.height,
                 position: block.position,
                 x: 0,
                 y: 0,
                 id: block.id
-            })
-            return this.resultPositions[0]
+            }
+            this.resultPositions.push(newPosition)
+            return newPosition
         }
-        throw new Error("No next block found")
+
+        // Plaats het nieuwe blok onder het laagste blok
+        const newPosition = {
+            width: block.width,
+            height: block.height,
+            x: 0,
+            y: lowestBlock.y + lowestBlock.height,
+            id: block.id,
+            sourceId: "none"
+        }
+
+        // Controleer of het binnen de grenzen past
+        if (this.autoResize != "height" && newPosition.height + newPosition.y > this.layoutHeight) {
+            throw new Error("Block exceeds layout height")
+        }
+
+        this.resultPositions.push(newPosition)
+        return newPosition
     }
 
     private fitRight = (target: Position, inputBlocks: Block[]) => {
