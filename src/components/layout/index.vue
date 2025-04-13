@@ -56,6 +56,7 @@ export default defineComponent ({
             layoutWidth: 0 as number,
             widthRatio: 0 as number,
             packerLayout: undefined as Packer | undefined,
+            firstLoad: true,
             loaded: false,
             processing: false,
             newBlocks: [] as BlockType[],
@@ -66,6 +67,12 @@ export default defineComponent ({
     computed: {
     },
     watch:{
+        "$route.path": {
+            handler() {
+                this.firstLoad = true
+            },
+            immediate: false
+        },
         "options.blocks": {
             handler(blocks) {
                 if (blocks.length <= 0) {
@@ -166,7 +173,8 @@ export default defineComponent ({
                 result.push(new Promise((resolve): void => {
                     const originalBlock = _.find(this.options.blocks, { id: block.id })
                     if (!originalBlock) {
-                        throw new Error("Missing original reference")
+                        return
+                        // throw new Error("Missing original reference")
                     }
                     
                     block.size = originalBlock.size > this.options.layoutSize ? this.options.layoutSize : originalBlock.size
@@ -243,10 +251,9 @@ export default defineComponent ({
             const res = await this.__setBlockDimensions([block])
             const newBlock = {...block, ...res[0]}
             this.newBlocks.push(newBlock)
-            
+
             if (!this.packerLayout) { return }
             if (_.every(_.map(this.blocks, block => block.loaded))) {
-                // this.updateLayout()
 
                 this.newBlocks = await this.__setBlockDimensions(this.newBlocks)
                 this.newBlocks = _.orderBy(
@@ -254,10 +261,19 @@ export default defineComponent ({
                     [ "position", "y", "x" ],
                     ["asc", "asc", "asc"]
                 );
+                
 
                 dispatchEvent(new CustomEvent("layoutChange"))
                 dispatchEvent(new CustomEvent("layoutHasChanged"))
-                this.addNewBlocks();
+                
+                if (this.firstLoad) {
+                    this.blocks = this.newBlocks
+                    this.newBlocks = [] 
+                    this.updateBlockSizes()
+                    this.firstLoad = false
+                } else {
+                    this.addNewBlocks();
+                }
             }
         },
         updateLayout() {

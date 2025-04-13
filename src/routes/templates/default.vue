@@ -18,6 +18,7 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 import gsap from "gsap"
+import Packer from "@/model/packer"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
 import payloadStore from "@/stores/payload"
@@ -187,12 +188,16 @@ export default defineComponent ({
             }
 
             if (this.Payload.page) {
+                console.log("page loaded!")
                 // Add new content
                 this.updateLayoutSize()
 
                 if (this.$refs["default-layout"]) {
                     const defaultLayout = this.$refs["default-layout"] as InstanceType<typeof Layout>
                     defaultLayout.blocks = []
+
+                    defaultLayout.packerLayout = new Packer(defaultLayout.layoutWidth, 0, { autoResize: "height" })
+                    console.log("defaultLayout", defaultLayout)
                 }
 
                 this.pageBlocks = this.Payload.page.data.blocks
