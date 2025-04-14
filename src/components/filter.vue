@@ -48,7 +48,7 @@
                 layoutSize: layoutSize,
                 blocks: blocks
             }"
-            ref="layout"/>
+            ref="filter-layout"/>
     </div>
 </template>
 

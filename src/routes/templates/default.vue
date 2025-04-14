@@ -195,9 +195,7 @@ export default defineComponent ({
                 if (this.$refs["default-layout"]) {
                     const defaultLayout = this.$refs["default-layout"] as InstanceType<typeof Layout>
                     defaultLayout.blocks = []
-
                     defaultLayout.packerLayout = new Packer(defaultLayout.layoutWidth, 0, { autoResize: "height" })
-                    console.log("defaultLayout", defaultLayout)
                 }
 
                 this.pageBlocks = this.Payload.page.data.blocks

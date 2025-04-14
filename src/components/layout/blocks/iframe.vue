@@ -153,6 +153,7 @@ export default defineComponent ({
 
             }
             this.refreshIframe()
+            this.$emit("blockLoaded")
         }
     },
 })

@@ -111,15 +111,9 @@ export default defineComponent ({
         },
         "options.image": {
             handler() {
-                const img = this.$refs["image"] as HTMLImageElement;
-                if (img) {
-                    // Reset de afbeelding eerst
-                    img.src = '';
-                }
-                // Wacht een tick zodat Vue de DOM kan updaten
                 this.$nextTick(() => {
                     this.loadImage();
-                });
+                })
             }
         }
     },
@@ -253,30 +247,29 @@ export default defineComponent ({
             this.bgSizeCache = ""
             this.bgImageCache = ""
         },
+        loadHandler() {
+            // setTimeout(() => {
+                this.$emit("blockLoaded");
+            // }, 0)
+        },
         loadImage() {
             const img = this.$refs["image"] as HTMLImageElement;
             
             if (!img) {
+                console.log("A")
                 this.$emit("blockLoaded");
                 return;
             }
 
-            img.addEventListener("load", () => {
-                setTimeout(() => {
-                    this.$emit("blockLoaded");
-                }, 0)
-            });
+            img.addEventListener("load", this.loadHandler);
             
-            if (img.complete) {
+            if (img.complete && img.src) {
+                console.log("C")
                 setTimeout(() => {
                     this.$emit("blockLoaded");
                 }, 0)
                 return;
             }
-
-            img.addEventListener("error", () => {
-                this.$emit("blockLoaded");
-            });
         },
     }
 })

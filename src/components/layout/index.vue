@@ -198,6 +198,7 @@ export default defineComponent ({
                     })
                 })) 
             })
+            
             await Promise.all(result)
             return blocks
         },
@@ -267,7 +268,7 @@ export default defineComponent ({
                 dispatchEvent(new CustomEvent("layoutHasChanged"))
                 
                 if (this.firstLoad) {
-                    this.blocks = this.newBlocks
+                    // this.blocks = this.newBlocks
                     this.newBlocks = [] 
                     this.updateBlockSizes()
                     this.firstLoad = false
@@ -338,12 +339,12 @@ export default defineComponent ({
                         })
                     }   
 
-                    this.__updateLayoutHeight()
                     setTimeout(() => {
+                        this.__updateLayoutHeight()
                     }, 0)
 
                     requestAnimationFrame(resolve)
-                }, 100)
+                }, 10)
             })
         },
     }

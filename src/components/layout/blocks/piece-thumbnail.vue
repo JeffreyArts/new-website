@@ -191,7 +191,9 @@ export default defineComponent ({
     watch: {
         "options": {
             handler() {
-                this.$emit("blockLoaded")
+                this.$nextTick(() => {
+                    this.$emit("blockLoaded")
+                })
             },
             deep: true
         }
@@ -204,7 +206,11 @@ export default defineComponent ({
         const img = this.$refs["image"] as HTMLImageElement
 
         if (!img) {
-            return this.$emit("blockLoaded")
+            this.$nextTick(() => {
+
+                this.$emit("blockLoaded")
+            })
+            return
         }
         
         new Promise<void>((resolve) => {

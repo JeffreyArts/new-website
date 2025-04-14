@@ -73,16 +73,17 @@ export default defineComponent ({
     watch: {
         "options": {
             handler() {
-                this.$emit("blockLoaded")
+                
                 const img = this.$refs["image"] as HTMLImageElement;
                 if (img) {
                     // Reset de afbeelding eerst
                     img.src = '';
                 }
-                // Wacht een tick zodat Vue de DOM kan updaten
+                
                 this.$nextTick(() => {
                     this.loadImage();
                 });
+                
             },
             deep: true
         }
