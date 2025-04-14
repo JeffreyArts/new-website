@@ -1,5 +1,6 @@
 <template>
     <div class="layout-wrapper">
+        <!-- firstLoad: {{ firstLoad }} -->
         <section  class="layout"
             :class="{
                 '__isLoaded': loaded,
@@ -270,7 +271,7 @@ export default defineComponent ({
                 if (this.firstLoad) {
                     // this.blocks = this.newBlocks
                     this.newBlocks = [] 
-                    this.updateBlockSizes()
+                    await this.updateBlockSizes()
                     this.firstLoad = false
                 } else {
                     this.addNewBlocks();
