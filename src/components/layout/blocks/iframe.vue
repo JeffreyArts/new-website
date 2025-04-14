@@ -67,7 +67,9 @@ export default defineComponent ({
     watch: {
         "options": {
             handler() {
-                this.$emit("blockLoaded")
+                this.$nextTick(() => {
+                    this.$emit("blockLoaded")
+                })
             },
             deep: true,
             immediate: true

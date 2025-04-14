@@ -201,7 +201,7 @@ export default defineComponent ({
                 this.pageBlocks = this.Payload.page.data.blocks
                 this.tempPageBlocks = []
 
-                setTimeout(() => {
+                this.$nextTick(() => {
                     const blokElements = document.querySelectorAll("#default-layout .block")
                     if (blokElements.length > 0) {
                         for (let index = 0; index < blokElements.length; index++) {
