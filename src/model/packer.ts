@@ -43,8 +43,8 @@ export default class Packer {
         this.order = ["position", "parentPosition", "y", "x"]
         this.positionOrder = {
             right: 1,
-            bottom: 2,
-            left: 3
+            bottom: 0,
+            left: 2
         }
         this.orderByOptions = {
             property: [],
@@ -132,6 +132,20 @@ export default class Packer {
         if (nextBlock) {
             this.resultPositions.push(nextBlock)
             return nextBlock
+        } else {
+
+            const lowestBlock = _.reverse(_.sortBy(this.resultPositions, block => block.y + block.height))[0]
+            const lastBlock = this.blocks[this.blocks.length - 1]
+            
+
+            this.resultPositions.push({
+                width: lastBlock.width,
+                height: lastBlock.height,
+                x: 0,
+                y: lowestBlock.y + lowestBlock.height,
+                id: lastBlock.id,
+                sourceId: "none"
+            })
         }
 
         // Als er geen volgende blok gevonden wordt, plaats het onderaan
@@ -288,15 +302,15 @@ export default class Packer {
                 options.push(tempPos);
             }
         }
-        
+    
         const nextBlocks = _(options)
             .flatten()
             .compact() // Removes undefined values
+            .uniqBy(item => `${item.x},${item.y},${item.id}`)
             .orderBy(this.orderByOptions.property, this.orderByOptions.order)
-            .take(1)
             .value() as Array<Position>
 
-        if (nextBlocks.length === 1)  {
+        if (nextBlocks.length >= 1)  {
             return nextBlocks[0]
         } 
         return undefined

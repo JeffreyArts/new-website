@@ -203,18 +203,20 @@ export default defineComponent ({
 
                 this.$nextTick(() => {
                     const blokElements = document.querySelectorAll("#default-layout .block")
-                    if (blokElements.length > 0) {
-                        for (let index = 0; index < blokElements.length; index++) {
-                            const element = blokElements[index];
+                    setTimeout(() => {
+                        if (blokElements.length > 0) {
+                            for (let index = 0; index < blokElements.length; index++) {
+                                const element = blokElements[index];
 
-                            gsap.fromTo(element, { opacity: 0 },{
-                                opacity: 1,
-                                duration: .24,
-                                delay: .1 + index * .1,
-                                ease: "sine.out"
-                            })
+                                gsap.fromTo(element, { opacity: 0 },{
+                                    opacity: 1,
+                                    duration: .24,
+                                    delay: .1 + index * .1,
+                                    ease: "sine.out"
+                                })
+                            }
                         }
-                    }
+                    }, blokElements.length * 1)
                 })
             }
         },
