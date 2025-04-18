@@ -188,7 +188,6 @@ export default defineComponent ({
             }
 
             if (this.Payload.page) {
-                console.log("page loaded!")
                 // Add new content
                 this.updateLayoutSize()
 

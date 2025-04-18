@@ -256,7 +256,6 @@ export default defineComponent ({
             const img = this.$refs["image"] as HTMLImageElement;
             
             if (!img) {
-                console.log("A")
                 this.$emit("blockLoaded");
                 return;
             }
@@ -264,7 +263,6 @@ export default defineComponent ({
             img.addEventListener("load", this.loadHandler);
             
             if (img.complete && img.src) {
-                console.log("C")
                 setTimeout(() => {
                     this.$emit("blockLoaded");
                 }, 0)
