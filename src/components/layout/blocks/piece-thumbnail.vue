@@ -39,10 +39,9 @@
                 </div>
             </div>
             <div class="piece-thumbnail-footer-right">
-                <figure ref="yearSVG"></figure>
-                
-                <!-- <jaoIcon name="comment" size="medium"></jaoIcon>
-                <jaoIcon name="heart-outline" size="medium"></jaoIcon> -->
+                <figure ref="yearSVG" class="piece-thumbnail-footer-year"></figure>
+                <!-- <jaoIcon name="comment" size="medium"></jaoIcon> -->
+                <jaoIcon :name="heartIcon" size="medium" inactiveColor="transparent" activeColor="var(--contrast-color)" @click="toggleLike" :transitEffect="{duration: .64, effect:'shuffle'}"></jaoIcon>
             </div>
         </footer>
     </div>
@@ -53,6 +52,7 @@ import { defineComponent, PropType } from "vue"
 import jaoIcon from "@/components/jao-icon.vue"
 import Icon from "jao-icons"
 import highlightjs from "./../../highlightjs.vue"
+import { FavoritesService } from "@/services/favorites"
 
 export type IframeProperties = {
     landscapeRatio: string
@@ -103,6 +103,7 @@ export type ImageProperties = {
 export type PieceThumbnailBlock = {
     blockType: "pieceThumbnail"
     piece: {
+        id: string
         type: string
         path: string
         title: string
@@ -148,7 +149,9 @@ export default defineComponent ({
                 width: 0 as number,
                 height: 0 as number,
                 size: ""
-            }
+            },
+            selfLove: false,
+            blockLikeToggle: false
         }
     },
     computed: {
@@ -185,6 +188,9 @@ export default defineComponent ({
             }
 
             return src
+        },
+        heartIcon() {
+            return this.selfLove ? "heart" : "heart-outline"
         }
     },
     watch: {
@@ -196,6 +202,9 @@ export default defineComponent ({
             },
             deep: true
         }
+    },
+    created() {
+        this.setSelfLove()
     },
     mounted() {
         if (typeof window === "undefined") {
@@ -272,6 +281,27 @@ export default defineComponent ({
                     categories: categoryId
                 }
             })
+        },
+        async setSelfLove() {
+            if (!this.options.piece.id) {
+                return
+            }
+
+            this.selfLove = await FavoritesService.setSelfLove(this.options.piece.id, 'pieces')
+        },
+
+        async toggleLike() {
+            if (this.blockLikeToggle || !this.options.piece.id) return
+            this.blockLikeToggle = true
+            this.selfLove = !this.selfLove
+            
+            try {
+                const isLiked = await FavoritesService.toggleLike(this.options.piece.id, 'pieces')
+            } catch (error) {
+                console.error('Error toggling like:', error)
+            } finally {
+                this.blockLikeToggle = false
+            }
         }
     }
 })
@@ -413,12 +443,12 @@ export default defineComponent ({
     }
 
     svg {
-        height: 24px;
+        height: 22px;
         display: block;
-
-        rect[v="0"] {
-            opacity: 0;
-        }
     }
+}
+
+.piece-thumbnail-footer-year svg {
+    height: 24px;
 }
 </style>

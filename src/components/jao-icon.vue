@@ -1,5 +1,5 @@
 <template>
-    <svg class="jao-icon" version="1.1" :viewBox="`0 0 ${svgWidth} ${svgHeight}`" xmlns="http://www.w3.org/2000/svg">
+    <svg :name="name" class="jao-icon" version="1.1" :viewBox="`0 0 ${svgWidth} ${svgHeight}`" xmlns="http://www.w3.org/2000/svg">
         <g v-if="displayGrid.length > 0">
             <rect class="jao-icon-cell" v-for="(cell,x) in displayGrid" :key="x"
                 :x="1 + cell.x * 10" 

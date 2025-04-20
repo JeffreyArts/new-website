@@ -11,6 +11,7 @@ import Payload from "@/stores/payload"
 import { Icon } from "jao-icons"
 import jaoIcon from "@/components/jao-icon.vue"
 import ProjectType  from "../../../types/project"
+import { FavoritesService } from "@/services/favorites"
 
 export type FavoriteBlock = {
     blockType: "favorite"
@@ -28,7 +29,7 @@ export default defineComponent ({
             required: true,
         },
     },   
-     setup() {
+    setup() {
         const payload = Payload()
 
         return {
@@ -53,15 +54,11 @@ export default defineComponent ({
     },
     computed: {
         icon() {
-            if (this.selfLove) {
-                return "heart"
-            } 
-            return "heart-outline"
+            return this.selfLove ? "heart" : "heart-outline"
         },
         favsNumber() {
             const svgElement = Icon(this.favs,"medium")
             const serializer = new XMLSerializer();
-            // Serialize the SVG element to a string
             if (svgElement ) {
                 return serializer.serializeToString(svgElement);
             }
@@ -72,165 +69,45 @@ export default defineComponent ({
         this.setSelfLove()
         this.loadFavs()
     },
-    mounted() {
-        if (typeof window === "undefined") {
-            return
-        }
-        
-    },
     methods: {
         async setSelfLove() {
-            if (!this.payload.page || !this.payload.auth?.self) {
-                return
-            }
+            if (!this.payload.page) return
             
             const pageId = this.payload.page.data.id
             const pageType = this.payload.page.data.collectionType
-            const userId = this.payload.auth.self.id.toString()
-
-            const request = {
-                payload_collection: pageType,
-                user: userId
-            } as {
-                payload_collection: string
-                user: string,
-                project_id?: string,
-                piece_id?: string
-                page_id?: string
-            }
-
-            if (pageType === "projects") {
-                request.project_id = pageId
-            } else if (pageType === "pieces") {
-                request.piece_id = pageId
-            } else {
-                request.page_id = pageId
-            }
-
-            let query  = `?`
-            for (const key in request) {
-                const value = request[key as keyof typeof request]
-                if (value) {
-                    query += `where[${key}][equals]=${value}&`
-                }
-            }
             
-            // Get Favorite from DB and add/remove it depending on the result
-            this.payload.GET("favorites" + query).then(response => {
-                if (response.data?.docs.length != 0) {
-                    this.selfLove = true
-                }
-            }).catch(error => {
-                console.error("error", error)
-            })
+            this.selfLove = await FavoritesService.setSelfLove(pageId, pageType)
         },
 
         async loadFavs() {
-            if (!this.payload?.page)  {
-                return
-            }
-            const query = {} as {
-                project_id?: string
-                piece_id?: string
-                page_id?: string
-            }
-            const pageType = this.payload.page.data.collectionType
-            switch (pageType) {
-                case "projects":
-                    query.project_id = this.payload.page.data.id
-                    break
-                case "pieces":
-                    query.piece_id = this.payload.page.data.id
-                    break
-                case "pages":
-                    query.page_id = this.payload.page.data.id
-                    break
-            }
-
-            this.payload.POST("favorites/totaldocs",query).then(response => {
-                this.favs = response.data.favs
-            }).catch(error => {
-                this.favs = 0
-                console.error("error", error)
-            })
-        },
-        async toggleLike() {
-            if (this.blocked) {
-                return
-            }
-
-            if (!this.payload.page || !this.payload.auth?.self) {
-                return
-            }
+            if (!this.payload.page) return
             
             const pageId = this.payload.page.data.id
             const pageType = this.payload.page.data.collectionType
-            const userId = this.payload.auth.self.id.toString()
+            
+            this.favs = await FavoritesService.loadFavs(pageId, pageType)
+        },
 
-            const request = {
-                payload_collection: pageType,
-                user: userId
-            } as {
-                payload_collection: string
-                user: string,
-                project_id?: string,
-                piece_id?: string
-                page_id?: string
-            }
-
-            if (pageType === "projects") {
-                request.project_id = pageId
-            } else if (pageType === "pieces") {
-                request.piece_id = pageId
-            } else {
-                request.page_id = pageId
-            }
-
-            let query  = `?`
-            for (const key in request) {
-                const value = request[key as keyof typeof request]
-                if (value) {
-                    query += `where[${key}][equals]=${value}&`
-                }
-            }
-
-            if (this.selfLove)  {
-                this.selfLove = false
-                this.favs--
-            } else {
-                this.selfLove = true
-                this.favs++
-            }
+        async toggleLike() {
+            if (this.blocked || !this.payload.page) return
+            
+            const pageId = this.payload.page.data.id
+            const pageType = this.payload.page.data.collectionType
+            
+            this.selfLove = !this.selfLove
             this.blocked = true
-            // Get Favorite from DB and add/remove it depending on the result
-            this.payload.GET("favorites" + query).then(response => {
-                if (response.data?.docs.length == 0) {
-                    this.payload.POST("favorites", request).then((response: any) => {
-                        this.selfLove = true
-                        this.blocked = false
-                    }).catch(error => {
-                        this.favs--
-                        this.blocked = false
-                    })
-                } else {
-                    response.data.docs.forEach((doc: { id: string }) => {
-                        this.payload.DELETE(`favorites/${doc.id}`).then((response: any) => {
-                            this.selfLove = false
-                            this.blocked = false
-                        }).catch(error => {
-                            this.favs--
-                            this.blocked = false
-                        })
-                    })
-                }
-            }).catch(error => {
-                console.error("error", error)
-            })
+            try {
+                const isLiked = await FavoritesService.toggleLike(pageId, pageType)
+                this.selfLove = isLiked
+                this.favs = isLiked ? this.favs + 1 : this.favs - 1
+            } catch (error) {
+                console.error('Error toggling like:', error)
+            } finally {
+                this.blocked = false
+            }
         }
     }
 })
-
-
 </script>
 
 <style lang="scss">
@@ -255,5 +132,4 @@ export default defineComponent ({
         height: 72px;
     }
 }
-
 </style>
