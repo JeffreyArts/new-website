@@ -212,9 +212,13 @@ export default defineComponent({
     mounted() {
         window.addEventListener("resize", this.onResizeEvent)
         window.addEventListener("layoutLoaded", this.setupScrollTrigger) 
+        window.addEventListener("layoutChange", this.fadeInBlocks)
+        
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
+        window.removeEventListener("layoutLoaded", this.setupScrollTrigger) 
+        window.removeEventListener("layoutChange", this.fadeInBlocks)
         // Cleanup ScrollTrigger
         ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     },
@@ -368,6 +372,26 @@ export default defineComponent({
             })
             this.updateResults()
         },
+        fadeInBlocks() {
+            const filterLayout = document.getElementById("filter-layout")
+            if (!filterLayout) return
+
+            // Get all .block elements from filterLayout that have an opacity of 0
+            const allBlockElements = filterLayout.querySelectorAll(".block") as NodeListOf<HTMLElement>
+            const blockElements = Array.from(allBlockElements).filter((block: HTMLElement) => {
+                const computedStyle = getComputedStyle(block)
+                return computedStyle.opacity === "0"
+            })
+
+            gsap.fromTo(blockElements, 
+                { opacity: 0 },
+                { 
+                    opacity: 1,
+                    duration: 0.8,
+                    stagger: 0.16,
+                }
+            );
+        },
         updateResults(page = 1) {
             if (this.updating) {
                 return
@@ -453,21 +477,6 @@ export default defineComponent({
                     })
                     this.blocks = [...this.blocks, ...blocks]
                 }  
-
-                setTimeout(() => {
-                    const filterLayout = document.getElementById("filter-layout")
-                    if (!filterLayout) return
-
-                    const blockElements = blocks.map(block => filterLayout.querySelector(`#block-${block.id}`)).filter(Boolean);
-                    gsap.fromTo(blockElements, 
-                        { opacity: 0 },
-                        { 
-                            opacity: 1,
-                            duration: 0.8,
-                            stagger: 0.08
-                        }
-                    );
-                }, 50)
                 
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
@@ -597,5 +606,9 @@ export default defineComponent({
     .site-filter-left {
         gap: 16px;
     }
+}
+
+#filter-layout .block {
+    opacity: 0;
 }
 </style>
