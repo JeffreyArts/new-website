@@ -31,7 +31,6 @@
             <div class="piece-thumbnail-footer-left">
                 <h4 class="piece-thumbnail-block-title">
                     <span>{{ options.piece.title }}</span>
-                    <!-- <jaoIcon name="chevron-right-fat" inactive-color="transparent" size="small"></jaoIcon> -->
                 </h4>
                 <div class="piece-thumbnail-tags" v-if="options.piece.categories">
                     <span class="piece-thumbnail-tag" v-for="category, index in options.piece.categories" :key="index" @click="goToCategory(category.id)">
@@ -42,8 +41,8 @@
             <div class="piece-thumbnail-footer-right">
                 <figure ref="yearSVG"></figure>
                 
-                <jaoIcon name="comment" size="medium"></jaoIcon>
-                <jaoIcon name="heart-outline" size="medium"></jaoIcon>
+                <!-- <jaoIcon name="comment" size="medium"></jaoIcon>
+                <jaoIcon name="heart-outline" size="medium"></jaoIcon> -->
             </div>
         </footer>
     </div>
@@ -202,6 +201,16 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
+
+
+        if (this.$refs.yearSVG && this.options.piece.year) {
+            const svgContainer = this.$refs.yearSVG as HTMLElement
+            const SVGElement = Icon(this.options.piece.year, "medium")
+            if (!svgContainer || !SVGElement) {
+                return
+            }
+            svgContainer.appendChild(SVGElement)
+        }
         
         const img = this.$refs["image"] as HTMLImageElement
 
@@ -229,16 +238,6 @@ export default defineComponent ({
             console.error(err)
             this.$emit("blockLoaded")
         })
-
-
-        if (this.$refs.yearSVG && this.options.piece.year) {
-            const svgContainer = this.$refs.yearSVG as HTMLElement
-            const SVGElement = Icon(this.options.piece.year, "medium")
-            if (!svgContainer || !SVGElement) {
-                return
-            }
-            svgContainer.appendChild(SVGElement)
-        }
 
         window.addEventListener("layoutChange", this.updateLayoutChange)
     },
