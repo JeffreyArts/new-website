@@ -125,7 +125,7 @@ const Filter = {
                 depth:1,
                 limit: options.limit,
                 page: options.page,
-                sort: targetCollection === "projects" ? "-year.from" : "-year",
+                sort: targetCollection === "projects" ? "-year.from,id" : "-year,id",
                 ...query, 
             },
             { addQueryPrefix: true },
