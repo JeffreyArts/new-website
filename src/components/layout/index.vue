@@ -98,7 +98,7 @@ export default defineComponent ({
             window.addEventListener("resize", this.__onResizeEvent)
         }
         this.newBlocks = []
-        dispatchEvent(new Event('layoutLoaded'))
+        // dispatchEvent(new Event('layoutLoaded')) // Deze is volgens mij niet nodig
 
         this.updateLayout()
         this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
@@ -164,6 +164,7 @@ export default defineComponent ({
              
             layout.style.height = `${Number(lastBlock.height) + Number(lastBlock.y)}px`
 
+            dispatchEvent(new CustomEvent("layoutChange"))
             dispatchEvent(new CustomEvent("layoutHasChanged"))
             dispatchEvent(new Event('layoutLoaded'))
         },
@@ -265,13 +266,13 @@ export default defineComponent ({
                 );
                 
 
-                dispatchEvent(new CustomEvent("layoutChange"))
-                dispatchEvent(new CustomEvent("layoutHasChanged"))
                 
                 if (this.firstLoad) {
                     // this.blocks = this.newBlocks
                     this.newBlocks = [] 
                     await this.updateBlockSizes()
+                    dispatchEvent(new CustomEvent("layoutChange"))
+                    dispatchEvent(new CustomEvent("layoutHasChanged"))
                     this.firstLoad = false
                 } else {
                     this.addNewBlocks();

@@ -169,6 +169,7 @@ export default defineComponent ({
                     return
                 }
                 this.tempPageBlocks = res.blocks
+                this.updateLayoutSize()
                 this.updatePageBlocks(this.pageIsLoading)
             } catch (error) {
                 console.error("Error loading page:", error)
