@@ -67,9 +67,7 @@ export default defineComponent ({
     watch: {
         "options": {
             handler() {
-                this.$nextTick(() => {
-                    this.$emit("blockLoaded")
-                })
+                this.onLayoutChange()
             },
             deep: true,
             immediate: true
@@ -118,44 +116,51 @@ export default defineComponent ({
             iframe.requestFullscreen()
         },
         onLayoutChange(){
-            if (!this.options.autoScaling) {
-                if (window.innerHeight/window.innerWidth < 1) { // Landscape
-                    const width = parseInt(this.options.landscapeRatio.split("/")[0])
-                    const height = parseInt(this.options.landscapeRatio.split("/")[1])
-                    const ratio =  height / width
-                    this.frame.width = this.$el.clientWidth
-                    this.frame.height = this.$el.clientWidth * ratio
-                } else if (window.innerHeight/window.innerWidth >= 1) { // Landscape
-                    const width = parseInt(this.options.portraitRatio.split("/")[0])
-                    const height = parseInt(this.options.portraitRatio.split("/")[1])
-                    const ratio =  height / width
-                    this.frame.width = this.$el.clientWidth
-                    this.frame.height = this.$el.clientWidth * ratio
+            try {
+                if (!this.options.autoScaling) {
+                    if (window.innerHeight/window.innerWidth < 1) { // Landscape
+                        const width = parseInt(this.options.landscapeRatio.split("/")[0])
+                        const height = parseInt(this.options.landscapeRatio.split("/")[1])
+                        const ratio =  height / width
+                        this.frame.width = this.$el.clientWidth
+                        this.frame.height = this.$el.clientWidth * ratio
+                    } else if (window.innerHeight/window.innerWidth >= 1) { // Landscape
+                        const width = parseInt(this.options.portraitRatio.split("/")[0])
+                        const height = parseInt(this.options.portraitRatio.split("/")[1])
+                        const ratio =  height / width
+                        this.frame.width = this.$el.clientWidth
+                        this.frame.height = this.$el.clientWidth * ratio
+                    } else {
+                        // shouldn't occur, but better safe than sorry
+                        this.frame.width = this.$el.clientWidth
+                        this.frame.height = this.$el.clientWidth
+                    }
                 } else {
-                    // shouldn't occur, but better safe than sorry
-                    this.frame.width = this.$el.clientWidth
-                    this.frame.height = this.$el.clientWidth
+                    if (this.$el.clientWidth < 512) {
+                        this.frame.width = 375
+                        this.frame.height = 812
+                        this.frame.size = "phone"
+                    } else if (this.$el.clientWidth < 768) {
+                        this.frame.size = "tablet"
+                        this.frame.width = 1024
+                        this.frame.height = 768
+                    } else {
+                        this.frame.size = "desktop"
+                        this.frame.width = 1440
+                        this.frame.height = 810
+                    }
+                    this.scale = this.$el.clientWidth / this.frame.width
                 }
-            } else {
 
-                if (this.$el.clientWidth < 512) {
-                    this.frame.width = 375
-                    this.frame.height = 812
-                    this.frame.size = "phone"
-                } else if (this.$el.clientWidth < 768) {
-                    this.frame.size = "tablet"
-                    this.frame.width = 1024
-                    this.frame.height = 768
-                } else {
-                    this.frame.size = "desktop"
-                    this.frame.width = 1440
-                    this.frame.height = 810
-                }
-                this.scale = this.$el.clientWidth / this.frame.width
+                this.refreshIframe()
 
+                this.$nextTick(() => {
+                    this.$emit("blockLoaded")
+                })
+            } catch (error) {
+                this.$emit("blockLoaded")
+                console.warn("Error in onLayoutChange:", error)
             }
-            this.refreshIframe()
-            this.$emit("blockLoaded")
         }
     },
 })

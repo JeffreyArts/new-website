@@ -74,6 +74,17 @@ export default defineComponent ({
             },
             immediate: false
         },
+        "options.layoutSize": {
+            handler() {
+                this.loaded = false
+                this.updateLayout()
+                this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+                // if (this.blocks.length > 0) {
+                //     this.updateBlockSizes()
+                // }
+            },
+            immediate: true
+        },
         "options.blocks": {
             handler(blocks) {
                 if (blocks.length <= 0) {
