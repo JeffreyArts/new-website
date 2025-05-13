@@ -215,44 +215,41 @@ export default defineComponent ({
         },
         async addNewBlocks() {
             this.processing = true
-            this.updateLayout()
             dispatchEvent(new CustomEvent("layoutChange"))
-            setTimeout(async () => {
-                this.updateLayout();
-                if (!this.packerLayout) { return }
-                const block = this.newBlocks[0]
-                const newBlock = {  
-                    width: block.width || 0,
-                    height: parseInt(block.height?.toString() || "0"),
-                    position: this.blocks.length,
-                    id: block.id
-                }
-                
-                const result = await this.packerLayout.addBlock(newBlock, 12);
-                
-                if (result) {
-                    this.newBlocks = this.newBlocks.filter(b => b.id !== block.id)
-                    // Update this.block with new position (match by id)
-                    const index = this.blocks.findIndex(b => b.id === block.id)
-                    if (index !== -1) {
-                        this.blocks[index] = {
-                            ...this.blocks[index],
-                            x: result.x,
-                            y: result.y,
-                            width: result.width,
-                            height: result.height
-                        }
+            this.updateLayout();
+            if (!this.packerLayout) { return }
+            const block = this.newBlocks[0]
+            const newBlock = {  
+                width: block.width || 0,
+                height: parseInt(block.height?.toString() || "0"),
+                position: this.blocks.length,
+                id: block.id
+            }
+            
+            const result = await this.packerLayout.addBlock(newBlock, 12);
+            
+            if (result) {
+                this.newBlocks = this.newBlocks.filter(b => b.id !== block.id)
+                // Update this.block with new position (match by id)
+                const index = this.blocks.findIndex(b => b.id === block.id)
+                if (index !== -1) {
+                    this.blocks[index] = {
+                        ...this.blocks[index],
+                        x: result.x,
+                        y: result.y,
+                        width: result.width,
+                        height: result.height
                     }
                 }
+            }
 
-                if (this.newBlocks.length > 0) {
-                    return this.addNewBlocks()
-                }
-                
+            if (this.newBlocks.length > 0) {
+                this.addNewBlocks()
+            } else {
                 this.__updateLayoutHeight()
                 this.processing = false
                 this.loaded = true
-            }, 1)
+            }
         },
         async blockLoaded(block: BlockType) {
             if (block.loaded) {
@@ -265,7 +262,7 @@ export default defineComponent ({
             const newBlock = {...block, ...res[0]}
             this.newBlocks.push(newBlock)
 
-            if (!this.packerLayout) { return }
+            // if (!this.packerLayout) { return }
             if (_.every(_.map(this.blocks, block => block.loaded))) {
 
                 this.newBlocks = await this.__setBlockDimensions(this.newBlocks)
@@ -281,12 +278,12 @@ export default defineComponent ({
                     this.newBlocks = [] 
                     await this.updateBlockSizes()
                     this.updateBlockSizes()
-                    dispatchEvent(new Event('layoutLoaded'))
+                    // dispatchEvent(new Event('layoutLoaded'))
                     this.firstLoad = false
                 } else {
-                    dispatchEvent(new Event('layoutLoaded'))
-                    this.addNewBlocks();
+                    await this.addNewBlocks();
                 }
+                dispatchEvent(new Event('layoutLoaded'))
             }
         },
         updateLayout() {
