@@ -40,7 +40,7 @@ const PhysicsService = {
         PhysicsService.walkLoop()                
     
         window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
-        window.addEventListener("layoutHasChanged", PhysicsService.layoutHasChangedEvent)
+        window.addEventListener("layoutChange", PhysicsService.layoutHasChangedEvent)
         // window.addEventListener("scroll", PhysicsService.onScroll, { passive: true })
         window.addEventListener("mouseup", PhysicsService.cancelMouseDown)
         document.body.addEventListener("mousedown", PhysicsService.mouseDownEvent);

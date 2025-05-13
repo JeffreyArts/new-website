@@ -68,6 +68,8 @@ export default defineComponent ({
         "options": {
             handler() {
                 this.onLayoutChange()
+                this.setTitle()
+                this.refreshIframe()
             },
             deep: true,
             immediate: true
@@ -92,9 +94,11 @@ export default defineComponent ({
         this.setTitle()
 
         window.addEventListener("layoutChange", this.onLayoutChange)
+        window.addEventListener("layoutLoaded", this.onLayoutChange)
     },
     unmounted() {
         window.removeEventListener("layoutChange", this.onLayoutChange)
+        window.removeEventListener("layoutLoaded", this.onLayoutChange)
     },
     methods: {
         refreshIframe(){

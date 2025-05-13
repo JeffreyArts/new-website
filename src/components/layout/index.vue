@@ -109,9 +109,8 @@ export default defineComponent ({
         if (typeof window !== "undefined") {
             window.addEventListener("resize", this.__onResizeEvent)
         }
+        
         this.newBlocks = []
-        // dispatchEvent(new Event('layoutLoaded')) // Deze is volgens mij niet nodig
-
         this.updateLayout()
         this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
     },
@@ -119,8 +118,6 @@ export default defineComponent ({
         window.removeEventListener("resize", this.__onResizeEvent)
     },
     methods: {
-
-        
         __onResizeEvent() { 
             clearTimeout(this.timeoutDelay)
             this.timeoutDelay = setTimeout(async () => {
@@ -178,8 +175,7 @@ export default defineComponent ({
             layout.style.height = `${Number(lastBlock.height) + Number(lastBlock.y)}px`
 
             dispatchEvent(new CustomEvent("layoutChange"))
-            dispatchEvent(new CustomEvent("layoutHasChanged"))
-            dispatchEvent(new Event('layoutLoaded'))
+            
         },
         async __setBlockDimensions(blocks: Array<BlockType>){
             const result = [] as Array<Promise<void>>
@@ -281,14 +277,13 @@ export default defineComponent ({
 
                 
                 if (this.firstLoad) {
-                    // this.blocks = this.newBlocks
                     this.newBlocks = [] 
                     await this.updateBlockSizes()
                     this.updateBlockSizes()
-                    dispatchEvent(new CustomEvent("layoutChange"))
-                    dispatchEvent(new CustomEvent("layoutHasChanged"))
+                    dispatchEvent(new Event('layoutLoaded'))
                     this.firstLoad = false
                 } else {
+                    dispatchEvent(new CustomEvent("layoutChange"))
                     this.addNewBlocks();
                 }
             }
