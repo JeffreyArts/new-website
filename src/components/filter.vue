@@ -214,6 +214,21 @@ export default defineComponent({
         window.addEventListener("layoutLoaded", this.setupScrollTrigger) 
         window.addEventListener("layoutChange", this.fadeInBlocks)
         
+        // Observe layout changes
+        const layoutWrapper = document.getElementById("filter-layout")
+        if (layoutWrapper) {
+            const observer = new MutationObserver(() => {
+                if (this.scrollTrigger) {
+                    this.scrollTrigger.refresh()
+                }
+            })
+            
+            observer.observe(layoutWrapper, {
+                childList: true,
+                subtree: true,
+                attributes: true
+            })
+        }
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)

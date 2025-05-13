@@ -216,6 +216,7 @@ export default defineComponent ({
         async addNewBlocks() {
             this.processing = true
             this.updateLayout()
+            dispatchEvent(new CustomEvent("layoutChange"))
             setTimeout(async () => {
                 this.updateLayout();
                 if (!this.packerLayout) { return }
@@ -283,7 +284,7 @@ export default defineComponent ({
                     dispatchEvent(new Event('layoutLoaded'))
                     this.firstLoad = false
                 } else {
-                    dispatchEvent(new CustomEvent("layoutChange"))
+                    dispatchEvent(new Event('layoutLoaded'))
                     this.addNewBlocks();
                 }
             }
