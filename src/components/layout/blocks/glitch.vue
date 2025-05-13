@@ -34,7 +34,7 @@ export default defineComponent ({
     },
     data() {
         return {
-            glitchValues: [] as string[],
+            glitchValues: [] as Array<{text: string, url?: string}>,
             fontSize: 0,
             glitchOptions: {
                 hover: false,
@@ -64,7 +64,10 @@ export default defineComponent ({
                     this.glitchOptions.delay = val.delay * 1000
                 }
                 if (val.values) {
-                    this.glitchValues = val.values.map((d: { text: string }) => d.text)
+                    this.glitchValues = val.values.map((d: { text: string, url?: string }) => ({
+                        text: d.text,
+                        url: d.url
+                    }))
                 }
                 if (val.fontSize) {
                     this.fontSize = val.fontSize

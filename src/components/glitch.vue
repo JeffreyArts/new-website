@@ -97,7 +97,7 @@ export default {
         if (!this.inputs || this.inputs.length === 0) {
             throw new Error("Missing input")
         }
-        this.glitchedInput = this.inputs[0]
+        this.processInput(this.inputs[0])
         this.cancelGlitch()
         this.glitchLayers()
     },
@@ -105,6 +105,15 @@ export default {
         this.cancelGlitch()
     },
     methods: {
+        processInput(input: any) {
+            if (typeof input === 'object' && input.url) {
+                this.glitchedInput = `<a href="${input.url}" target="_blank">${input.text}</a>`
+            } else if (typeof input === 'object' && input.text) {
+                this.glitchedInput = input.text
+            } else {
+                this.glitchedInput = input
+            }
+        },
         generateGlitchMasksPath() {
             const number = Math.floor(Math.random() * 60)
             const points = []
@@ -211,7 +220,7 @@ export default {
                 this.repeatIndex++
                 if (this.inputs) {
                     this.textIndex = (this.textIndex + 1) % this.inputs.length
-                    this.glitchedInput = this.inputs[this.textIndex]
+                    this.processInput(this.inputs[this.textIndex])
                     this.$emit("glitchChange", this.glitchedInput)
 
                     if ((!this.repeat && this.textIndex === this.inputs.length - 1 ) ||
@@ -283,6 +292,15 @@ export default {
             color: #ddd;
         }
     }
-}
 
+    a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s ease;
+
+        &:hover {
+            color: var(--accent-color);
+        }
+    }
+}
 </style>
