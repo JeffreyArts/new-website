@@ -22,18 +22,19 @@ const generateRoutes = async (url, filename) => {
     
     try {
         const response = await axios.get(url)
-
+        
         if (!response.data?.docs) {
             throw new Error("No documents found for", url)
         }
         
         response.data.docs.forEach(data => {
             const meta = {}
+            
             if (typeof data.metaDescription == "string") {
                 meta.description = data.metaDescription
             }
 
-            if (data.metaTags.length > 0) {
+            if (data.metaTags?.length > 0) {
                 meta.keywords = data.metaTags.join(", ")
             }
 

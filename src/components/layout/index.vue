@@ -75,13 +75,14 @@ export default defineComponent ({
             immediate: false
         },
         "options.layoutSize": {
-            handler() {
+            async handler() {
                 this.loaded = false
                 this.updateLayout()
                 this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
-                // if (this.blocks.length > 0) {
-                //     this.updateBlockSizes()
-                // }
+                if (this.blocks.length > 0) {
+                    await this.updateBlockSizes()
+                    this.updateBlockSizes()
+                }
             },
             immediate: true
         },
@@ -122,9 +123,10 @@ export default defineComponent ({
         
         __onResizeEvent() { 
             clearTimeout(this.timeoutDelay)
-            this.timeoutDelay = setTimeout(() => {
+            this.timeoutDelay = setTimeout(async () => {
                 this.updateLayout()
                 this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
+                await this.updateBlockSizes()
                 this.updateBlockSizes()
             }, 80)
         },
@@ -282,6 +284,7 @@ export default defineComponent ({
                     // this.blocks = this.newBlocks
                     this.newBlocks = [] 
                     await this.updateBlockSizes()
+                    this.updateBlockSizes()
                     dispatchEvent(new CustomEvent("layoutChange"))
                     dispatchEvent(new CustomEvent("layoutHasChanged"))
                     this.firstLoad = false
