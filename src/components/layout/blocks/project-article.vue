@@ -10,7 +10,7 @@
 
             <span class="project-article-button">view project</span>
         </router-link>
-        <SlateText  class="project-article-text" :data="options.project.description" />
+        <SlateText  class="project-article-text" v-if="!options.hideDescription " :data="description" />
     </div>
 </template>
 
@@ -24,6 +24,8 @@ import ProjectType  from "./../../../types/project"
 
 export type ProjectArticleBlock = {
     blockType: "projectArticle"
+    hideDescription: boolean
+    customDescription: SlateNode
     project: ProjectType
 }
 
@@ -80,6 +82,12 @@ export default defineComponent ({
                 src += this.options.project?.thumbnail.sizes[this.imageSize].url
             }
             return src
+        },
+        description() {
+            if (this.options.customDescription) {
+                return this.options.customDescription
+            }
+            return this.options.project.description
         }
     },
     mounted() {
