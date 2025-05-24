@@ -24,15 +24,17 @@ interface FilterOptions {
     project?: string,
     year?: Array<string>,
     series?: Array<string>,
-    categories?: Array<string>
+    categories?: Array<string>,
+    projects?: Array<string> 
 }
 
 interface FilterQuery {
     where: {
         archived: {equals: boolean}
-        project: {equals: string}
+        project: {equals: string} | { in: string[] }
         series?: { in: string[] }
         categories?: { in: string[] }
+        id?: { in: string[] }
         "year"?: { in: string[] }
         "year.from"?: { in: string[] }
         "year.to"?: { in: string[]  }
@@ -91,6 +93,18 @@ const Filter = {
         if (options.project) {
             query.where.project = {
                 equals: options.project 
+            }
+        }
+
+        if (options.projects && options.projects.length > 0) {
+            if (targetCollection === "projects") {
+                query.where.id = {
+                    in: options.projects
+                }
+            } else if (targetCollection === "pieces") {
+                query.where.project = {
+                    in: options.projects
+                }
             }
         }
 

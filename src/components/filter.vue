@@ -279,6 +279,8 @@ export default defineComponent({
                     }
                 });
             }
+
+            // Process categories
             if (this.options.prefill.categories) {
                 this.options.prefill.categories.forEach(category => {
                     const foundCategory = find(this.filterOptions.categories, { value: category.id })
@@ -411,6 +413,7 @@ export default defineComponent({
             if (this.updating) {
                 return
             }
+            
             this.updating = true
             const query = {
                 limit: this.limit,
@@ -422,6 +425,7 @@ export default defineComponent({
                 archived?: boolean
                 series?: Array<string>
                 categories?: Array<string>
+                projects?: Array<string>
                 year?: Array<string>
             }
 
@@ -455,6 +459,9 @@ export default defineComponent({
             const year = filter(this.filterOptions.year, { selected: true })
             if (year.length > 0) {
                 query.year = year.map(serie => serie.value.toString())
+            }
+            if (this.options.prefill.projects) {
+                query.projects = this.options.prefill.projects.map(project => project.id)
             }
 
             Filter.query(this.options.targetCollection, query).then((data) => {
