@@ -19,9 +19,19 @@
 
             
             <section v-if="options.piece.type === 'iframe'" class="piece-thumbnail-block-iframe-wrapper">
+                <template v-if="options.piece.iframeProperties.image">
+                    <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                    <span class="piece-thumbnail-block-iframe-wrapper-url">{{ cleanUrl }}</span>
+                    <img :src="src" class="piece-thumbnail-block-image" ref="image"/>
+                </template>
                 <iframe 
                 :style="`aspect-ratio: ${ratio};`"
                 :src="src"
+                v-if="!options.piece.iframeProperties.image"
                 frameborder="0" 
                 ref="iframe"/>
             </section>
@@ -55,10 +65,8 @@ import highlightjs from "./../../highlightjs.vue"
 import { FavoritesService } from "@/services/favorites"
 
 export type IframeProperties = {
-    landscapeRatio: string
-    portraitRatio: string
-    autoScaling: boolean
     url:string
+    image?: ImageProperties
 }
 
 export type YoutubeProperties = {
@@ -138,7 +146,6 @@ export default defineComponent ({
     },
     data: function() {
         return {
-            hoverEvent: undefined as undefined | gsap.core.Tween,
             imageSize: "image_sm" as "image_sm" | "image_md" | "image_lg" | "original",
             link: "",
             patternHover: false,
@@ -161,10 +168,13 @@ export default defineComponent ({
                 const ratio = this.options.piece.youtubeProperties.ratio.split("/")
                 return Number(ratio[0])/Number(ratio[1])
             } else if (this.options.piece.type === "iframe") {
-                const ratio = this.options.piece.iframeProperties.landscapeRatio.split("/")
-                return Number(ratio[0])/Number(ratio[1])
+                return 4/3
             } 
             return  "undefined"
+        },
+        cleanUrl() {
+            let url = this.options.piece.iframeProperties.url.replace("https://", "").replace("http://", "").replace("www.", "").replace(/\/$/, "")
+            return url
         },
         src() {
             let src = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","")
@@ -184,8 +194,25 @@ export default defineComponent ({
             } else if (this.options.piece.type === "youtube") {
                 src = this.options.piece.youtubeProperties.url
             } else if (this.options.piece.type === "iframe") {
-                src = this.options.piece.iframeProperties.url
+
+                let imageProperties = this.options.piece.iframeProperties.image //? this.options.piece.imageProperties.image : this.options.piece.imageProperties
+
+                console.log("Test 123.", imageProperties)
+                if (!imageProperties) {
+                    return this.options.piece.iframeProperties.url
+                }
+
+                if (imageProperties.mimeType.toString().includes("svg")) {
+                    return this.options.piece.iframeProperties.url
+                }
+
+                if (this.imageSize === "original") {
+                    src += `/api/media/file/${imageProperties.filename}`
+                } else {
+                    src += imageProperties.sizes[this.imageSize].url
+                }
             }
+
 
             return src
         },
@@ -326,17 +353,18 @@ export default defineComponent ({
     opacity: 0.9;
     filter: saturate(.9);
     width: 100%;
+    overflow: hidden;
+    outline: 1px solid transparent;
 
     &:hover,
     &:focus {
         background:var(--bg-color);
         filter: saturate(1.04);
         opacity: 1;
-        img {
-            border-radius: 8px;
-            outline: 1px solid var(--bg-color);
-            box-shadow: 0 0 12px rgba(0,0,0,.16);
-        }
+        border-radius: 8px;
+        outline: 1px solid var(--bg-color);
+        box-shadow: 0 0 12px rgba(0,0,0,.16);
+
     }
 }
 
@@ -363,10 +391,48 @@ export default defineComponent ({
 }
 
 .piece-thumbnail-block-iframe-wrapper {
+    display: flex;
+    flex-flow: column;
+
     iframe {
         width: 100%;
         pointer-events: none;
     }
+    ul {
+        display: flex;
+        gap: 4px;
+        flex-flow: row;
+        padding: 14px;
+        margin: 0;
+        background-color: #ccc;
+        height: 36px;
+        border-radius: 4px 4px 0 0;
+
+        li {
+            display: block;
+            padding: 0;
+            margin: 0;
+            border-radius: 100%;
+            width: 8px;
+            height: 8px;
+            background-color: rgba(0,0,0,.08);
+        }
+    }
+}
+.piece-thumbnail-block-iframe-wrapper-url {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    font-size: 12px;
+    font-family: var(--accent-font);
+    color: var(--contrast-color);
+    opacity: 0.6;
+    transform: translateX(-50%);
+    width: 50%;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .piece-thumbnail-block-code-wrapper {
