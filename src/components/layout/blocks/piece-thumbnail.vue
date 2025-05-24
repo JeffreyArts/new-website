@@ -197,7 +197,6 @@ export default defineComponent ({
 
                 let imageProperties = this.options.piece.iframeProperties.image //? this.options.piece.imageProperties.image : this.options.piece.imageProperties
 
-                console.log("Test 123.", imageProperties)
                 if (!imageProperties) {
                     return this.options.piece.iframeProperties.url
                 }
@@ -323,7 +322,7 @@ export default defineComponent ({
             this.selfLove = !this.selfLove
             
             try {
-                const isLiked = await FavoritesService.toggleLike(this.options.piece.id, 'pieces')
+                await FavoritesService.toggleLike(this.options.piece.id, 'pieces')
             } catch (error) {
                 console.error('Error toggling like:', error)
             } finally {
