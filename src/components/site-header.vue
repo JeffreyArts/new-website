@@ -18,6 +18,30 @@
                 </div>
             </span>
         </nav>
+        
+        <span class="site-header-settings" :class="[userMenuOpen ? '__isActive' : '']">
+            <jaoIcon size="large" name="user" inactiveColor="transparent" :activeColor="userMenuColor" @click="toggleUserMenu"/>
+        </span>
+
+        <div class="site-header-user-menu">
+            <form @submit.prevent="registerAccount" class="site-header-user-menu-form">
+                <div class="row">
+                    <label for="email">E-mailadres</label>
+                    <input type="email" id="email" v-model="email" required>
+                </div>
+                <div class="row" v-if="showPassword">
+                    <label for="password">Wachtwoord</label>
+                    <input type="password" id="password" v-model="password" required>
+                </div>
+                <div class="row">
+                    <button class="button small" type="submit">{{ showPassword ? 'Inloggen' : 'Registreren / Login' }}</button>
+                </div>
+            </form>
+            
+            <div v-if="emailSent" class="email-sent-message">
+                An e-mail has been sent to {{ email }}, please follow the steps in the e-mail to complete the creation of this new account.
+            </div>
+        </div>
     </header>
 </template>
 
@@ -28,6 +52,8 @@ import Icon from "jao-icons"
 import Navigation from "@/services/payload/navigation"
 import jaoIcon from "@/components/jao-icon.vue"
 import gsap from "gsap"
+import AccountService from "@/services/account"
+import Payload from "@/stores/payload"
 
 type NavItem = {
     id: string,
@@ -52,6 +78,12 @@ export default defineComponent({
             nav: [] as NavItem[],
             tweens: [] as gsap.core.Tween[],
             expendedItem: undefined as undefined | NavItem,
+            email: "",
+            password: "",
+            showPassword: false,
+            emailSent: false,
+            userMenuColor: "#fff",
+            userMenuOpen: false,
         }
     },
     computed: {
@@ -203,6 +235,102 @@ export default defineComponent({
 
                 this.tweens.push(childTween)
             }
+        },
+        toggleUserMenu() {
+            this.userMenuOpen = !this.userMenuOpen
+
+            if (this.userMenuOpen) {
+                this.userMenuColor = "#222"
+                gsap.set(".site-header-user-menu", {
+                    y: -8,
+                    opacity: 0
+                })
+
+                gsap.to(".site-header-user-menu", {
+                    y: 0,
+                    opacity: 1,
+                    duration: .8,
+                    pointerEvents: "all"
+                })
+
+                // Voeg event listener toe voor klikken buiten het menu
+                document.addEventListener('click', this.handleClickOutside)
+            } else {
+                this.userMenuColor = "#fff"
+                gsap.killTweensOf(".site-header-user-menu")
+                gsap.to(".site-header-user-menu", {
+                    y: -8,
+                    opacity: 0,
+                    duration: .48,
+                    pointerEvents: "none"
+                })
+
+                // Verwijder event listener wanneer menu sluit
+                document.removeEventListener('click', this.handleClickOutside)
+            }
+        },
+        handleClickOutside(event: MouseEvent) {
+            const userMenu = this.$el.querySelector('.site-header-user-menu')
+            const settingsButton = this.$el.querySelector('.site-header-settings')
+            
+            if (userMenu && settingsButton) {
+                if (!userMenu.contains(event.target as Node) && !settingsButton.contains(event.target as Node)) {
+                    this.userMenuOpen = false
+                    this.userMenuColor = "#fff"
+                    gsap.killTweensOf(".site-header-user-menu")
+                    gsap.to(".site-header-user-menu", {
+                        y: -8,
+                        opacity: 0,
+                        duration: .48,
+                        pointerEvents: "none"
+                    })
+                    document.removeEventListener('click', this.handleClickOutside)
+                }
+            }
+        },
+        async registerAccount() {
+            const valid = await AccountService.validateEmail(this.email)
+            
+            if (valid) {
+                this.showPassword = true;
+            } else {
+                gsap.to(".site-header-user-menu-form", {
+                    height: 0,
+                    padding: 0
+                })
+                this.emailSent = true;
+                let height = 0
+                this.$nextTick(() => {
+                    height = parseInt(gsap.getProperty(".email-sent-message", "height").toString())
+                    
+                    gsap.set(".email-sent-message", {opacity:0, height:0 })
+                })
+                const payload = Payload()
+                const password = payload.auth?.self?.defaultPassword + ""
+                const email = payload.auth?.self?.email + ""
+                if (payload.auth?.self) {
+                    await AccountService.register(this.email, email, password)
+
+                    gsap.to(".email-sent-message", {
+                        height,
+                        opacity: 1,
+                        delay: .2,
+                        onComplete: () => {
+                            gsap.to(".email-sent-message", {
+                                opacity: 0,
+                                delay: 6,
+                                duration: .4,
+                                onComplete: () => {
+                                    this.userMenuOpen = false
+                                    this.showPassword = false;
+                                    this.emailSent = false;
+                                    this.userMenuColor = "#fff"
+                                }
+                            })
+                        }
+                    })
+                }
+            }
         }
     }
 })
@@ -225,8 +353,8 @@ export default defineComponent({
     height: 36px;
     position: absolute;
     z-index: 1990;
-    mix-blend-mode: difference;
-    filter: invert(100%);
+    // mix-blend-mode: difference;
+    // filter: invert(100%);
 }
 
 .site-header-navigation {
@@ -303,7 +431,84 @@ export default defineComponent({
     }
 }
 
+.site-header-settings {
+    position: absolute;
+    padding: 4px;
+    background-color: var(--contrast-color);
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 4px;
+    top: 4px;
+    transition: .4s all ease;
 
+    &.__isActive {
+        outline: 1px solid var(--contrast-color);
+        background-color: var(--bg-color);
+    }
+
+    svg {
+        width: 13px;
+    }
+}
+
+.site-header-user-menu {
+    position: absolute;
+    right: 16px;
+    top: 64px;
+    max-width: 256px;
+    opacity: 0;
+    pointer-events: none;
+    
+    .row {
+        display: flex;
+        flex-flow: column;
+        +.row {
+            padding-top: 8px;
+        }
+    }
+
+    .email-sent-message {
+        padding: 8px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+        width: calc(100% - 16px);
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        font-size: 14px;
+        line-height: 1.4;
+        overflow: hidden;
+    }
+}
+
+.site-header-user-menu-form {
+    padding: 8px;
+    background-color: #fff;
+    overflow: hidden;
+
+    label {
+        font-size: 12px;
+        font-family: var(--accent-font);
+    }
+
+    input[type=text],input[type=email] {
+        font-size: 14px;
+        line-height: 2;
+        outline-width: 1px;
+        border-radius: 0;
+        border: 1px solid var(--contrast-color);
+        padding-left: 4px;
+
+        &:focus {
+            outline: 0 none transparent;
+            border-left-color: #fff;
+            border-right-color: #fff;
+            border-top-color: #fff;
+        }
+    }
+
+}
 
 @media all and (min-width: 640px) {
     .site-header-logo,
@@ -328,6 +533,16 @@ export default defineComponent({
         height: 20px;
         padding-right: 8px;
         margin-left: -28px;
+    }
+
+    .site-header-settings {
+        padding: 8px;
+        right: 16px;
+        top: 16px;
+
+        svg {
+            width: 26px;
+        }
     }
 }
 

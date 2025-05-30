@@ -3,7 +3,7 @@
 .button {
     background-color: transparent;
     border: 1px solid var(--contrast-color);
-    border-radius: 32px;
+    border-radius: 0;
     background-color: var(--contrast-color);
     height: 36px;
     display: inline-block;
@@ -11,6 +11,8 @@
     padding: 0 32px;
     transition: var(--transition-fast);
     cursor: pointer;
+    color: var(--bg-color);
+    font-size: 12px;
     
     &.small {
         height: 28px;

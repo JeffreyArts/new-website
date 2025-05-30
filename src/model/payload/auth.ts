@@ -37,7 +37,13 @@ export class AuthModel {
             this.createAnonymousAccount()
         } else {
             if (this.self.defaultPassword) {
-                this.authenticate({ email: this.self.email, password: this.self.defaultPassword })
+                this.authenticate({ email: this.self.email, password: this.self.defaultPassword }).catch(error => {
+                    let id = this.self?.id
+                    const event = new CustomEvent("removeCatterpillar", { detail: { id } })
+                    window.dispatchEvent(event)
+                    this.logout()
+                    this.createAnonymousAccount()
+                })
             } else {
                 this.axios(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`).then((response) => {
                     if (response.data.user) {

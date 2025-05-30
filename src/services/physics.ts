@@ -40,6 +40,7 @@ const PhysicsService = {
         PhysicsService.walkLoop()                
     
         window.addEventListener("addCatterpillar", PhysicsService.addCatterpillarEvent as EventListener)
+        window.addEventListener("removeCatterpillar", PhysicsService.removeCatterpillarEvent as EventListener)
         window.addEventListener("layoutChange", PhysicsService.layoutHasChangedEvent)
         // window.addEventListener("scroll", PhysicsService.onScroll, { passive: true })
         window.addEventListener("mouseup", PhysicsService.cancelMouseDown)
@@ -60,6 +61,19 @@ const PhysicsService = {
             
             if (!PhysicsService.cache.find(catterpillar => catterpillar.id === id)) {
                 PhysicsService.cache.push(event.detail)
+            }
+        }
+    },
+    removeCatterpillarEvent: (event: CustomEvent) => {
+        if (event.detail) {
+            const id = event.detail.id
+            if (!id) {
+                throw new Error("Catterpillar is missing `id`")
+            }
+
+            const index = PhysicsService.cache.findIndex(catterpillar => catterpillar.id === id)
+            if (index !== -1) {
+                PhysicsService.cache.splice(index, 1)
             }
         }
     },

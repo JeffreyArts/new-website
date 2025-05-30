@@ -109,6 +109,12 @@ export default defineComponent ({
             },
             immediate: true
         },
+        "activeColor": {
+            handler: function () {
+                this.updateIcon()
+            },
+            immediate: true
+        },
         "custom":{
             handler: function () {
                 if (!this.$el || typeof window === "undefined") {
