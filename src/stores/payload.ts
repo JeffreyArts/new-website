@@ -19,7 +19,6 @@ export const Payload = defineStore({
     actions: {
         axios: axios.create(),
         init() {
-
             // Set url
             let url = import.meta.env.VITE_PAYLOAD_REST_ENDPOINT
             // if last char is a slash, remove it
@@ -55,7 +54,6 @@ export const Payload = defineStore({
                             const newAuthToken = refreshResponse.data.token; // Extract the new token
 
                             localStorage.setItem('authToken', newAuthToken);
-                            originalRequest.headers['Authorization'] = `Bearer ${newAuthToken}`;
                             return this.axios(originalRequest);
                         }
                     } catch (refreshError) {
@@ -86,6 +84,9 @@ export const Payload = defineStore({
             }
             return this.REST("PUT", path, data)
         },
+        PATCH(path: string, data?: object | string) {
+            return this.REST("PATCH", path, data)
+        },
         REST(method: string, path: string, data?: object | string) : Promise<AxiosResponse> {
             
             const headers = {
@@ -97,10 +98,6 @@ export const Payload = defineStore({
             }
 
             path = this.baseUrl + path
-             
-            if (this.auth && this.auth.self) {
-                headers["Authorization"] = `Bearer ${this.auth.authToken}`
-            }
 
             const request = {
                 method: method,

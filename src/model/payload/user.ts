@@ -13,6 +13,7 @@ export class UserModel {
     public email: string
     public username: string
     public defaultPassword?: string
+    public verified?: boolean
     public catterpillar?: CatterpillarOptions
 
     constructor(properties: {
@@ -21,7 +22,8 @@ export class UserModel {
         email?: string,
         defaultPassword?: string,
         self?: boolean,
-        catterpillar?: CatterpillarOptions
+        catterpillar?: CatterpillarOptions,
+        verified?: boolean
     }) {
         if (!properties) {
             throw new Error("Missing options for UserModel")
@@ -31,6 +33,7 @@ export class UserModel {
         this.username = properties.username || ""
         this.email = properties.email || ""
         this.catterpillar = properties.catterpillar || undefined
+        this.verified = properties.verified || false
         this.self = (typeof properties.self !== "undefined") ? properties.self : false
         if (properties.defaultPassword) {
             this.defaultPassword = properties.defaultPassword

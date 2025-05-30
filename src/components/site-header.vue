@@ -24,22 +24,49 @@
         </span>
 
         <div class="site-header-user-menu">
-            <form @submit.prevent="registerAccount" class="site-header-user-menu-form">
-                <div class="row">
+
+            
+            <form @submit.prevent="handleAccountForm" class="site-header-user-menu-form" v-if="userMenu != 'user'">
+                <div class="column">
                     <label for="email">E-mailadres</label>
                     <input type="email" id="email" v-model="email" required>
                 </div>
-                <div class="row" v-if="showPassword">
+                <div class="column" v-if="userMenu == 'login'">
                     <label for="password">Wachtwoord</label>
                     <input type="password" id="password" v-model="password" required>
+                    <div v-if="loginError" class="error-message">{{ loginError }}</div>
                 </div>
-                <div class="row">
-                    <button class="button small" type="submit">{{ showPassword ? 'Inloggen' : 'Registreren / Login' }}</button>
+
+
+                <div class="column" v-if="userMenu == 'register'">
+                    <button class="button small" type="submit">Register / Login</button>
+                </div>
+
+                <div class="row" v-if="userMenu == 'login'">
+                    <button class="button small cancel" @click="cancelLogin">Cancel</button>
+                    <button class="button small login" type="submit">Login</button>
                 </div>
             </form>
+
+            <div v-if="userMenu == 'user' && payload.auth?.self" class="site-header-user-menu-user">
+                <div class="site-header-user-menu-container">
+                    <div class="row">
+                        Hello {{ payload.auth.self.username }}
+                        <!-- <input class="site-header-user-menu-username" :disabled="userNameDisabled" v-model="payload.auth.self.username" ref="usernameInput" />
+                        <span class="site-header-user-menu-username-change" @click="changeUsername" v-if="userNameDisabled">change username</span>
+                        <span class="site-header-user-menu-username-change" v-if="!userNameDisabled">
+                            <span @click="saveUsername">save</span> &nbsp; 
+                            <span @click="cancelUsername">cancel</span>
+                        </span> -->
+                    </div>
+                </div>
+            </div>
             
             <div v-if="emailSent" class="email-sent-message">
                 An e-mail has been sent to {{ email }}, please follow the steps in the e-mail to complete the creation of this new account.
+            </div>
+            <div v-if="timesCanceled > 1 && userMenu == 'login'" class="email-sent-message">
+                <p>It seems like you are trying to create a new account. However, there is already an account with this e-mail address. Please try again with a different e-mail address.</p>
             </div>
         </div>
     </header>
@@ -80,10 +107,21 @@ export default defineComponent({
             expendedItem: undefined as undefined | NavItem,
             email: "",
             password: "",
-            showPassword: false,
+            loginError: "",
             emailSent: false,
+            timesCanceled: 0,
+            userMenu: "register" as "register" | "login" | "user",
             userMenuColor: "#fff",
             userMenuOpen: false,
+            userNameDisabled: true,
+            userNameCache: "",
+        }
+    },
+    setup() {
+        const payload = Payload()
+
+        return {
+            payload
         }
     },
     computed: {
@@ -96,9 +134,21 @@ export default defineComponent({
     mounted() {
         const logo = this.$refs["logo"] as HTMLElement
         const icon = Icon("medium/logo")
+
         // this.loadMenu()
         if (logo && icon) {
             logo.appendChild(icon)
+        }
+    },
+    watch: {
+        "payload.auth.self": {
+            handler(self) {
+                
+                if (self && !self.email.includes("user@jeffreyarts.nl")) {
+                    this.userMenu = "user"
+                }
+            },
+            deep: true
         }
     },
     methods: {
@@ -288,11 +338,35 @@ export default defineComponent({
                 }
             }
         },
+        handleAccountForm(e: Event) {
+            if (this.userMenu == "register") {
+                this.registerAccount()
+            } else if (this.userMenu == "login") {
+                this.loginAccount()
+            } else if (this.userMenu == "user") {
+                // this.logoutAccount()
+            }
+        },
+        async loginAccount() {
+            if (!this.payload.auth) {
+                return
+            }
+            this.loginError = ""
+
+            this.payload.auth.authenticate({
+                email: this.email,
+                password: this.password
+            }).then(res => {
+                this.userMenu = "user"
+            }).catch(err => {
+                this.loginError = err.response.data.errors[0].message
+            })            
+        },
         async registerAccount() {
             const valid = await AccountService.validateEmail(this.email)
             
             if (valid) {
-                this.showPassword = true;
+                this.userMenu = "login";
             } else {
                 gsap.to(".site-header-user-menu-form", {
                     height: 0,
@@ -305,10 +379,11 @@ export default defineComponent({
                     
                     gsap.set(".email-sent-message", {opacity:0, height:0 })
                 })
-                const payload = Payload()
-                const password = payload.auth?.self?.defaultPassword + ""
-                const email = payload.auth?.self?.email + ""
-                if (payload.auth?.self) {
+
+                const password = this.payload.auth?.self?.defaultPassword + ""
+
+                const email = this.payload.auth?.self?.email + ""
+                if (this.payload.auth?.self) {
                     await AccountService.register(this.email, email, password)
 
                     gsap.to(".email-sent-message", {
@@ -322,7 +397,7 @@ export default defineComponent({
                                 duration: .4,
                                 onComplete: () => {
                                     this.userMenuOpen = false
-                                    this.showPassword = false;
+                                    this.userMenu = "login";
                                     this.emailSent = false;
                                     this.userMenuColor = "#fff"
                                 }
@@ -331,6 +406,46 @@ export default defineComponent({
                     })
                 }
             }
+        },
+        changeUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = false
+            if (this.payload.auth?.self) {
+                this.userNameCache = this.payload.auth.self.username
+            }
+            // set focus on input
+            const input = this.$refs["usernameInput"] as HTMLInputElement
+            this.$nextTick(() => {
+                if (input) {
+                    input.focus()
+                }
+            })
+        },
+        saveUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = true
+            if (this.payload.auth?.self) {
+                this.payload.PATCH(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/${this.payload.auth.self.id}`, {
+                    username: this.payload.auth.self.username
+                })
+            }
+        },
+        cancelUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = true
+            if (this.payload.auth?.self) {
+                this.payload.auth.self.username = this.userNameCache
+                this.userNameCache = ""
+            }
+        },
+        cancelLogin(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userMenu = "register"
+            this.timesCanceled++
         }
     }
 })
@@ -457,19 +572,25 @@ export default defineComponent({
     position: absolute;
     right: 16px;
     top: 64px;
-    max-width: 256px;
+    width: 256px;
     opacity: 0;
     pointer-events: none;
     
     .row {
         display: flex;
+        flex-flow: row;
+        gap: 8px;
+        padding-bottom: 8px;
+    }
+
+    .column {
+        display: flex;
         flex-flow: column;
-        +.row {
-            padding-top: 8px;
-        }
+        padding-bottom: 8px;
     }
 
     .email-sent-message {
+        margin-top: 8px;
         padding: 8px;
         margin-left: 8px;
         margin-bottom: 8px;
@@ -482,7 +603,8 @@ export default defineComponent({
     }
 }
 
-.site-header-user-menu-form {
+.site-header-user-menu-form,
+.site-header-user-menu-container {
     padding: 8px;
     background-color: #fff;
     overflow: hidden;
@@ -507,8 +629,36 @@ export default defineComponent({
             border-top-color: #fff;
         }
     }
-
 }
+
+.site-header-user-menu-username {
+    font-size: 14px;
+    line-height: 2;
+    border: 1px solid transparent;
+    // border-bottom-width: 1px;
+
+    border-bottom-color: var(--contrast-color);
+
+    &:disabled {
+        border-bottom-color: transparent;
+    }
+
+    &:focus {
+        outline: 0 none transparent;
+        border-bottom-color: var(--accent-color);
+    }
+}
+
+.site-header-user-menu-username-change {
+    font-size: 12px;
+    font-family: var(--accent-font);
+    margin-top: 4px;
+    text-align: right;
+    text-decoration: underline;
+    opacity: .64;
+    font-weight: normal;
+}
+
 
 @media all and (min-width: 640px) {
     .site-header-logo,

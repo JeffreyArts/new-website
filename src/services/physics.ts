@@ -55,7 +55,7 @@ const PhysicsService = {
         if (event.detail) {
             const id = event.detail.id
             if (!id) {
-                throw new Error("Catterpillar is missing `id`")
+                throw new Error("Adding Catterpillar is missing `id`")
             }
 
             
@@ -68,7 +68,7 @@ const PhysicsService = {
         if (event.detail) {
             const id = event.detail.id
             if (!id) {
-                throw new Error("Catterpillar is missing `id`")
+                throw new Error("Remove Catterpillar is missing `id`")
             }
 
             const index = PhysicsService.cache.findIndex(catterpillar => catterpillar.id === id)

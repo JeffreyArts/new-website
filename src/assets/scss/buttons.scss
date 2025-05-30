@@ -26,7 +26,15 @@
         border-width:2px;
         font-size: 24px;
     }
-    
+
+    &.cancel {
+        background-color: #eee;
+        border-color: #eee;
+        color: #666;
+        &.ghost {
+            color:#eee;
+        }
+    }
 
     &.c-accent {
         background-color: var(--accent-color);
@@ -79,9 +87,15 @@
     }
     
     &:hover {
-        background-color: var(--contrast-color);
-        border-color: var(--contrast-color);
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
         color: var(--bg-color);
+
+        &.cancel {
+            background-color: var(--contrast-color);
+            border-color: var(--contrast-color);
+            color: var(--bg-color);
+        }
         
         &.ghost {
             color: var(--bg-color);

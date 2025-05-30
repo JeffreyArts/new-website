@@ -32,21 +32,7 @@ const AccountService = {
                 resolve(false)
             }
         })
-    },
-
-    // passwordReset: async (email: string): Promise<boolean> => {
-    //     return new Promise(async (resolve) => {
-    //         try {
-    //             const response = await axios.post(`${import.meta.env.VITE_PAYLOAD_REST_ENDPOINT}/site-users/forgot-password`, {
-    //                 email
-    //             })
-    //             resolve(true)
-    //         } catch (error) {
-    //             console.error('Error requesting password reset:', error)
-    //             resolve(false)
-    //         }
-    //     })
-    // }
+    }
 }
 
 export { AccountService }
