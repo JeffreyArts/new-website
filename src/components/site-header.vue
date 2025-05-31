@@ -42,9 +42,14 @@
                     <button class="button small" type="submit">Register / Login</button>
                 </div>
 
-                <div class="row" v-if="userMenu == 'login'">
-                    <button class="button small cancel" @click="cancelLogin">Cancel</button>
-                    <button class="button small login" type="submit">Login</button>
+                <div class="column" v-if="userMenu == 'login'">
+                    <div class="row">
+                        <span class="site-header-text-small" @click="requestPasswordReset">Reset password</span>
+                    </div>
+                    <div class="row">
+                        <button class="button small cancel" @click="cancelLogin">Cancel</button>
+                        <button class="button small login" type="submit">Login</button>
+                    </div>
                 </div>
             </form>
 
@@ -67,6 +72,9 @@
             </div>
             <div v-if="timesCanceled > 1 && userMenu == 'login'" class="email-sent-message">
                 <p>It seems like you are trying to create a new account. However, there is already an account with this e-mail address. Please try again with a different e-mail address.</p>
+            </div>
+            <div v-if="passwordResetRequestSent && userMenu == 'login'" class="email-sent-message">
+                <p>An e-mail has been sent to {{ email }}, please follow the steps in the e-mail to reset your password.</p>
             </div>
         </div>
     </header>
@@ -115,6 +123,7 @@ export default defineComponent({
             userMenuOpen: false,
             userNameDisabled: true,
             userNameCache: "",
+            passwordResetRequestSent: false,
         }
     },
     setup() {
@@ -384,7 +393,7 @@ export default defineComponent({
 
                 const email = this.payload.auth?.self?.email + ""
                 if (this.payload.auth?.self) {
-                    await AccountService.register(this.email, email, password)
+                    AccountService.register(this.email, email, password)
 
                     gsap.to(".email-sent-message", {
                         height,
@@ -406,6 +415,50 @@ export default defineComponent({
                     })
                 }
             }
+        },
+        async requestPasswordReset(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            
+            gsap.to(".site-header-user-menu-form", {
+                height: 0,
+                padding: 0,
+                duration: .64,
+            })
+
+            this.passwordResetRequestSent = true
+
+            let height = 0
+            this.$nextTick(() => {
+                height = parseInt(gsap.getProperty(".email-sent-message", "height").toString())
+                
+                gsap.set(".email-sent-message", {opacity:0, height:0 })
+
+                gsap.to(".email-sent-message", {
+                    height,
+                    opacity: 1,
+                    delay: .8,
+                    onComplete: () => {
+                        gsap.to(".email-sent-message", {
+                            opacity: 0,
+                            delay: 6,
+                            duration: .4,
+                            onComplete: () => {
+                                this.userMenuOpen = false
+                                this.passwordResetRequestSent = false
+                                this.userMenu = "login";
+                                this.emailSent = false;
+                                this.userMenuColor = "#fff"
+                            }
+                        })
+                    }
+                })
+            })
+
+            this.payload.POST(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/forgot-password`, {
+                email: this.email
+            })
+
         },
         changeUsername(e: Event) {
             e.preventDefault()
@@ -657,6 +710,19 @@ export default defineComponent({
     text-decoration: underline;
     opacity: .64;
     font-weight: normal;
+}
+
+.site-header-text-small {
+    font-size: 12px;
+    font-family: var(--accent-font);
+    opacity: 0.8;
+    transition: .4s all ease;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
 }
 
 

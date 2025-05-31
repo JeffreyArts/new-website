@@ -34,9 +34,7 @@
                         <input type="checkbox" id="newsletter" v-model="subscribeToNewsletter">
                         <span> Subscribe to newsletter </span>
                     </label>
-                </div>
-                <div class="row">
-                    <p class="newsletter-text">May I use your e-mail to send you future updates about my work?</p>
+                    <p class="newsletter-text">May I use your e-mail address to send you future updates about my work?</p>
                 </div>
             </div>
         </form>
@@ -139,13 +137,14 @@ export default defineComponent({
                 await this.payload.PATCH(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/${this.payload.auth.self.id}`, {
                     username: this.username
                 })
-
+                
                 if (this.subscribeToNewsletter) {
-                    await PayloadNewsletterSubscription.add(this.email)
+                    PayloadNewsletterSubscription.add(this.email)
                 }
 
                 this.success = "Username updated"
                 return true
+
             } catch (e) {
                 this.error = "Something went wrong while updating your username, try a different username. Or send an e-mail to contact@jeffreyarts.nl"
                 return false
@@ -153,7 +152,7 @@ export default defineComponent({
         },
         async handleSubmit() {
             if (this.page == 1) {
-                this.handlePasswordResetForm().then(success => {
+                return await this.handlePasswordResetForm().then(success => {
                     if (this.$route.query.newUser) {
                         this.page = success ? 2 : 1
                         if (this.page == 2) {
