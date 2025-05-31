@@ -14,6 +14,7 @@
         <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"            :data-blocktype="data.blockType"/>
         <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"                  :data-blocktype="data.blockType"/>
         <FavoriteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'favorite'"          :data-blocktype="data.blockType"/>
+        <PageCommentsBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'pageComments'"  :data-blocktype="data.blockType"/>
         <PieceThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'pieceThumbnail'"      :data-blocktype="data.blockType"/>
         <ProjectThumbnailBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectThumbnail'"  :data-blocktype="data.blockType"/>
         <ProjectArticleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'projectArticle'"  :data-blocktype="data.blockType"/>
@@ -34,6 +35,7 @@ import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
 import Model3DBlock from "./model-3d.vue"
 import FavoriteBlock from "./favorite.vue"
+import PageCommentsBlock from "./page-comments.vue"
 import PieceThumbnailBlock from "./piece-thumbnail.vue"
 import ProjectThumbnailBlock from "./project-thumbnail.vue"
 import ProjectArticleBlock from "./project-article.vue"
@@ -54,6 +56,7 @@ export default defineComponent ({
         NoteBlock,
         Model3DBlock,
         FavoriteBlock,
+        PageCommentsBlock,
         PieceThumbnailBlock,
         ProjectThumbnailBlock,
         ProjectArticleBlock,
