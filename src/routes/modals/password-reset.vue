@@ -29,6 +29,15 @@
                         {{ error }}
                     </div>
                 </div>
+                <div class="row">
+                    <label class="newsletter-label">
+                        <input type="checkbox" id="newsletter" v-model="subscribeToNewsletter">
+                        <span> Subscribe to newsletter </span>
+                    </label>
+                </div>
+                <div class="row">
+                    <p class="newsletter-text">May I use your e-mail to send you future updates about my work?</p>
+                </div>
             </div>
         </form>
     </div>
@@ -38,7 +47,8 @@
 import { defineComponent } from "vue"
 import isArray from "lodash/isArray"
 import { Payload } from "@/stores/payload"
-import AuthModel from "@/model/payload/auth"
+import PayloadNewsletterSubscription from "@/services/payload/newsletter-subscription"
+
 
 export default defineComponent({
     name: "passwordResetComponent",
@@ -56,6 +66,8 @@ export default defineComponent({
             error: "",
             success: "",
             username: "",
+            subscribeToNewsletter: false,
+            email: "",
             page: 1
         }
     },
@@ -88,12 +100,14 @@ export default defineComponent({
                     throw new Error("Auth not initialized")
                 }
                 
-                 await this.payload.auth.resetPassword({
+                const response = await this.payload.auth.resetPassword({
                     paswordForgotCode: this.token,
                     newPassword: this.password
                 })
 
-                this.success = ""
+                if (response.data.user) {
+                   this.email = response.data.user.email
+                }
                 return true
             } catch (e) {
                 
@@ -126,6 +140,10 @@ export default defineComponent({
                     username: this.username
                 })
 
+                if (this.subscribeToNewsletter) {
+                    await PayloadNewsletterSubscription.add(this.email)
+                }
+
                 this.success = "Username updated"
                 return true
             } catch (e) {
@@ -136,7 +154,6 @@ export default defineComponent({
         async handleSubmit() {
             if (this.page == 1) {
                 this.handlePasswordResetForm().then(success => {
-                    console.log(this.$route.query, this.page, success)
                     if (this.$route.query.newUser) {
                         this.page = success ? 2 : 1
                         if (this.page == 2) {
@@ -196,6 +213,19 @@ export default defineComponent({
             }
         }
     }
+}
+.newsletter-label {
+    input {
+        translate: 0 2px;
+    }
+    
+}
+
+.newsletter-text {
+    font-size: 12px;
+    font-family: var(--accent-font);
+    margin-top: 8px;
+    opacity: 0.8;
 }
 
 .error-message {
