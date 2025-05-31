@@ -141,7 +141,10 @@ export default defineComponent({
                 if (this.subscribeToNewsletter) {
                     PayloadNewsletterSubscription.add(this.email)
                 }
-
+                this.payload.auth.authenticate({
+                    email: this.email,
+                    password: this.password
+                })
                 this.success = "Username updated"
                 return true
 

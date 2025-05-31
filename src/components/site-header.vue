@@ -387,33 +387,32 @@ export default defineComponent({
                     height = parseInt(gsap.getProperty(".email-sent-message", "height").toString())
                     
                     gsap.set(".email-sent-message", {opacity:0, height:0 })
+
+                    const password = this.payload.auth?.self?.defaultPassword + ""
+                    const email = this.payload.auth?.self?.email + ""
+                    if (this.payload.auth?.self) {
+                        AccountService.register(this.email, email, password)
+
+                        gsap.to(".email-sent-message", {
+                            height,
+                            opacity: 1,
+                            delay: .64,
+                            onComplete: () => {
+                                gsap.to(".email-sent-message", {
+                                    opacity: 0,
+                                    delay: 6,
+                                    duration: .4,
+                                    onComplete: () => {
+                                        this.userMenuOpen = false
+                                        this.userMenu = "login";
+                                        this.emailSent = false;
+                                        this.userMenuColor = "#fff"
+                                    }
+                                })
+                            }
+                        })
+                    }
                 })
-
-                const password = this.payload.auth?.self?.defaultPassword + ""
-
-                const email = this.payload.auth?.self?.email + ""
-                if (this.payload.auth?.self) {
-                    AccountService.register(this.email, email, password)
-
-                    gsap.to(".email-sent-message", {
-                        height,
-                        opacity: 1,
-                        delay: .2,
-                        onComplete: () => {
-                            gsap.to(".email-sent-message", {
-                                opacity: 0,
-                                delay: 6,
-                                duration: .4,
-                                onComplete: () => {
-                                    this.userMenuOpen = false
-                                    this.userMenu = "login";
-                                    this.emailSent = false;
-                                    this.userMenuColor = "#fff"
-                                }
-                            })
-                        }
-                    })
-                }
             }
         },
         async requestPasswordReset(e: Event) {
