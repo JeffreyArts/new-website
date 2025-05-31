@@ -39,8 +39,10 @@ export class AuthModel {
             if (this.self.defaultPassword && !this.self.verified) {
                 this.authenticate({ email: this.self.email, password: this.self.defaultPassword }).catch(error => {
                     let id = this.self?.id
-                    const event = new CustomEvent("removeCatterpillar", { detail: { id } })
-                    window.dispatchEvent(event)
+                    if (id) {
+                        const event = new CustomEvent("removeCatterpillar", { detail: { id } })
+                        window.dispatchEvent(event)
+                    }
                     this.logout()
                     this.createAnonymousAccount()
                 })
@@ -145,19 +147,29 @@ export class AuthModel {
                 const response = await this.axios.post(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/login`, credentials)                
     
                 if (response.data) {
+                    const oldId = this.self?.id
+                    const newId = response.data.user.id
                     this.logout()
-
-                    const event = new CustomEvent("removeCatterpillar", { detail: { id:this.self?.id } })
-                    window.dispatchEvent(event)
+                    if (oldId) {
+                        const event = new CustomEvent("removeCatterpillar", { detail: { id: oldId } })
+                        window.dispatchEvent(event)
+                    }
                     
                     const cleanDefaultPassword = response.data.user.defaultPassword != options.password
 
                     this.setSelf(response.data.user, cleanDefaultPassword)
                     localStorage.setItem("authToken", JSON.stringify(response.data.token))
+
+                    if (newId) {
+                        const event = new CustomEvent("addCatterpillar", { detail: {id: newId} })
+                        window.dispatchEvent(event)
+                        PhysicsService.layoutHasChangedEvent()
+                    }
+
                     return resolve(response)
                 }
 
-                reject(response)
+                resolve(response)
                 
             } catch (err) {
                 

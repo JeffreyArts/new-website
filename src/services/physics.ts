@@ -57,8 +57,7 @@ const PhysicsService = {
             if (!id) {
                 throw new Error("Adding Catterpillar is missing `id`")
             }
-
-            
+                        
             if (!PhysicsService.cache.find(catterpillar => catterpillar.id === id)) {
                 PhysicsService.cache.push(event.detail)
             }
@@ -74,6 +73,16 @@ const PhysicsService = {
             const index = PhysicsService.cache.findIndex(catterpillar => catterpillar.id === id)
             if (index !== -1) {
                 PhysicsService.cache.splice(index, 1)
+            }
+
+            const oldCatterpillars = PhysicsService.catterpillars.filter(catterpillar => catterpillar.id == id)
+
+            if (oldCatterpillars.length > 0) {
+                const oldCatterpillar = oldCatterpillars[0]
+                oldCatterpillar.id = "[removed]"
+                oldCatterpillar.composite.bodies.forEach(body => {
+                    body.collisionFilter.category = 4
+                })
             }
         }
     },
@@ -325,7 +334,11 @@ const PhysicsService = {
                 (head.position.y > window.innerHeight + 100 && butt.position.y > window.innerHeight + 100) ||
                 (head.position.y <= -400 && butt.position.y < -400)
                 ) {
-                    PhysicsService.resetCatterpillar(catterpillar)
+                    if (catterpillar.id == "[removed]") {
+                        PhysicsService.destroyCatterpillar(catterpillar)
+                    } else {
+                        PhysicsService.resetCatterpillar(catterpillar)
+                    }
                 } 
             })
 
@@ -338,6 +351,14 @@ const PhysicsService = {
             }
         }
         window.requestAnimationFrame(PhysicsService.animationFrame)
+    },
+    destroyCatterpillar(catterpillar: Catterpillar) {
+        if (!PhysicsService.physics) {
+            return
+        }
+        
+        Matter.World.remove(PhysicsService.physics.engine.world, catterpillar.composite, true);
+        PhysicsService.catterpillars = PhysicsService.catterpillars.filter(catterpillar => catterpillar.id !== catterpillar.id)
     }
 }
 export { PhysicsService }
