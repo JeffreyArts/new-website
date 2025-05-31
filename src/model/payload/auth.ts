@@ -36,12 +36,20 @@ export class AuthModel {
         if (!this.self) {
             this.createAnonymousAccount()
         } else {
-            if (this.self.defaultPassword) {
-                this.authenticate({ email: this.self.email, password: this.self.defaultPassword })
+            if (this.self.defaultPassword && !this.self.verified) {
+                this.authenticate({ email: this.self.email, password: this.self.defaultPassword }).catch(error => {
+                    let id = this.self?.id
+                    if (id) {
+                        const event = new CustomEvent("removeCatterpillar", { detail: { id } })
+                        window.dispatchEvent(event)
+                    }
+                    this.logout()
+                    this.createAnonymousAccount()
+                })
             } else {
                 this.axios(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`).then((response) => {
                     if (response.data.user) {
-                        this.setSelf(response.data.user)
+                        this.setSelf(response.data.user, true)
                     } else {
                         this.self = undefined
                     }
@@ -50,25 +58,20 @@ export class AuthModel {
         }
     }
 
-    setSelf(userData?: { [key:string]: any }, defaultPassword?: boolean) {
+    setSelf(userData?: { [key:string]: any }, cleanDefaultPassword?: boolean) {
 
-        const properties = ["id", "username", "email", "catterpillar"]
+        const properties = ["id", "username", "email", "catterpillar", "defaultPassword", "verified"]
 
         // Check if user is anonymous
         if (localStorage.getItem("self")) {
-            const userAccount = JSON.parse(localStorage.getItem("self") || "")
-            if (userAccount.defaultPassword) {
-                properties.push("defaultPassword")
-            }
-
             if (!userData) {
                 userData = JSON.parse(localStorage.getItem("self") || "")
             }
         }
-
         
-        if (defaultPassword) {
-            properties.push("defaultPassword")
+        
+        if (cleanDefaultPassword) {
+            properties.splice(properties.indexOf("defaultPassword"), 1)
         }
         
         if (!userData) {
@@ -84,6 +87,7 @@ export class AuthModel {
         })
 
         if (PhysicsService.physics) {
+
             let catterpillarOptions = {x: document.body.clientWidth/2, y: 8, autoBlink: true} as CatterpillarOptions
             if (this.self?.catterpillar) {
                 catterpillarOptions = {...catterpillarOptions, ...this.self.catterpillar }
@@ -140,15 +144,32 @@ export class AuthModel {
                 }
                 
                 const credentials = { email: options.email, password: options.password }
-                const response = await this.axios.post(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/login`, credentials)                
+                const response = await this.axios.post(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/login`, credentials)                
     
                 if (response.data) {
-                    this.setSelf(response.data.user)
+                    const oldId = this.self?.id
+                    const newId = response.data.user.id
+                    this.logout()
+                    if (oldId) {
+                        const event = new CustomEvent("removeCatterpillar", { detail: { id: oldId } })
+                        window.dispatchEvent(event)
+                    }
+                    
+                    const cleanDefaultPassword = response.data.user.defaultPassword != options.password
+
+                    this.setSelf(response.data.user, cleanDefaultPassword)
                     localStorage.setItem("authToken", JSON.stringify(response.data.token))
+
+                    if (newId) {
+                        const event = new CustomEvent("addCatterpillar", { detail: {id: newId} })
+                        window.dispatchEvent(event)
+                        PhysicsService.layoutHasChangedEvent()
+                    }
+
                     return resolve(response)
                 }
 
-                reject(response)
+                resolve(response)
                 
             } catch (err) {
                 
@@ -176,7 +197,7 @@ export class AuthModel {
 
                 const response = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}`, request)
                 
-                this.setSelf(response.data.doc, true)
+                this.setSelf(response.data.doc)
 
                 const authResponse = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`, {method: "GET"})
                 localStorage.setItem("authToken", JSON.stringify(authResponse.data.token))
@@ -214,7 +235,7 @@ export class AuthModel {
                 // request.data = JSON.stringify(request.data, null, 2)
 
                 const response = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}`, request)
-                this.setSelf(response.data.doc)
+                this.setSelf(response.data.doc, true)
 
                 resolve(response)
                 
@@ -236,7 +257,7 @@ export class AuthModel {
                     credentials.username = options.username
                 }
                 
-                const response = await this.axios.post(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/forgot-password`, credentials)                
+                const response = await this.axios.post(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/forgot-password`, credentials)                
                 
                 if (response.data) {
                     return resolve(response)
@@ -261,18 +282,23 @@ export class AuthModel {
                     password: options.newPassword
                 }
 
-                
-                const response = await this.axios.post(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/reset-password`, requestBody)
+                const response = await this.axios.post(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/reset-password`, requestBody)
                 
                 if (response.data) {
+                    localStorage.setItem("authToken", JSON.stringify(response.data.token))
+                    this.setSelf(response.data.user)
+
                     return resolve(response)
                 }
 
                 reject(response)
             } catch (err) {
                 if (err instanceof AxiosError && err.response) {
-                    // const serverError = err.response.data.error
-                    return reject(err)
+                    const serverError = err.response.data
+                    if (err.response.data.errors.length > 0) {
+                        return reject(serverError.errors)
+                    }
+                    return reject(serverError)
                 }
                 reject(err)
             }

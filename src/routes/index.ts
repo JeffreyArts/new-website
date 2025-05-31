@@ -1,6 +1,5 @@
 // import type { DefineComponent } from "vue"
 import defaultTemplate from "@/routes/templates/default.vue"
-import ResetPassword from "@/routes/auth/password-reset.vue"
 import Error404 from "@/routes/error-404.vue"
 import Error301 from "@/routes/error-301.vue"
 import LivePreview from "@/routes/live-preview.vue"
@@ -25,11 +24,6 @@ const routes = [
         path: "/live-preview",
         name: "Live preview",
         component: LivePreview,
-    },
-    {
-        path: "/reset-password",
-        name: "Reset password",
-        component: ResetPassword,
     }
 ]
 

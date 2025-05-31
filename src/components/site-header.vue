@@ -18,6 +18,65 @@
                 </div>
             </span>
         </nav>
+        
+        <span class="site-header-settings" :class="[userMenuOpen ? '__isActive' : '']">
+            <jaoIcon size="large" name="user" inactiveColor="transparent" :activeColor="userMenuColor" @click="toggleUserMenu"/>
+        </span>
+
+        <div class="site-header-user-menu">
+
+            
+            <form @submit.prevent="handleAccountForm" class="site-header-user-menu-form" v-if="userMenu != 'user'">
+                <div class="column">
+                    <label for="email">E-mailadres</label>
+                    <input type="email" id="email" v-model="email" required>
+                </div>
+                <div class="column" v-if="userMenu == 'login'">
+                    <label for="password">Wachtwoord</label>
+                    <input type="password" id="password" v-model="password" required>
+                    <div v-if="loginError" class="error-message">{{ loginError }}</div>
+                </div>
+
+
+                <div class="column" v-if="userMenu == 'register'">
+                    <button class="button small" type="submit">Register / Login</button>
+                </div>
+
+                <div class="column" v-if="userMenu == 'login'">
+                    <div class="row">
+                        <span class="site-header-text-small" @click="requestPasswordReset">Reset password</span>
+                    </div>
+                    <div class="row">
+                        <button class="button small cancel" @click="cancelLogin">Cancel</button>
+                        <button class="button small login" type="submit">Login</button>
+                    </div>
+                </div>
+            </form>
+
+            <div v-if="userMenu == 'user' && payload.auth?.self" class="site-header-user-menu-user">
+                <div class="site-header-user-menu-container">
+                    <div class="row">
+                        Hello {{ payload.auth.self.username }}
+                        <!-- <input class="site-header-user-menu-username" :disabled="userNameDisabled" v-model="payload.auth.self.username" ref="usernameInput" />
+                        <span class="site-header-user-menu-username-change" @click="changeUsername" v-if="userNameDisabled">change username</span>
+                        <span class="site-header-user-menu-username-change" v-if="!userNameDisabled">
+                            <span @click="saveUsername">save</span> &nbsp; 
+                            <span @click="cancelUsername">cancel</span>
+                        </span> -->
+                    </div>
+                </div>
+            </div>
+            
+            <div v-if="emailSent" class="email-sent-message">
+                An e-mail has been sent to {{ email }}, please follow the steps in the e-mail to complete the creation of this new account.
+            </div>
+            <div v-if="timesCanceled > 1 && userMenu == 'login'" class="email-sent-message">
+                <p>It seems like you are trying to create a new account. However, there is already an account with this e-mail address. Please try again with a different e-mail address.</p>
+            </div>
+            <div v-if="passwordResetRequestSent && userMenu == 'login'" class="email-sent-message">
+                <p>An e-mail has been sent to {{ email }}, please follow the steps in the e-mail to reset your password.</p>
+            </div>
+        </div>
     </header>
 </template>
 
@@ -28,6 +87,8 @@ import Icon from "jao-icons"
 import Navigation from "@/services/payload/navigation"
 import jaoIcon from "@/components/jao-icon.vue"
 import gsap from "gsap"
+import AccountService from "@/services/account"
+import Payload from "@/stores/payload"
 
 type NavItem = {
     id: string,
@@ -52,6 +113,24 @@ export default defineComponent({
             nav: [] as NavItem[],
             tweens: [] as gsap.core.Tween[],
             expendedItem: undefined as undefined | NavItem,
+            email: "",
+            password: "",
+            loginError: "",
+            emailSent: false,
+            timesCanceled: 0,
+            userMenu: "register" as "register" | "login" | "user",
+            userMenuColor: "#fff",
+            userMenuOpen: false,
+            userNameDisabled: true,
+            userNameCache: "",
+            passwordResetRequestSent: false,
+        }
+    },
+    setup() {
+        const payload = Payload()
+
+        return {
+            payload
         }
     },
     computed: {
@@ -64,9 +143,21 @@ export default defineComponent({
     mounted() {
         const logo = this.$refs["logo"] as HTMLElement
         const icon = Icon("medium/logo")
+
         // this.loadMenu()
         if (logo && icon) {
             logo.appendChild(icon)
+        }
+    },
+    watch: {
+        "payload.auth.self": {
+            handler(self) {
+                
+                if (self && !self.email.includes("user@jeffreyarts.nl")) {
+                    this.userMenu = "user"
+                }
+            },
+            deep: true
         }
     },
     methods: {
@@ -203,6 +294,210 @@ export default defineComponent({
 
                 this.tweens.push(childTween)
             }
+        },
+        toggleUserMenu() {
+            this.userMenuOpen = !this.userMenuOpen
+
+            if (this.userMenuOpen) {
+                this.userMenuColor = "#222"
+                gsap.set(".site-header-user-menu", {
+                    y: -8,
+                    opacity: 0
+                })
+
+                gsap.to(".site-header-user-menu", {
+                    y: 0,
+                    opacity: 1,
+                    duration: .8,
+                    pointerEvents: "all"
+                })
+
+                // Voeg event listener toe voor klikken buiten het menu
+                document.addEventListener('click', this.handleClickOutside)
+            } else {
+                this.userMenuColor = "#fff"
+                gsap.killTweensOf(".site-header-user-menu")
+                gsap.to(".site-header-user-menu", {
+                    y: -8,
+                    opacity: 0,
+                    duration: .48,
+                    pointerEvents: "none"
+                })
+
+                // Verwijder event listener wanneer menu sluit
+                document.removeEventListener('click', this.handleClickOutside)
+            }
+        },
+        handleClickOutside(event: MouseEvent) {
+            const userMenu = this.$el.querySelector('.site-header-user-menu')
+            const settingsButton = this.$el.querySelector('.site-header-settings')
+            
+            if (userMenu && settingsButton) {
+                if (!userMenu.contains(event.target as Node) && !settingsButton.contains(event.target as Node)) {
+                    this.userMenuOpen = false
+                    this.userMenuColor = "#fff"
+                    gsap.killTweensOf(".site-header-user-menu")
+                    gsap.to(".site-header-user-menu", {
+                        y: -8,
+                        opacity: 0,
+                        duration: .48,
+                        pointerEvents: "none"
+                    })
+                    document.removeEventListener('click', this.handleClickOutside)
+                }
+            }
+        },
+        handleAccountForm(e: Event) {
+            if (this.userMenu == "register") {
+                this.registerAccount()
+            } else if (this.userMenu == "login") {
+                this.loginAccount()
+            } else if (this.userMenu == "user") {
+                // this.logoutAccount()
+            }
+        },
+        async loginAccount() {
+            if (!this.payload.auth) {
+                return
+            }
+            this.loginError = ""
+
+            this.payload.auth.authenticate({
+                email: this.email,
+                password: this.password
+            }).then(res => {
+                this.userMenu = "user"
+            }).catch(err => {
+                this.loginError = err.response.data.errors[0].message
+            })            
+        },
+        async registerAccount() {
+            const valid = await AccountService.validateEmail(this.email)
+            
+            if (valid) {
+                this.userMenu = "login";
+            } else {
+                gsap.to(".site-header-user-menu-form", {
+                    height: 0,
+                    padding: 0
+                })
+                this.emailSent = true;
+                let height = 0
+                this.$nextTick(() => {
+                    height = parseInt(gsap.getProperty(".email-sent-message", "height").toString())
+                    
+                    gsap.set(".email-sent-message", {opacity:0, height:0 })
+
+                    const password = this.payload.auth?.self?.defaultPassword + ""
+                    const email = this.payload.auth?.self?.email + ""
+                    if (this.payload.auth?.self) {
+                        AccountService.register(this.email, email, password)
+
+                        gsap.to(".email-sent-message", {
+                            height,
+                            opacity: 1,
+                            delay: .64,
+                            onComplete: () => {
+                                gsap.to(".email-sent-message", {
+                                    opacity: 0,
+                                    delay: 6,
+                                    duration: .4,
+                                    onComplete: () => {
+                                        this.userMenuOpen = false
+                                        this.userMenu = "login";
+                                        this.emailSent = false;
+                                        this.userMenuColor = "#fff"
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        },
+        async requestPasswordReset(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            
+            gsap.to(".site-header-user-menu-form", {
+                height: 0,
+                padding: 0,
+                duration: .64,
+            })
+
+            this.passwordResetRequestSent = true
+
+            let height = 0
+            this.$nextTick(() => {
+                height = parseInt(gsap.getProperty(".email-sent-message", "height").toString())
+                
+                gsap.set(".email-sent-message", {opacity:0, height:0 })
+
+                gsap.to(".email-sent-message", {
+                    height,
+                    opacity: 1,
+                    delay: .8,
+                    onComplete: () => {
+                        gsap.to(".email-sent-message", {
+                            opacity: 0,
+                            delay: 6,
+                            duration: .4,
+                            onComplete: () => {
+                                this.userMenuOpen = false
+                                this.passwordResetRequestSent = false
+                                this.userMenu = "login";
+                                this.emailSent = false;
+                                this.userMenuColor = "#fff"
+                            }
+                        })
+                    }
+                })
+            })
+
+            this.payload.POST(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/forgot-password`, {
+                email: this.email
+            })
+
+        },
+        changeUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = false
+            if (this.payload.auth?.self) {
+                this.userNameCache = this.payload.auth.self.username
+            }
+            // set focus on input
+            const input = this.$refs["usernameInput"] as HTMLInputElement
+            this.$nextTick(() => {
+                if (input) {
+                    input.focus()
+                }
+            })
+        },
+        saveUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = true
+            if (this.payload.auth?.self) {
+                this.payload.PATCH(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/${this.payload.auth.self.id}`, {
+                    username: this.payload.auth.self.username
+                })
+            }
+        },
+        cancelUsername(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userNameDisabled = true
+            if (this.payload.auth?.self) {
+                this.payload.auth.self.username = this.userNameCache
+                this.userNameCache = ""
+            }
+        },
+        cancelLogin(e: Event) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.userMenu = "register"
+            this.timesCanceled++
         }
     }
 })
@@ -225,8 +520,8 @@ export default defineComponent({
     height: 36px;
     position: absolute;
     z-index: 1990;
-    mix-blend-mode: difference;
-    filter: invert(100%);
+    // mix-blend-mode: difference;
+    // filter: invert(100%);
 }
 
 .site-header-navigation {
@@ -303,6 +598,131 @@ export default defineComponent({
     }
 }
 
+.site-header-settings {
+    position: absolute;
+    padding: 4px;
+    background-color: var(--contrast-color);
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 4px;
+    top: 4px;
+    transition: .4s all ease;
+
+    &.__isActive {
+        outline: 1px solid var(--contrast-color);
+        background-color: var(--bg-color);
+    }
+
+    svg {
+        width: 13px;
+    }
+}
+
+.site-header-user-menu {
+    position: absolute;
+    right: 16px;
+    top: 64px;
+    width: 256px;
+    opacity: 0;
+    pointer-events: none;
+    
+    .row {
+        display: flex;
+        flex-flow: row;
+        gap: 8px;
+        padding-bottom: 8px;
+    }
+
+    .column {
+        display: flex;
+        flex-flow: column;
+        padding-bottom: 8px;
+    }
+
+    .email-sent-message {
+        margin-top: 8px;
+        padding: 8px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+        width: calc(100% - 16px);
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        font-size: 14px;
+        line-height: 1.4;
+        overflow: hidden;
+    }
+}
+
+.site-header-user-menu-form,
+.site-header-user-menu-container {
+    padding: 8px;
+    background-color: #fff;
+    overflow: hidden;
+
+    label {
+        font-size: 12px;
+        font-family: var(--accent-font);
+    }
+
+    input[type=text],input[type=email] {
+        font-size: 14px;
+        line-height: 2;
+        outline-width: 1px;
+        border-radius: 0;
+        border: 1px solid var(--contrast-color);
+        padding-left: 4px;
+
+        &:focus {
+            outline: 0 none transparent;
+            border-left-color: #fff;
+            border-right-color: #fff;
+            border-top-color: #fff;
+        }
+    }
+}
+
+.site-header-user-menu-username {
+    font-size: 14px;
+    line-height: 2;
+    border: 1px solid transparent;
+    // border-bottom-width: 1px;
+
+    border-bottom-color: var(--contrast-color);
+
+    &:disabled {
+        border-bottom-color: transparent;
+    }
+
+    &:focus {
+        outline: 0 none transparent;
+        border-bottom-color: var(--accent-color);
+    }
+}
+
+.site-header-user-menu-username-change {
+    font-size: 12px;
+    font-family: var(--accent-font);
+    margin-top: 4px;
+    text-align: right;
+    text-decoration: underline;
+    opacity: .64;
+    font-weight: normal;
+}
+
+.site-header-text-small {
+    font-size: 12px;
+    font-family: var(--accent-font);
+    opacity: 0.8;
+    transition: .4s all ease;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+}
 
 
 @media all and (min-width: 640px) {
@@ -328,6 +748,16 @@ export default defineComponent({
         height: 20px;
         padding-right: 8px;
         margin-left: -28px;
+    }
+
+    .site-header-settings {
+        padding: 8px;
+        right: 16px;
+        top: 16px;
+
+        svg {
+            width: 26px;
+        }
     }
 }
 
