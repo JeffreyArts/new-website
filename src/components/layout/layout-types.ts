@@ -9,6 +9,7 @@ import { LineBlock } from "./blocks/line.vue"
 import { NewsletterBlock } from "./blocks/newsletter.vue"
 import { NoteBlock } from "./blocks/note.vue"
 import { FavoriteBlock } from "./blocks/favorite.vue"
+import { PageCommentsBlock } from "./blocks/page-comments.vue"
 import { ProjectThumbnailBlock } from "./blocks/project-thumbnail.vue"
 import { ProjectArticleBlock } from "./blocks/project-article.vue"
 import { PieceThumbnailBlock } from "./blocks/piece-thumbnail.vue"
@@ -24,7 +25,7 @@ export interface LayoutOptions {
     blocks: Array<BlockType>
 }
 
-export type BlockTypeData = TitleBlock | TextBlock | FavoriteBlock | Model3DBlock | PieceThumbnailBlock | ProjectThumbnailBlock | ProjectArticleBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
+export type BlockTypeData = TitleBlock | TextBlock | FavoriteBlock | Model3DBlock | PageCommentsBlock | PieceThumbnailBlock | ProjectThumbnailBlock | ProjectArticleBlock | YearBlock  | NoteBlock | ImageBlock | LineBlock | BannerBlock | GlitchBlock | CodeBlock | IframeBlock | YoutubeBlock | NewsletterBlock
 
 export type BlockType = {
     size: number
