@@ -280,6 +280,7 @@ export default defineComponent ({
 .image-block {
     margin: 0;
     position: relative;
+    container-name: image-block;
     
     img {
         width: 100%;
@@ -295,10 +296,19 @@ export default defineComponent ({
     position: absolute;
     bottom: -8px;
     left: -10px;
-    padding: 8px;
-    font-size: 14px;
+    padding: 4px 8px;
+    font-size: 10px;
     font-family: 'Fixedsys';
     max-width: calc(100% + 16px);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
+@container image-block (min-width: 256px) {
+    .image-block-title {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
 </style>

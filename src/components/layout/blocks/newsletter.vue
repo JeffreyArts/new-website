@@ -67,9 +67,10 @@ export default defineComponent ({
         },
         onSubmit(e:Event) {
             e.preventDefault()
+            const email = this.email
+            this.email = ""
             
-            PayloadNewsletterSubscription.add(this.email).then(() => {
-                this.email = "" 
+            PayloadNewsletterSubscription.add(email).then(() => {
                 this.submitMessage = "A mail has been sent to confirm your e-mailaddress"
                 const messageEl = this.$refs["message"] as HTMLElement
 
@@ -96,7 +97,7 @@ export default defineComponent ({
                     }
                 })
             }).catch(() => {
-
+                this.email = email
                 this.submitMessage = "This e-mail address could not be added"
                 const messageEl = this.$refs["message"] as HTMLElement
                 if (!messageEl) {
