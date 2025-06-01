@@ -104,6 +104,8 @@ export default defineComponent({
                 })
 
                 if (response.data.user) {
+                    const event = new CustomEvent("removeCatterpillar", { detail: { id: this.payload.auth.self?.id } })
+                    window.dispatchEvent(event)
                    this.email = response.data.user.email
                 }
                 return true

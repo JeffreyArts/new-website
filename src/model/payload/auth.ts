@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode"
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig, AxiosInstance } from "axios"
 import PhysicsService from "@/services/physics"
-import Catterpillar, { CatterpillarOptions } from "@/model/catterpillar"
+import { CatterpillarOptions } from "@/model/catterpillar"
 import UserModel from "./user"
 import _ from "lodash"
 
@@ -26,6 +26,7 @@ export class AuthModel {
         
         if (!this.validateAuthToken(this.authToken)) {
             localStorage.removeItem("authToken")
+            this.logout()
         }
 
         if (localStorage.getItem("self")) {
@@ -306,8 +307,14 @@ export class AuthModel {
     }
     
     logout() {
+        let id = this.self?.id
+        if (id) {
+            const event = new CustomEvent("removeCatterpillar", { detail: { id } })
+            window.dispatchEvent(event)
+        }
         localStorage.removeItem("authToken")
         localStorage.removeItem("self")
+        
         this.self = undefined
     }
 }
