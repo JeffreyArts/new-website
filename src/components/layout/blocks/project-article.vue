@@ -217,30 +217,26 @@ export default defineComponent ({
     background-color: var(--contrast-color);
     color: var(--bg-color);
     z-index: 1;
-    left: 16px;
     font-family: var(--accent-font);
-    max-width: calc(100% - 60px);
-    @media (max-width: 640px) {
-        font-size: 16px;
-        
-        &.__isSmall {
-            font-size: 14px;
-        }
-    }
+    left: 8px;
+    font-size: 14px;
+    max-width: calc(100%);
 }
 
 .project-article-button {
     position: absolute;
     bottom: -12px;
-    right: 16px;
+    right: 8px;
     font-family: var(--accent-font);
     background-color: var(--contrast-color);
     color: var(--bg-color);
     padding: 4px 12px;
     transition: var(--transition-default);
+    font-size: 12px;
 }
 
 .project-article-block-year {
+    display: none;
     position: absolute;
     right: -4px;
     top: 4px;
@@ -263,6 +259,25 @@ export default defineComponent ({
 @container project-article (min-width: 256px) {
     .project-article-text {
         margin-left: 24px;
+    }
+
+    .project-article-block-year {
+        display: block;
+    }
+
+    
+    .project-article-title {
+        max-width: calc(100% - 60px);
+        left: 16px;
+        font-size: 16px;
+        
+        &.__isSmall {
+            font-size: 14px;
+        }
+    }
+
+    .project-article-button {
+        right: 16px;
     }
 }
 </style>
