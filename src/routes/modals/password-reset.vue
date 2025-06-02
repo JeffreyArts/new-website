@@ -18,6 +18,8 @@
                 <div v-if="success" class="success-message">
                     {{ success }}
                 </div>
+                <!-- Required because otherwise I can't submit via enter key -->
+                <button type="submit" style="display:none;"></button>
             </div>
 
             
@@ -36,6 +38,8 @@
                     </label>
                     <p class="newsletter-text">May I use your e-mail address to send you future updates about my work?</p>
                 </div>
+                <!-- Required because otherwise I can't submit via enter key -->
+                <button type="submit" style="display:none;"></button>
             </div>
         </form>
     </div>

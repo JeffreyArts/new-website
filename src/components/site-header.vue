@@ -44,7 +44,7 @@
 
                 <div class="column" v-if="userMenu == 'login'">
                     <div class="row">
-                        <span class="site-header-text-small" @click="requestPasswordReset">Reset password</span>
+                        <span class="site-header-text-small" @click="requestPasswordReset">Forgot password?</span>
                     </div>
                     <div class="row">
                         <button class="button small cancel" @click="cancelLogin">Cancel</button>
