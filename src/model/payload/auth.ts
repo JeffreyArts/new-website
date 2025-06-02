@@ -160,12 +160,7 @@ export class AuthModel {
 
                     this.setSelf(response.data.user, cleanDefaultPassword)
                     localStorage.setItem("authToken", JSON.stringify(response.data.token))
-
-                    if (newId) {
-                        const event = new CustomEvent("addCatterpillar", { detail: {id: newId} })
-                        window.dispatchEvent(event)
-                        PhysicsService.layoutHasChangedEvent()
-                    }
+                    PhysicsService.layoutHasChangedEvent()
 
                     return resolve(response)
                 }
