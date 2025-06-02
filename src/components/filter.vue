@@ -48,6 +48,8 @@
                 layoutSize: layoutSize,
                 blocks: blocks
             }"
+            :class="{'__hideLoader': blocks.length > 24}"
+            @loaded="fadeInBlocks"
             ref="filter-layout"/>
     </div>
 </template>
@@ -212,7 +214,7 @@ export default defineComponent({
     mounted() {
         window.addEventListener("resize", this.onResizeEvent)
         window.addEventListener("layoutLoaded", this.setupScrollTrigger) 
-        window.addEventListener("layoutChange", this.fadeInBlocks)
+        // window.addEventListener("layoutChange", this.fadeInBlocks)
         
         // Observe layout changes
         const layoutWrapper = document.getElementById("filter-layout")
@@ -233,7 +235,7 @@ export default defineComponent({
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
         window.removeEventListener("layoutLoaded", this.setupScrollTrigger) 
-        window.removeEventListener("layoutChange", this.fadeInBlocks)
+        // window.removeEventListener("layoutChange", this.fadeInBlocks)
         // Cleanup ScrollTrigger
         ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     },
@@ -632,5 +634,11 @@ export default defineComponent({
 
 #filter-layout .block {
     opacity: 0;
+}
+
+#filter-layout.__hideLoader {
+    .layout-loader {
+        display: none;
+    }
 }
 </style>
