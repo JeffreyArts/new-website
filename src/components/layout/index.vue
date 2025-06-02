@@ -10,6 +10,15 @@
             :layout-size="options.layoutSize"
             :layout-gap="options.layoutGap">
             
+            <!-- <div class="layout-loader"> -->
+            <div class="layout-loader" v-if="!loaded">
+                <h6>Loading...</h6>
+                <span>
+                    {{newBlocks.length }} / {{ blocks.length }}
+                </span>
+            </div>
+
+
             <Block v-for="block,key in blocks" :key="key" @blockLoaded="blockLoaded(block)"
                 :id="`block-${block.id}`"
                 :size="block.size" 
@@ -76,7 +85,6 @@ export default defineComponent ({
         },
         "options.layoutSize": {
             async handler() {
-                this.loaded = false
                 this.updateLayout()
                 this.packerLayout = new Packer(this.layoutWidth, 0, { autoResize: "height" })
                 if (this.blocks.length > 0) {
@@ -103,7 +111,7 @@ export default defineComponent ({
             },
             deep:false,
             immediate: true // Cause if will first be an empty array, than it will be filled with blocks
-        }
+        },
     },
     mounted() {
         if (typeof window !== "undefined") {
@@ -248,14 +256,12 @@ export default defineComponent ({
             } else {
                 this.__updateLayoutHeight()
                 this.processing = false
-                this.loaded = true
             }
         },
         async blockLoaded(block: BlockType) {
             if (block.loaded) {
                 return
             }   
-            this.loaded = false
             block.loaded = true
             
             const res = await this.__setBlockDimensions([block])
@@ -283,6 +289,8 @@ export default defineComponent ({
                 } else {
                     await this.addNewBlocks();
                 }
+                this.loaded = true
+                this.$emit("loaded", this.loaded)
                 dispatchEvent(new Event('layoutLoaded'))
             }
         },
@@ -378,6 +386,29 @@ export default defineComponent ({
 
     .block {
         opacity: 0;
+    }
+}
+
+.layout-loader {
+    width: 100%;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    position: relative;
+    font-family: var(--accent-font);
+    gap: 8px;
+
+    h6 {
+        font-size: 16px;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    span {
+        font-size: 14px;
     }
 }
 

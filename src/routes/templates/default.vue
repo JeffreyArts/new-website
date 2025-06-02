@@ -7,7 +7,7 @@
             id: Payload.page?.data.id,
             layoutSize: layoutSize,
             blocks: pageBlocks
-        }"/>
+        }" @loaded="loaded"/>
         <FilterComponent v-if="Payload.page?.data?.filter?.name && showFilters" :options="Payload.page?.data?.filter" :pageDetails="Payload.page.data" ref="filter" @filterUpdated="updateFilter"/>
     </section>
 
@@ -158,6 +158,26 @@ export default defineComponent ({
         window.removeEventListener("resize", this.updateLayoutSize)
     },
     methods: {
+        loaded() {
+            
+            this.$nextTick(() => {
+                const blokElements = document.querySelectorAll("#default-layout .block")
+                setTimeout(() => {
+                    if (blokElements.length > 0) {
+                        for (let index = 0; index < blokElements.length; index++) {
+                            const element = blokElements[index];
+
+                            gsap.fromTo(element, { opacity: 0 },{
+                                opacity: 1,
+                                duration: .24,
+                                delay: .1 + index * .1,
+                                ease: "sine.out"
+                            })
+                        }
+                    }
+                }, blokElements.length * 1)
+            })
+        },
         async loadPage() {
             try {
                 this.pageIsLoading++
@@ -200,24 +220,6 @@ export default defineComponent ({
 
                 this.pageBlocks = this.Payload.page.data.blocks
                 this.tempPageBlocks = []
-
-                this.$nextTick(() => {
-                    const blokElements = document.querySelectorAll("#default-layout .block")
-                    setTimeout(() => {
-                        if (blokElements.length > 0) {
-                            for (let index = 0; index < blokElements.length; index++) {
-                                const element = blokElements[index];
-
-                                gsap.fromTo(element, { opacity: 0 },{
-                                    opacity: 1,
-                                    duration: .24,
-                                    delay: .1 + index * .1,
-                                    ease: "sine.out"
-                                })
-                            }
-                        }
-                    }, blokElements.length * 1)
-                })
             }
         },
         updateLayoutSize() {
