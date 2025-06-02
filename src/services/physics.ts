@@ -14,6 +14,7 @@ const PhysicsService = {
     activeCatterpillar: undefined as Catterpillar | undefined,
     physics: undefined as undefined | Physics,
     timeout: undefined as NodeJS.Timeout | undefined,
+    debounceTimeout: undefined as NodeJS.Timeout | undefined,
     observer: undefined as MutationObserver | undefined,
     cache: [] as CatterpillarOptionsWithId[],
     catterpillars: [] as Catterpillar[],
@@ -87,21 +88,29 @@ const PhysicsService = {
         }
     },
     layoutHasChangedEvent: () => {
-        if (PhysicsService.cache.length > 0) {
-            PhysicsService.cache.forEach(catterpillarOptions => {
-                if (PhysicsService.physics) {
-                    if (!PhysicsService.catterpillars.find(catterpillar => catterpillar.id === catterpillarOptions.id)) {
-                        // Add catterpillar if it is not already there
-                        const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
-                        PhysicsService.catterpillars.push(catterpillar)
-                    }
-                }
-            })
-            // Empty catterpillars from cache
-            PhysicsService.cache = []
+        // Clear any existing timeout
+        if (PhysicsService.debounceTimeout) {
+            clearTimeout(PhysicsService.debounceTimeout)
         }
 
-        PhysicsService.updateBlocks()
+        // Set a new timeout
+        PhysicsService.debounceTimeout = setTimeout(() => {
+            if (PhysicsService.cache.length > 0) {
+                PhysicsService.cache.forEach(catterpillarOptions => {
+                    if (PhysicsService.physics) {
+                        if (!PhysicsService.catterpillars.find(catterpillar => catterpillar.id === catterpillarOptions.id)) {
+                            // Add catterpillar if it is not already there
+                            const catterpillar = PhysicsService.addCatterpillar(catterpillarOptions)   
+                            PhysicsService.catterpillars.push(catterpillar)
+                        }
+                    }
+                })
+                // Empty catterpillars from cache
+                PhysicsService.cache = []
+            }
+
+            PhysicsService.updateBlocks()
+        }, 100) // 100ms debounce 
     },
     walkLoop: () => {
         if (!PhysicsService.mouseDown) {
