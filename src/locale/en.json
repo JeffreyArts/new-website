@@ -7,7 +7,7 @@
         "title": "Jeff-frontend boilerplate",
         "divider": "🇬🇧",
         "description": [
-            "This is a boilerplate for a frontend application using Vue 3, Typescript, Vue Router, Pinia, Vite, Lodash, PouchDB, Sass & normalize.css.",
+            "This is a boilerplate for a frontend application using Vue 3, Typescript, Vue Router, Pinia, Vite, Lodash, Sass & normalize.css.",
         "It is made as a scaffolding framework to quickly get up and running to develop a webapplication build upon the headless [Payload](https://payloadcms.com) CMS."
         ],
         "payload-test": {

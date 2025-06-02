@@ -7,7 +7,7 @@
         "title": "_Jeff-frontend_ <em>boilerplate</em>",
         "divider": "🇳🇱",
         "description": [
-            "Dit is een sjabloon voor een frontend-applicatie met standaard support voor Vue 3, TypeScript, Vue Router, Pinia, Vite, Lodash, PouchDB, Sass & normalize.css.",
+            "Dit is een sjabloon voor een frontend-applicatie met standaard support voor Vue 3, TypeScript, Vue Router, Pinia, Vite, Lodash, Sass & normalize.css.",
             "Het is gemaakt als raamwerk met technologie die ik vaak gebruik voor projecten, inclusief een koppeling met het [Payload](https://payloadcms.com) CMS."
         ],
         "payload-test": {

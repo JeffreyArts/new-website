@@ -15,7 +15,6 @@ import siteHeader from "@/components/site-header.vue"
 import Modal from "@/components/modal.vue"
 import PasswordReset from "@/routes/modals/password-reset.vue"
 import Payload from "@/stores/payload"
-import LocalDB from "@/stores/localdb"
 import Locale from "@/stores/locale"
 import gsap from "gsap"
 // import { useRouter } from "vue-router"
@@ -37,11 +36,9 @@ export default defineComponent({
     mounted() {
         const payload = Payload()
         const locale = Locale()
-        const localDB = LocalDB()
 
         if (typeof window !== "undefined") {
             locale.select(localStorage.getItem("i18n_locale") || locale.current)
-            localDB.load()
             payload.init()
             
             gsap.to("html", {
