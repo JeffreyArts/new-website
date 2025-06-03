@@ -138,16 +138,30 @@ export default defineComponent ({
             }
             
             if (width <= 320) {
-                return this.imageSize = "image_sm"
+                this.imageSize = "image_sm"
+
+                if (!this.options.image.sizes[this.imageSize]?.url) {
+                    this.imageSize = "original"
+                }
+                return this.imageSize
             }
 
             if (width <= 800) {
-                return this.imageSize = "image_md"
+                this.imageSize = "image_md"
+                if (!this.options.image.sizes[this.imageSize]?.url) {
+                    this.imageSize = "original"
+                }
+                return this.imageSize
             }
 
             if (width <= 1200) {
-                return this.imageSize = "image_lg"
+                this.imageSize = "image_lg"
+                if (!this.options.image.sizes[this.imageSize]?.url) {
+                    this.imageSize = "original"
+                }
+                return this.imageSize
             }
+
 
             return this.imageSize = "original"
         },
