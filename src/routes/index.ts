@@ -2,6 +2,7 @@
 import defaultTemplate from "@/routes/templates/default.vue"
 import Error404 from "@/routes/error-404.vue"
 import Error301 from "@/routes/error-301.vue"
+import Favorites from "@/routes/favorites.vue"
 import LivePreview from "@/routes/live-preview.vue"
 import pageRoutes from "./pages.json"
 import projectRoutes from "./projects.json"
@@ -14,6 +15,11 @@ const routes = [
         path: "/:pathMatch(.*)*",
         // name: "404 | Not found",
         component: defaultTemplate,
+    },
+    {
+        path: "/favorites",
+        name: "Favorites",
+        component: Favorites,
     },
     {
         path: "/404",
