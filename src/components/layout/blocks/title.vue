@@ -31,7 +31,9 @@ export default defineComponent ({
         "options": {
             handler() {
                 this.$nextTick(() => {
-                    this.$emit("blockLoaded")
+                    setTimeout(() => {
+                        this.$emit("blockLoaded")
+                    }, 0)
                 })
             },
             deep: true,

@@ -47,24 +47,29 @@
                         <span class="site-header-text-small" @click="requestPasswordReset">Forgot password?</span>
                     </div>
                     <div class="row">
-                        <button class="button small cancel" @click="cancelLogin">Cancel</button>
+                        <button class="button small cancel" type="button" @click="cancelLogin">Cancel</button>
                         <button class="button small login" type="submit">Login</button>
                     </div>
                 </div>
             </form>
 
             <div v-if="userMenu == 'user' && payload.auth?.self" class="site-header-user-menu-user">
-                <div class="site-header-user-menu-container">
-                    <div class="row">
+                <aside class="site-header-user-menu-container">
+                    <header class="row">
                         Hello {{ payload.auth.self.username }}
-                        <!-- <input class="site-header-user-menu-username" :disabled="userNameDisabled" v-model="payload.auth.self.username" ref="usernameInput" />
-                        <span class="site-header-user-menu-username-change" @click="changeUsername" v-if="userNameDisabled">change username</span>
-                        <span class="site-header-user-menu-username-change" v-if="!userNameDisabled">
-                            <span @click="saveUsername">save</span> &nbsp; 
-                            <span @click="cancelUsername">cancel</span>
-                        </span> -->
-                    </div>
-                </div>
+                    </header>
+                    <ul class="site-header-user-menu-list">
+                        <li :class="{'__isActive': $route.path == '/favorites'}">
+                            <RouterLink to="/favorites">
+                                Favorites
+                            </RouterLink>
+                        </li>
+                        
+                    </ul>
+                    <footer>
+                        <button class="button small cancel" type="button" @click="logout">Logout</button>
+                    </footer>
+                </aside>
             </div>
             
             <div v-if="emailSent" class="email-sent-message">
@@ -498,6 +503,10 @@ export default defineComponent({
             e.stopPropagation()
             this.userMenu = "register"
             this.timesCanceled++
+        },
+        logout() {
+            this.payload.auth.logout()
+            this.userMenu = "register"
         }
     }
 })
@@ -721,6 +730,41 @@ export default defineComponent({
     &:hover {
         opacity: 1;
         text-decoration: underline;
+    }
+}
+
+.site-header-user-menu-list {
+    padding-left: 0;
+    
+    li {
+        font-family: var(--accent-font);
+        font-size: 14px;
+        list-style: none;
+        
+        a {
+            text-decoration: none;
+            color: var(--contrast-color);
+            transition: .4s all ease;
+
+            &:hover, &:focus {
+                color: var(--accent-color);
+            }
+        }
+
+        &:before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 4px;
+            background-color: var(--contrast-color);
+        }
+
+        &.__isActive {
+            &:before {
+                background-color: var(--accent-color);
+            }
+        }
     }
 }
 
