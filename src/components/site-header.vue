@@ -505,8 +505,12 @@ export default defineComponent({
             this.timesCanceled++
         },
         logout() {
-            this.payload.auth.logout()
-            this.userMenu = "register"
+            if (this.payload.auth) {
+                this.payload.auth.logout()
+                this.userMenu = "register"
+            } else {
+                console.error("Auth object missing")
+            }
         }
     }
 })
