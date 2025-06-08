@@ -1,11 +1,11 @@
 <template>
-    <div v-if="isVisible" class="modal-overlay" @click="closeModal">
-        <div class="modal-content" @click.stop>
+    <div v-if="isVisible" class="modal-overlay" ref="modalOverlay" @click="closeModal">
+        <div class="modal-content" @click.stop ref="modalContent">
             <div class="modal-header">
                 <jao-icon name="cross" size="medium" inactiveColor="var(--bg-color)" @click="closeModal" />
             </div>
             <slot></slot>
-            <div class="modal-actions">
+            <div v-if="!hideSubmit" class="modal-actions">
                 <button class="modal-submit" @click="handleSubmit">
                     <slot name="submit-text">Submit</slot>
                 </button>
@@ -15,6 +15,7 @@
 </template>
 
 <script lang="ts">
+import gsap from "gsap"
 import { defineComponent } from "vue"
 import jaoIcon from "@/components/jao-icon.vue"
 
@@ -30,6 +31,11 @@ export default defineComponent({
             type: Boolean,
             required: false,
             default: true
+        },
+        hideSubmit: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     components: {
@@ -44,6 +50,11 @@ export default defineComponent({
         isOpen: {
             handler(val) {
                 this.isVisible = val
+                if (val) {
+                    this.openModal()
+                } else {
+                    this.closeModal()
+                }
             },
             immediate: true
         }
@@ -55,9 +66,53 @@ export default defineComponent({
         document.removeEventListener('keydown', this.handleEscape)
     },
     methods: {
+        openModal() {
+            this.$nextTick(() => {
+                const modalOverlay = this.$refs.modalOverlay as HTMLElement
+                const modalContent = this.$refs.modalContent as HTMLElement
+                
+                if (!modalOverlay || !modalContent) {
+                    return
+                }
+                gsap.fromTo(modalOverlay, {
+                    opacity: 0
+                },{
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "power3.out"
+                })
+                gsap.fromTo(modalContent, {
+                    y: 32,
+                },{
+                    y: 0,
+                    duration: 0.64,
+                    ease: "power3.out"
+                })
+            })
+        },
         closeModal() {
-            this.isVisible = false
-            this.$emit('close')
+            const modalOverlay = this.$refs.modalOverlay as HTMLElement
+            const modalContent = this.$refs.modalContent as HTMLElement
+            if (!modalOverlay || !modalContent) {
+                return
+            }
+            modalOverlay.style.pointerEvents = "none"
+            gsap.to(modalOverlay, {
+                opacity: 0,
+                duration: 1.28,
+                ease: "power3.out",
+                onComplete: () => {
+                    this.isVisible = false
+                    this.$emit('close')
+                    modalOverlay.style.pointerEvents = "auto"
+                }
+            })
+            gsap.to(modalContent, {
+                y: 32,
+                duration: 0.64,
+                opacity: 0,
+                ease: "power3.out"
+            })
         },
         handleSubmit() {
             this.$emit('submit')

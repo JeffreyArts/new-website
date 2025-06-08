@@ -1,20 +1,31 @@
 <template>
-    <figure class="image-block" :title="options.description">
-        <a :href="link" v-if="link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
-            <img :src="src" :alt="options.description" ref="image"/>
-        </a>
-        <span v-if="!link">
-            <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent"/>
-        </span>
-        <span class="image-block-title" v-if="options.title">
-            {{options.title}}
-        </span>
-    </figure>
+    <div>
+        <figure class="image-block" :title="options.description">
+            <a :href="link" v-if="link" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent">
+                <img :src="src" :alt="options.description" ref="image"/>
+            </a>
+            <span v-if="!link">
+                <img :src="src" :alt="options.description" ref="image" @mouseenter="onMouseEnterEvent" @mouseleave="onMouseLeaveEvent" @click="expandImage"/>
+            </span>
+            <span class="image-block-title" v-if="options.title">
+                {{options.title}}
+            </span>
+        </figure>
+
+        <teleport to="body">
+            <modal-component :is-open="isModalOpen" @close="closeModal" :hide-submit="true">
+                <div class="full-size-image">
+                    <img :src="fullSize" :alt="options.description" ref="fullSizeImage"/>
+                </div>
+            </modal-component>
+        </teleport>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import gsap from "gsap"
+import modalComponent from "@/components/modal.vue"
 
 export type ImageBlock = {
     blockType: "image"
@@ -52,6 +63,7 @@ export type ImageBlock = {
 export default defineComponent ({
     name: "imageBlock",
     components: {
+        modalComponent
     }, 
     props: {
         options: {
@@ -66,7 +78,8 @@ export default defineComponent ({
             link: "",
             patternHover: false,
             bgImageCache: "" as string,
-            bgSizeCache: "" as string
+            bgSizeCache: "" as string,
+            isModalOpen: false
         }
     },
     computed: {
@@ -90,6 +103,9 @@ export default defineComponent ({
                 src += this.options.image.sizes[this.imageSize].url
             }
             return src
+        },
+        fullSize() {
+            return import.meta.env.VITE_PAYLOAD_REST_ENDPOINT.replace("/api","") + this.options.image.url
         }
     },
     watch: {
@@ -283,6 +299,12 @@ export default defineComponent ({
                 return;
             }
         },
+        expandImage() {
+            this.isModalOpen = true
+        },
+        closeModal() {
+            this.isModalOpen = false
+        }
     }
 })
 
@@ -323,6 +345,22 @@ export default defineComponent ({
     .image-block-title {
         font-size: 14px;
         padding: 8px;
+    }
+}
+
+.full-size-image {
+    max-width: 100%;
+    max-height: calc(90vh - 64px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    img {
+        max-width: calc(100% - 64px);
+        max-height: 90vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }
 </style>
