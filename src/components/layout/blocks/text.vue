@@ -1,7 +1,7 @@
 <template>
     <div class="text-block">
         <h1 class="text-block-title" v-if="options.title">{{ options.title  }}</h1>
-        <SlateText class="text-block-text" @loaded="textLoaded" :data="options.text" />
+        <SlateText class="text-block-text" @loaded="textLoaded" :data="options.text" :class="{'__noBackground': !options.title}" />
     </div>
 </template>
 
@@ -97,6 +97,9 @@ export default defineComponent ({
     width: 100%;
     background: var(--bg-color);
     padding: 8px 16px;
+    &.__noBackground {
+        background: transparent;
+    }
 }
 
 

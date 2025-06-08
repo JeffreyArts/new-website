@@ -45,6 +45,11 @@ const generateRoutes = async (url, filename) => {
                 meta.redirect = `${data.redirect}`
             }
 
+            // Ignore favorites route
+            if(data.path == "/favorites") {
+                return
+            }
+
             result.push({
                 path: data.path,
                 name: data.title,
