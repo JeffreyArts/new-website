@@ -67,9 +67,12 @@ export default defineComponent ({
     watch: {
         "options": {
             handler() {
-                this.onLayoutChange()
-                this.setTitle()
-                this.refreshIframe()
+
+                this.$nextTick(() => {
+                    this.setTitle()
+                    this.refreshIframe()
+                    this.onLayoutChange()
+                })
             },
             deep: true,
             immediate: true
@@ -90,7 +93,6 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
-        this.setTitle()
 
         window.addEventListener("layoutChange", this.onLayoutChange)
         window.addEventListener("layoutLoaded", this.onLayoutChange)
@@ -157,9 +159,7 @@ export default defineComponent ({
 
                 this.refreshIframe()
 
-                this.$nextTick(() => {
-                    this.$emit("blockLoaded")
-                })
+                this.$emit("blockLoaded")
             } catch (error) {
                 this.$emit("blockLoaded")
                 console.warn("Error in onLayoutChange:", error)
