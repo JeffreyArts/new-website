@@ -504,6 +504,7 @@ export default defineComponent({
                 
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
+                    this.setupScrollTrigger()
                     // console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
                     this.updating = false
                 })
