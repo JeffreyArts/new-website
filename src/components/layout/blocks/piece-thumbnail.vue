@@ -392,6 +392,7 @@ export default defineComponent ({
 .piece-thumbnail-block-iframe-wrapper {
     display: flex;
     flex-flow: column;
+    position: relative;
 
     iframe {
         width: 100%;

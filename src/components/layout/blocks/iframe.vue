@@ -90,7 +90,6 @@ export default defineComponent ({
         if (typeof window === "undefined") {
             return
         }
-        this.onLayoutChange()
         this.setTitle()
 
         window.addEventListener("layoutChange", this.onLayoutChange)

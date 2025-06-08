@@ -14,6 +14,7 @@ import { defineComponent } from "vue"
 import { sentenceCase } from "change-case"
 import payloadStore from "@/stores/payload"
 import jaoIcon from "./jao-icon.vue"
+import { iconsMap } from "jao-icons"
 import gsap from "gsap"
 
 type BreadcrumbItem = {
@@ -59,7 +60,7 @@ export default defineComponent({
             if (this.$route.path.startsWith("/archive")) { this.icon = "archive"}
             if (this.$route.path.startsWith("/project")) { this.icon = "hammer"}
             if (this.$route.path.startsWith("/tool")) { this.icon = "wrench"}
-            if (this.$route.path.startsWith("/about")) { this.icon = "user"}
+            if (this.$route.path.startsWith("/about")) { this.icon = "user-outline"}
 
             if (this.Payload.page?.data) {
                 if (typeof this.Payload.page.data.archived === "boolean") {
