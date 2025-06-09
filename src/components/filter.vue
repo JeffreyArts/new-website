@@ -65,11 +65,7 @@ import { BlockType } from "@/components/layout/layout-types"
 import Layout from "@/components/layout/index.vue"
 import { map, filter, find } from "lodash"
 import { PageType } from "@/model/payload/page"
-import ScrollTrigger from "gsap/ScrollTrigger"
 import gsap from "gsap"
-
-// Registreer ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger)
 
 type TargetCollections = "projects" | "pieces"
 
@@ -126,7 +122,6 @@ export default defineComponent({
             },
             filterName: "",
             filterIcon: "empty",
-            scrollTrigger: null as ScrollTrigger | null
         }
     },
     watch: {
@@ -216,62 +211,50 @@ export default defineComponent({
     },
     mounted() {
         window.addEventListener("resize", this.onResizeEvent)
-        window.addEventListener("layoutLoaded", this.setupScrollTrigger) 
+        window.addEventListener("layoutLoaded", this.setupScrollEvent) 
         // window.addEventListener("layoutChange", this.fadeInBlocks)
-        
-        // Observe layout changes
-        const layoutWrapper = document.getElementById("filter-layout")
-        if (layoutWrapper) {
-            const observer = new MutationObserver(() => {
-                if (this.scrollTrigger) {
-                    this.scrollTrigger.refresh()
-                }
-            })
-            
-            observer.observe(layoutWrapper, {
-                childList: true,
-                subtree: true,
-                attributes: true
-            })
-        }
     },
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent)
-        window.removeEventListener("layoutLoaded", this.setupScrollTrigger) 
-        // window.removeEventListener("layoutChange", this.fadeInBlocks)
-        // Cleanup ScrollTrigger
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+        window.removeEventListener("layoutLoaded", this.setupScrollEvent) 
+        document.removeEventListener("scroll", this.onScrollEvent)
     },
     methods: {
         onResizeEvent() {
             this.updateLayoutSize()
         },
-        setupScrollTrigger() {
-            const layoutWrapper = document.getElementById("filter-layout")
-            if (!layoutWrapper) return
-            if (this.scrollTrigger) {
-                this.scrollTrigger.kill()
+        onScrollEvent() {
+            const layout = this.$refs["filter-layout"] as HTMLElement
+            if (!layout) { 
+                return
             }
-           
-            this.scrollTrigger = ScrollTrigger.create({
-                trigger: layoutWrapper,
-                start: "bottom bottom+=100%",
-                end: "bottom bottom",
-                // markers: {
-                //     startColor: "green",
-                //     endColor: "red"
-                // },
-                onEnter: () => {
-                    if (this.updating || !this.hasNextPage) return
-                    
-                    const layout = layoutWrapper.querySelector(".layout")
-                    if (!layout || layout.classList.contains('__isProcessing')) return
-
-                    // console.log('%cTriggering new page load', 'background: #4CAF50; color: white; padding: 4px 8px;')
-                    this.page = this.page + 1
-                    this.updateResults(this.page)
-                }
-            })
+            
+            const layoutHeight = document.body.clientHeight - window.innerHeight * 2
+            const scrollPosition = window.scrollY 
+            
+            // If the scroll position is greater than the layout height, load the next page
+            if (scrollPosition >= layoutHeight) {
+                this.page = this.page + 1
+                this.updateResults(this.page)
+                document.removeEventListener("scroll", this.onScrollEvent)
+            }
+        },
+        setupScrollEvent() {
+            if (this.updating || !this.hasNextPage) { 
+                return
+            }
+            
+            
+            const layoutHeight = document.body.clientHeight - window.innerHeight * 2
+            const scrollPosition = window.scrollY 
+            
+            // If the scroll position is greater than the layout height, load the next page
+            if (scrollPosition >= layoutHeight) {
+                this.page = this.page + 1
+                this.updateResults(this.page)
+            } else {
+                document.addEventListener("scroll", this.onScrollEvent)
+            }
         },
         setDefaults() {
             // Process filter prefils
@@ -531,7 +514,7 @@ export default defineComponent({
                 
                 this.$emit("filterUpdated")
                 this.$nextTick(() => {
-                    this.setupScrollTrigger()
+                    this.setupScrollEvent()
                     // console.info("%cUpdating done", "background-color: #09f; color: white; padding: 4px 8px;")
                     this.updating = false
                 })
