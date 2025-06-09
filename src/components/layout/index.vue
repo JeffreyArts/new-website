@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, nextTick } from "vue"
-import _, { set } from "lodash"
+import _ from "lodash"
 import Packer, { Position, Block } from "@/model/packer"
 import gsap from "gsap"
 import BlockComponent from "./blocks/index.vue"

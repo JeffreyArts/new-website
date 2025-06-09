@@ -89,18 +89,19 @@ export default defineComponent ({
             breakpoint: "",
             layoutSize: 8,
             is404: false,
-            fadeOutCompleted: false,
-            pageIsLoading: 0,
+            pageLoaded: false,
+            pageSwitchIndex: 0,
             pageBlocks: [] as Array<BlockType>,
             tempPageBlocks: [] as Array<BlockType>,
-            abortController: null as AbortController | null
+            abortController: null as AbortController | null,
+            pageIsLoading: null as NodeJS.Timeout | null
         }
     },
     watch: {
         "$route.path": {
             async handler() {
-                this.fadeOutCompleted = false
-                this.loadPage()
+                this.pageLoaded = false
+                await this.loadPage()
 
                 const blokElements = Array.from(document.querySelectorAll("#default-layout .block"))
                     .sort((a, b) => (a as HTMLElement).offsetTop - (b as HTMLElement).offsetTop);
@@ -118,7 +119,7 @@ export default defineComponent ({
                             onComplete: () => {
                                 if ((element.offsetTop > viewportHeight || index === blokElements.length - 1)  && !onCompleteAdded) {
                                     setTimeout(() => {
-                                        this.fadeOutCompleted = true
+                                        this.pageLoaded = true
                                         onCompleteAdded = true
                                     }, 240)
                                 }
@@ -126,7 +127,7 @@ export default defineComponent ({
                         })
                     }
                 } else {
-                    this.fadeOutCompleted = true
+                    this.pageLoaded = true
                 }
 
                 // Scroll to top
@@ -159,7 +160,6 @@ export default defineComponent ({
     },
     methods: {
         loaded() {
-            
             this.$nextTick(() => {
                 const blokElements = document.querySelectorAll("#default-layout .block")
                 setTimeout(() => {
@@ -187,9 +187,26 @@ export default defineComponent ({
                 }, blokElements.length * 1)
             })
         },
+        cancelPageLoad() {
+            if (this.pageIsLoading) {
+                clearTimeout(this.pageIsLoading)
+            }
+            this.tempPageBlocks = []
+            this.pageBlocks = []
+            if (this.Payload.page) {
+                this.Payload.page.data.blocks = []
+            }
+            
+            // Clear Layout blocks cache
+            if (this.$refs["default-layout"]) {
+                const defaultLayout = this.$refs["default-layout"] as InstanceType<typeof Layout>
+                defaultLayout.newBlocks = []
+            }
+        },
         async loadPage() {
             try {
-                this.pageIsLoading++
+                this.pageSwitchIndex++
+                this.cancelPageLoad()
                 const res = await this.Payload.getPageByPath(this.$route.path)
                 
                 // this.Payload.page?.data = res as PageType
@@ -199,19 +216,20 @@ export default defineComponent ({
                 }
                 this.tempPageBlocks = res.blocks
                 this.updateLayoutSize()
-                this.updatePageBlocks(this.pageIsLoading)
+                this.updatePageBlocks(this.pageSwitchIndex)
             } catch (error) {
                 console.error("Error loading page:", error)
                 this.is404 = true
             }
         },
         updatePageBlocks(index: number) {
-            if (index !== this.pageIsLoading) {
+            if (index !== this.pageSwitchIndex) {
                 return
             }
-            if (!this.fadeOutCompleted) {
-                // Repeat this function until fadeOutCompleted is true
-                setTimeout(() => {
+
+            if (!this.pageLoaded) {
+                // Repeat this function until pageLoaded is true
+                this.pageIsLoading = setTimeout(() => {
                     this.updatePageBlocks(index)
                 }, 50)
                 return
