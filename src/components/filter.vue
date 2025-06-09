@@ -154,7 +154,7 @@ export default defineComponent({
                 } else if (name === "tools") {
                     this.filterIcon = "wrench"
                     this.filterName = "Tools"
-                } else if (name === "same_project") {
+                } else if (name === "<same_project>" || name === "same_project") {
                     this.filterIcon = "hammer"
                     this.filterName = Name
 
@@ -164,6 +164,9 @@ export default defineComponent({
                     } else if ( this.pageDetails?.title) {
                         this.filterName = this.pageDetails.title
                     }
+                } else if (name === "<query>") {
+                    this.filterIcon = "archive" 
+                    this.filterName = "" // This is being updated in setDefaults()
                 } else {
                     this.filterIcon = "archive"
                     this.filterName = Name
@@ -331,6 +334,28 @@ export default defineComponent({
                         foundYear.selected = true
                     }
                 })
+            }
+
+            // Update filter name if it is based on <query>
+            if (this.options.name === "<query>") {
+                if (this.$route.query) {
+                    if (this.$route.query.series) {
+                        const foundSeries = filter(this.filterOptions.series, { value: this.$route.query.series })
+                        if (foundSeries.length > 0) {
+                            this.filterName = foundSeries[0].label.toString()
+                        }
+                    } else if (this.$route.query.categories) {
+                        const foundCategories = filter(this.filterOptions.categories, { value: this.$route.query.categories })
+                        if (foundCategories.length > 0) {
+                            this.filterName = foundCategories[0].label.toString()
+                        }
+                    } else if (this.$route.query.year) {
+                        const foundYears = filter(this.filterOptions.year, { value: this.$route.query.year })
+                        if (foundYears.length > 0) {
+                            this.filterName = foundYears[0].label.toString()
+                        }
+                    }
+                }
             }
         },
         reset() {

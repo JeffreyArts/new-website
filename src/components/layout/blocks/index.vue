@@ -10,6 +10,7 @@
         <BannerBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'banner'"              :data-blocktype="data.blockType"/>
         <GlitchBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'glitch'"              :data-blocktype="data.blockType"/>
         <NewsletterBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'newsletter'"      :data-blocktype="data.blockType"/>
+        <TagsBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'tags'"                   :data-blocktype="data.blockType"/>
         <TextBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'text'"                  :data-blocktype="data.blockType"/>
         <YoutubeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'youtube'"            :data-blocktype="data.blockType"/>
         <CodeBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'code'"                  :data-blocktype="data.blockType"/>
@@ -30,6 +31,7 @@ import IframeBlock from "./iframe.vue"
 import ImageBlock from "./image.vue"
 import LineBlock from "./line.vue"
 import NoteBlock from "./note.vue"
+import TagsBlock from "./tags.vue"
 import TextBlock from "./text.vue"
 import TitleBlock from "./title.vue"
 import NewsletterBlock from "./newsletter.vue"
@@ -60,6 +62,7 @@ export default defineComponent ({
         PieceThumbnailBlock,
         ProjectThumbnailBlock,
         ProjectArticleBlock,
+        TagsBlock,
         TextBlock,
         TitleBlock,
         YearBlock,
