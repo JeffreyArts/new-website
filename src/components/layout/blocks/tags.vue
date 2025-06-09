@@ -1,6 +1,6 @@
 <template>
     <div class="tags-block">
-        <a v-for="tag in options.tags" :href="tag.url" class="tag">{{ tag.name }}</a>
+        <a v-for="tag in options.tags" :href="tag.url + '#filter-layout'" class="tag">{{ tag.name }}</a>
     </div>
 </template>
 

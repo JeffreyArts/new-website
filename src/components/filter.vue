@@ -354,6 +354,8 @@ export default defineComponent({
                         if (foundYears.length > 0) {
                             this.filterName = foundYears[0].label.toString()
                         }
+                    } else {
+                        this.filterName = "Archive"
                     }
                 }
             }

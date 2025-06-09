@@ -171,7 +171,16 @@ export default defineComponent ({
                                 opacity: 1,
                                 duration: .24,
                                 delay: .1 + index * .1,
-                                ease: "sine.out"
+                                ease: "sine.out",
+                                onComplete: () => {
+                                    // Check if a #filter-layout exists in the current url, using this.$route.hash
+                                    if (this.$route.hash === "#filter-layout") {
+                                        const filterLayout = document.getElementById("filter-layout")
+                                        if (filterLayout) {
+                                            filterLayout.scrollIntoView({ behavior: "smooth" })
+                                        }
+                                    }
+                                }
                             })
                         }
                     }
