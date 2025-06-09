@@ -458,7 +458,7 @@ export default defineComponent({
                 year?: Array<string>
             }
 
-            if (this.options.name.toLowerCase() === "same_project" && this.pageDetails) {
+            if ((this.options.name.toLowerCase() === "same_project" || this.options.name.toLowerCase() === "<same_project>") && this.pageDetails) {
                 if (this.pageDetails?.project){
                     query.project = this.pageDetails?.project.id
                 } else {
