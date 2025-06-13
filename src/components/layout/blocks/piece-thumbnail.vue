@@ -217,6 +217,12 @@ export default defineComponent ({
         },
         heartIcon() {
             return this.selfLove ? "heart" : "heart-outline"
+        },
+        year() {
+            if ( Number(this.options.piece.year) < 0) {
+                return Math.abs(Number(this.options.piece.year)).toLocaleString('nl-NL') + "BC"
+            }
+            return this.options.piece.year
         }
     },
     watch: {
@@ -238,9 +244,9 @@ export default defineComponent ({
         }
 
 
-        if (this.$refs.yearSVG && this.options.piece.year) {
+        if (this.$refs.yearSVG && this.year) {
             const svgContainer = this.$refs.yearSVG as HTMLElement
-            const SVGElement = Icon(this.options.piece.year, "medium")
+            const SVGElement = Icon(this.year, "medium")
             if (!svgContainer || !SVGElement) {
                 return
             }

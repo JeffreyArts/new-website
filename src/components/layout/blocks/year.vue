@@ -31,8 +31,6 @@ export default defineComponent ({
             
         }
     },
-    computed: {
-    },
     watch:{
         "options": {
             handler() {
@@ -41,6 +39,14 @@ export default defineComponent ({
             },
             deep: true,
             immediate: true
+        }
+    },
+    computed: {
+        year() {
+            if ( Number(this.options.year) < 0) {
+                return Math.abs(Number(this.options.year)).toLocaleString('nl-NL') + "BC"
+            }
+            return this.options.year + ""
         }
     },
     mounted() {
@@ -59,11 +65,11 @@ export default defineComponent ({
             if (window.innerWidth > 960) {
                 size = "medium"
             }
-            const svg = Icon(this.options.year, size)
+            const svg = Icon(this.year, size)
             const targetEL = this.$refs["year"] as HTMLElement
               
             if (!svg) {
-                throw new Error(`Can not create icon for number ${this.options.year}`)
+                throw new Error(`Can not create icon for number ${this.year}`)
             }
             if (!targetEL) {
                 return
