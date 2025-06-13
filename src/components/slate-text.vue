@@ -33,14 +33,15 @@ const serialize = (node: SlateNode) => {
     }
 
     if (node.type === "ol") { text = `<ol>${text}</ol>` }
-    if (node.type === "ul") { text = `<ul>${text}</ul>` }
-    if (node.type === "li") { text = `<li>${text}</li>` }
-    if (node.type === "h1") { text = `<h1>${text}</h1>` }
-    if (node.type === "h2") { text = `<h2>${text}</h2>` }
-    if (node.type === "h3") { text = `<h3>${text}</h3>` }
-    if (node.type === "h4") { text = `<h4>${text}</h4>` }
-    if (node.type === "h5") { text = `<h5>${text}</h4>` }
-    if (node.type === "h6") { text = `<h6>${text}</h4>` }
+    else if (node.type === "ul") { text = `<ul>${text}</ul>` }
+    else if (node.type === "li") { text = `<li>${text}</li>` }
+    else if (node.type === "h1") { text = `<h1>${text}</h1>` }
+    else if (node.type === "h2") { text = `<h2>${text}</h2>` }
+    else if (node.type === "h3") { text = `<h3>${text}</h3>` }
+    else if (node.type === "h4") { text = `<h4>${text}</h4>` }
+    else if (node.type === "h5") { text = `<h5>${text}</h5>` }
+    else if (node.type === "h6") { text = `<h6>${text}</h6>` }
+    else if (node.text) { text = `<p>${text}</p>` }
 
     if (node.bold) {
         text = `<strong>${text}</strong>`
@@ -99,12 +100,12 @@ export default defineComponent({
     methods: {
         serializeData(node: SlateNode) {
             const res = serialize(node)
-        
+
             if (!this.loaded) {
                 this.loaded = true
 
                 // Timeout to give time for dom to be updated
-                setTimeout(() => {
+                this.$nextTick(() => {
                     this.$emit("loaded")
                 })
             }

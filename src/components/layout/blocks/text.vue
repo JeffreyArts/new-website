@@ -145,6 +145,16 @@ export default defineComponent ({
         margin: 8px 0;
         padding: 0 0 0 16px;
     }
+
+    p {
+        margin: 8px 0;        
+        &:first-child {
+            margin-top: 0;
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
 }
 
 </style>
