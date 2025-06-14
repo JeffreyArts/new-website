@@ -155,6 +155,26 @@ export default defineComponent ({
             margin-bottom: 0;
         }
     }
+
+    blockquote {
+        position: relative;
+        font-size: 1.2em;
+        margin: 0;
+        padding: 0 0 0 1em;
+        font-style: italic;
+        font-weight: 200;
+
+        &:before {
+            content: "“";
+            position: absolute;
+            left: 0;
+        }   
+        &:after {
+            content: "”";
+            position: absolute;
+            right: 0;
+        }
+    }   
 }
 
 </style>
