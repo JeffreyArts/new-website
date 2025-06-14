@@ -24,13 +24,17 @@ const serialize = (node: SlateNode) => {
     if (Array.isArray(node)) {
         text = node.map(n => serialize(n)).join("")
     }
+    
     if (Array.isArray(node.children)) {
+        text += "<p>"
         text = node.children.map(n => serialize(n)).join("")
+        text += "</p>"
     }
 
     if (node.text) {
         text += node.text
     }
+
 
     if (node.type === "ol") { text = `<ol>${text}</ol>` }
     else if (node.type === "ul") { text = `<ul>${text}</ul>` }
@@ -42,7 +46,6 @@ const serialize = (node: SlateNode) => {
     else if (node.type === "h5") { text = `<h5>${text}</h5>` }
     else if (node.type === "h6") { text = `<h6>${text}</h6>` }
     else if (node.type === "blockquote") { text = `<blockquote>${text}</blockquote>` }
-    else if (node.text) { text = `<p>${text}</p>` }
 
     if (node.bold) {
         text = `<strong>${text}</strong>`

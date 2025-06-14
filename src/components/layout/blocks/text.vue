@@ -155,14 +155,18 @@ export default defineComponent ({
             margin-bottom: 0;
         }
     }
+    * > p {
+        margin: 0;
+    }
 
     blockquote {
         position: relative;
         font-size: 1.2em;
         margin: 0;
-        padding: 1em 0 2em 1em;
+        padding: 8px 16px;
         font-style: italic;
         font-weight: 200;
+        display: inline-block;
 
         &:before {
             content: "“";
@@ -173,6 +177,7 @@ export default defineComponent ({
             content: "”";
             position: absolute;
             right: 0;
+            bottom: -8px;
         }
     }   
 }
