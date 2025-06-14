@@ -160,7 +160,7 @@ export default defineComponent ({
         position: relative;
         font-size: 1.2em;
         margin: 0;
-        padding: 0 0 0 1em;
+        padding: 1em 0 2em 1em;
         font-style: italic;
         font-weight: 200;
 
