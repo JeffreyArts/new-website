@@ -58,6 +58,7 @@ export default defineComponent ({
     aspect-ratio: 6/4;
     word-wrap: break-word;
     padding: 0px 16%;
+    overflow: hidden;
 
     h1 {
         font-weight: 240;
