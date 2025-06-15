@@ -26,9 +26,9 @@ const serialize = (node: SlateNode, isRoot = false) => {
     }
     
     if (Array.isArray(node.children)) {
-        text = node.children.map(n => serialize(n)).join("")
-        if (isRoot) {
-            text = "<p>" + text + "</p>"
+        text = node.children.map(n => serialize(n, true)).join("")       
+        if (!isRoot) {
+            text = `<p>${text}</p>`
         }
     }
 
@@ -66,22 +66,11 @@ const serialize = (node: SlateNode, isRoot = false) => {
 
     if (node.type === "link" && node.url) {
         text = `<a href="${node.url}">${text}</a>`
-        // if (node.url[0] != "/") {
-        //     const s = new XMLSerializer()
-        //     const svg = Icon("medium/external-link")
-        //     if (svg) {
-        //         text = `<a href="${node.url}">${text}${s.serializeToString(svg)}</a>`
-        //     } else {
-        //         text = `<a href="${node.url}">${text}🔗</a>`
-        //     }
-                    
-        // } else {
-        //     text = `<RouterLink to="${node.url}">${text}</RouterLink>`
-        // }
     }
 
     // Clean up all empty <p> tags
     text = text.replace(/<p>\s*<\/p>/g, "")
+
     return text
 }
         

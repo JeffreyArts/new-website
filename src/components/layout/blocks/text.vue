@@ -127,14 +127,17 @@ export default defineComponent ({
         font-stretch: 120%;
         font-weight: 400;
         font-size: 20px;
+        margin: 16px 0 4px;
         letter-spacing: -0.16px;
     }
     h5 {
         font-stretch: 120%;
         font-weight: 200;
         font-size: 18px;
+        margin: 16px 0 4px;
         letter-spacing: -0.16px;
     }
+    
     h6 {
         font-stretch: 88%;
         font-weight: 200;
