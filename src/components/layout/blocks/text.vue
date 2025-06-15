@@ -180,6 +180,11 @@ export default defineComponent ({
             bottom: -8px;
         }
     }   
+    .blockquote-spacer {
+        display: block;
+        height: 8px;
+        width: 100%;
+    }
 }
 
 </style>

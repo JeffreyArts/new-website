@@ -19,16 +19,17 @@ export interface SlateNode {
     url?: string
 }
 
-const serialize = (node: SlateNode) => {
+const serialize = (node: SlateNode, isRoot = false) => {
     let text = ""
     if (Array.isArray(node)) {
         text = node.map(n => serialize(n)).join("")
     }
     
     if (Array.isArray(node.children)) {
-        text += "<p>"
         text = node.children.map(n => serialize(n)).join("")
-        text += "</p>"
+        if (isRoot) {
+            text = "<p>" + text + "</p>"
+        }
     }
 
     if (node.text) {
@@ -45,7 +46,7 @@ const serialize = (node: SlateNode) => {
     else if (node.type === "h4") { text = `<h4>${text}</h4>` }
     else if (node.type === "h5") { text = `<h5>${text}</h5>` }
     else if (node.type === "h6") { text = `<h6>${text}</h6>` }
-    else if (node.type === "blockquote") { text = `<blockquote>${text}</blockquote>` }
+    else if (node.type === "blockquote") { text = `<span class="blockquote-spacer"></span><blockquote>${text}</blockquote><span class="blockquote-spacer"></span>` }
 
     if (node.bold) {
         text = `<strong>${text}</strong>`
@@ -78,6 +79,9 @@ const serialize = (node: SlateNode) => {
         //     text = `<RouterLink to="${node.url}">${text}</RouterLink>`
         // }
     }
+
+    // Clean up all empty <p> tags
+    text = text.replace(/<p>\s*<\/p>/g, "")
     return text
 }
         
@@ -103,7 +107,7 @@ export default defineComponent({
     },
     methods: {
         serializeData(node: SlateNode) {
-            const res = serialize(node)
+            const res = serialize(node, true)
 
             if (!this.loaded) {
                 this.loaded = true
