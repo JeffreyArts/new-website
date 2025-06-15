@@ -109,6 +109,11 @@ export default defineComponent ({
         }
     },
     watch: {
+        "$route.path": {
+            handler() {
+                this.updateLayoutChange()
+            }
+        },
         "options.link": {
             handler() {
                 if (!this.options.link) {
@@ -291,6 +296,7 @@ export default defineComponent ({
             }
 
             img.addEventListener("load", this.loadHandler);
+            img.addEventListener("error", this.loadHandler);
             
             if (img.complete && img.src) {
                 setTimeout(() => {
