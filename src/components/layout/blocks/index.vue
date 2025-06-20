@@ -1,5 +1,6 @@
 <template>
     <div class="block" :block-size="size">
+        <AsciiBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'ascii'"                :data-blocktype="data.blockType"/>
         <TitleBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'title'"                :data-blocktype="data.blockType"/>
         <YearBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'year'"                  :data-blocktype="data.blockType"/>
         <NoteBlock @blockLoaded="blockLoaded" :options="data" v-if="data.blockType === 'note'"                  :data-blocktype="data.blockType"/>
@@ -24,6 +25,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
+import AsciiBlock from "./ascii.vue"
 import BannerBlock from "./banner.vue"
 import CodeBlock from "./code.vue"
 import GlitchBlock from "./glitch.vue"
@@ -48,6 +50,7 @@ import { BlockType } from "@/components/layout/layout-types"
 export default defineComponent ({
     name: "blockComponent", 
     components: { 
+        AsciiBlock,
         BannerBlock,
         CodeBlock,
         GlitchBlock,
