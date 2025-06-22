@@ -1,8 +1,8 @@
 <template>
     <div class="ascii-block" ref="container">
-        <!-- defaultFontSize: {{defaultFontSize}} -->
         <pre class="ascii-block-content" ref="content">{{ ascii }}</pre>
         <div class="slider" ref="slider" :class="{'__isActive': slider.isActive}"
+            v-if="options.allowResizing"
             @mousedown="startSlider"
             @touchstart="startSlider">
             <div class="knob"></div>
@@ -25,7 +25,7 @@ export type MediaSize = {
 
 export type AsciiBlock = {
     blockType: "ascii"
-    showSlider: boolean
+    allowResizing: boolean
     pixelSize: {
         min: number
         max: number
@@ -120,11 +120,11 @@ export default defineComponent ({
     },
     mounted() {
         window.addEventListener("resize", this.scaleText)
-        window.addEventListener("layoutLoaded", this.scaleText) 
+        window.addEventListener("layoutLoaded", this.setDefaultFontSize) 
     },
     unmounted() {
         window.removeEventListener("resize", this.scaleText)
-        window.removeEventListener("layoutLoaded", this.scaleText) 
+        window.removeEventListener("layoutLoaded", this.setDefaultFontSize) 
     },
     methods: {
         fadeOutLetters() {
@@ -137,6 +137,17 @@ export default defineComponent ({
                 duration: 0.64,
                 ease: "power2.out"
             })
+        },
+        setDefaultFontSize(event: CustomEvent) {
+            const blockID = this.$el.parentElement.id.replace("block-", "")
+            if (event.detail.blocks) {
+                const block = event.detail.blocks.find((block: any) => block.id === blockID)
+                if (block) {
+                    this.scaleText()
+                    this.defaultFontSize = this.fontSize
+                    this.scaleText()
+                }
+            }
         },
         fadeInLetters() {
             const content = this.$refs.content as HTMLElement
@@ -194,8 +205,6 @@ export default defineComponent ({
                         
                         // Fade in new letters
                         this.fadeInLetters()
-                        
-                        // dispatchEvent(new Event("resize"))
                     })
                 }
             } catch (error) {
@@ -219,12 +228,8 @@ export default defineComponent ({
                     return this.scaleText()
                 }
             }
-
-            if (!this.defaultFontSize) {
-                if (this.fontSize != 20) {
-                    this.defaultFontSize = this.fontSize
-                }
-            } else {
+            
+            if (this.defaultFontSize) {
                 this.lineHeight = this.defaultFontSize * (this.defaultLines / this.lines)
                 content.style.lineHeight = `${this.lineHeight * 1}px`
             }
@@ -268,7 +273,6 @@ export default defineComponent ({
             // xValue is the pixelValue of X in relation to the parent container
             // we need to convert this to a value between 0 and 1
             const slider = this.$refs.slider as HTMLElement
-            const knob = slider.querySelector(".knob") as HTMLElement
             const rects = slider.getBoundingClientRect()
 
             
@@ -281,14 +285,19 @@ export default defineComponent ({
             const slider = this.$refs.slider as HTMLElement
             const knob = slider.querySelector(".knob") as HTMLElement
             const rects = slider.getBoundingClientRect()
+            const paddingLeft = 16
+            const paddingRight = 16
             
+            const width = rects.width - paddingLeft - paddingRight
+
             // Calculate knob position based on slider value
             const percentage = (this.slider.value - this.slider.min) / (this.slider.max - this.slider.min)
-            const xValue = percentage * rects.width
-            knob.style.left = `${xValue - knob.clientWidth / 2}px`
+            const xValue = percentage * width
+            knob.style.left = `${(xValue - knob.clientWidth / 2) + paddingLeft}px`
         },
         moveSlider(event: MouseEvent | TouchEvent) {
             const slider = this.$refs.slider as HTMLElement
+            
             if (!slider) {
                 return
             }
@@ -300,7 +309,14 @@ export default defineComponent ({
             }
             const rects = slider.getBoundingClientRect()
             xValue -= rects.x
-            if (xValue > 0 && xValue < rects.width) {
+            if (xValue < 0) {
+                xValue = 0
+            }
+            if (xValue > rects.width) {
+                xValue = rects.width
+            }
+            
+            if (xValue >= 0 && xValue <= rects.width) {
                 this.setSliderValue(xValue)
             }
             
@@ -337,36 +353,38 @@ export default defineComponent ({
     margin: 0;
     position: relative;
     font-family: var(--accent-font);
+    overflow: hidden;
+
     // font-family: "Courier New", Courier, monospace;
 }
 
 .slider {
     position: absolute;
-    bottom: -48px;
+    bottom: -32px;
     left: 0;
     width: calc(100% - 64px);
     min-width: 128px;
     max-width: 320px;
     height: 64px;
+    padding: 0 16px;
     // background-color: #ccc;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 25%;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 
     &:after{ 
         content: "";
         position: absolute;
-        top: 16px;
-        left: 0;
-        width: 100%;
+        top: 32px;
+        left: 16px;
+        width: calc(100% - 32px);
         height: 1px;
         background-color: #ccc;
     }
 
     .knob {
         position: absolute;
-        top: 8px;
+        top: 24px;
         left: 0;
         width: 16px;
         height: 16px;

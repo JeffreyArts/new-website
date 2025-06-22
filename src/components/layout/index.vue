@@ -291,7 +291,7 @@ export default defineComponent ({
                 }
                 this.loaded = true
                 this.$emit("loaded", this.loaded)
-                dispatchEvent(new Event('layoutLoaded'))
+                dispatchEvent(new CustomEvent('layoutLoaded', { detail: this.options }))
             }
         },
         updateLayout() {
