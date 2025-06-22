@@ -138,10 +138,11 @@ export default defineComponent ({
                 ease: "power2.out"
             })
         },
-        setDefaultFontSize(event: CustomEvent) {
+        setDefaultFontSize(event: Event) {
+            const customEvent = event as CustomEvent
             const blockID = this.$el.parentElement.id.replace("block-", "")
-            if (event.detail.blocks) {
-                const block = event.detail.blocks.find((block: any) => block.id === blockID)
+            if (customEvent.detail.blocks) {
+                const block = customEvent.detail.blocks.find((block: any) => block.id === blockID)
                 if (block) {
                     this.scaleText()
                     this.defaultFontSize = this.fontSize
