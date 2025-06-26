@@ -119,6 +119,8 @@ export default defineComponent ({
         },
     },
     mounted() {
+        this.$el.parentElement.style.zIndex = 1
+
         window.addEventListener("resize", this.scaleText)
         window.addEventListener("layoutLoaded", this.setDefaultFontSize) 
     },
