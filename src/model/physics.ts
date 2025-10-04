@@ -18,7 +18,6 @@ export default class Physics {
     public blocks: Array<PhysicsBlock>
     private ceiling: Matter.Body
     private ground: Matter.Body
-    private catterpillars: Array<Matter.Composite>
     public engine: Matter.Engine
     private render: Matter.Render
     private runner: Matter.Runner
@@ -30,7 +29,6 @@ export default class Physics {
         this.layoutWidth = window.innerWidth
         this.layoutHeight = window.innerHeight
         this.blocks = []
-        this.catterpillars = []
 
         const domEl = document.createElement("canvas")
         domEl.id = "physics"
