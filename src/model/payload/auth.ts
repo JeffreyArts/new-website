@@ -40,13 +40,13 @@ export class AuthModel {
             this.createAnonymousAccount()
         } else {
             if (this.self.defaultPassword && !this.self.verified) {
-                this.authenticate({ email: this.self.email, password: this.self.defaultPassword }).catch(error => {
-                    let id = this.self?.id
-                    if (id) {
-                        const event = new CustomEvent("removeCatterpillar", { detail: { id } })
-                        window.dispatchEvent(event)
-                    }
+                this.authenticate({ email: this.self.email, password: this.self.defaultPassword }).catch(() => {
+                    // Error handling when the user can not authenticate:
+
+                    // Remove any old data if available
                     this.logout()
+
+                    // Create new account
                     this.createAnonymousAccount()
                 })
             } else {
@@ -158,6 +158,7 @@ export class AuthModel {
                     this.logout()
                     if (oldId) {
                         const event = new CustomEvent("removeCatterpillar", { detail: { id: oldId } })
+                        this.catterpillarAdded = false
                         window.dispatchEvent(event)
                     }
                     
@@ -308,6 +309,7 @@ export class AuthModel {
     
     logout() {
         let id = this.self?.id
+        this.catterpillarAdded = false
         if (id) {
             const event = new CustomEvent("removeCatterpillar", { detail: { id } })
             window.dispatchEvent(event)
