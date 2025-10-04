@@ -13,11 +13,13 @@ export class AuthModel {
     // refreshToken: string
     authToken: string
     axios: AxiosInstance
+    catterpillarAdded: boolean
 
     constructor (baseUrl: string) {
         this.baseUrl = baseUrl
         this.refreshTimeout = 0
         this.authToken = localStorage.getItem("authToken") || ""
+        this.catterpillarAdded = false
 
         this.axios = axios.create({
             withCredentials: true,
@@ -95,8 +97,11 @@ export class AuthModel {
             }
 
             // Emit event to update the catterpillar
-            const event = new CustomEvent("addCatterpillar", { detail: {...catterpillarOptions, id: this.self.id} })
-            window.dispatchEvent(event)
+            if (!this.catterpillarAdded) {
+                const event = new CustomEvent("addCatterpillar", { detail: {...catterpillarOptions, id: this.self.id} })
+                window.dispatchEvent(event)
+                this.catterpillarAdded = true
+            }
         }
     }
     

@@ -71,11 +71,6 @@ const PhysicsService = {
                 throw new Error("Remove Catterpillar is missing `id`")
             }
 
-            const index = PhysicsService.cache.findIndex(catterpillar => catterpillar.id === id)
-            if (index !== -1) {
-                PhysicsService.cache.splice(index, 1)
-            }
-
             const oldCatterpillars = PhysicsService.catterpillars.filter(catterpillar => catterpillar.id == id)
 
             if (oldCatterpillars.length > 0) {
@@ -104,9 +99,9 @@ const PhysicsService = {
                             PhysicsService.catterpillars.push(catterpillar)
                         }
                     }
+                    // Empty catterpillars from cache
+                    PhysicsService.cache = []
                 })
-                // Empty catterpillars from cache
-                PhysicsService.cache = []
             }
 
             PhysicsService.updateBlocks()
