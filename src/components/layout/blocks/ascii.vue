@@ -74,7 +74,9 @@ export default defineComponent ({
                     })
                 }
 
-                await this.loadAciiImage()
+                this.imageLoading = this.loadAciiImage()
+                await this.imageLoading
+
                 this.defaultLines = this.ascii.split("\n").length
                 this.defaultCharactersPerLine = this.ascii.split("\n")[0].length
                 
@@ -104,6 +106,7 @@ export default defineComponent ({
             charactersPerLine: 0,
             height: 0,
             currentRequestId: 0,
+            imageLoading: undefined as undefined | Promise<void>,
             slider: {
                 min: 4,
                 max: 64,
@@ -282,7 +285,7 @@ export default defineComponent ({
             this.slider.value = Math.round((xValue / rects.width) * (this.slider.max - this.slider.min) + this.slider.min)
             this.updateKnobPosition()
 
-            this.loadAciiImage()
+            this.imageLoading = this.loadAciiImage()
         },
         updateKnobPosition() {
             const slider = this.$refs.slider as HTMLElement
@@ -326,7 +329,14 @@ export default defineComponent ({
 
         },
         endSlider(event: MouseEvent | TouchEvent) {
-            this.slider.isActive = false
+            if (this.imageLoading) {
+                this.imageLoading.then(() => {
+                    this.slider.isActive = false
+                    this.imageLoading = undefined
+                })
+            } else {
+                this.slider.isActive = false
+            }
             window.removeEventListener("mousemove", this.moveSlider)
             window.removeEventListener("mouseup", this.endSlider)
             window.removeEventListener("touchmove", this.moveSlider)
