@@ -72,7 +72,7 @@ export default class Physics {
         Matter.Runner.run(this.runner, this.engine);
      
         // Add ground
-        this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 192, this.layoutWidth, 400, {
+        this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 194, this.layoutWidth, 400, {
             isStatic: true,
             label: "ground",
             collisionFilter: {
@@ -123,7 +123,7 @@ export default class Physics {
             Matter.World.remove(this.engine.world, this.ground)
             
             // Voeg nieuwe ground toe
-            this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 192, this.layoutWidth, 400, {
+            this.ground = Matter.Bodies.rectangle(this.layoutWidth/2, this.layoutHeight + 194, this.layoutWidth, 400, {
                 isStatic: true,
                 label: "ground",
                 collisionFilter: {
