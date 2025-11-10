@@ -195,14 +195,36 @@ export class AuthModel {
                     }
                 } as AxiosRequestConfig
 
-                // request.data = JSON.stringify(request.data, null, 2)
-
-                const response = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}`, request)
                 
+                // Maak nieuw account aan
+                const response = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}`, request)
                 this.setSelf(response.data.doc)
+                
+                
+                // Login met het nieuwe account
+                const loginRequest = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/login`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    data: {
+                        email: response.data.doc.email,
+                        password: response.data.doc.defaultPassword
+                    }
+                } as AxiosRequestConfig)    
+                
 
-                const authResponse = await this.axios(`/${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/me`, {method: "GET"})
-                localStorage.setItem("authToken", JSON.stringify(authResponse.data.token))
+                // Update het axios object met de nieuwe token voor toekomstige requests
+                this.axios = this.axios.create({
+                    baseURL: this.baseUrl,
+                    headers: { Authorization: `Bearer ${loginRequest.data.token}` }
+                });
+
+
+                // Sla de token op in localStorage
+                localStorage.setItem("authToken", JSON.stringify(loginRequest.data.token))
+
+                
                 resolve(response)
                 
             } catch (err: unknown | AxiosError) {
