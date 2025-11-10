@@ -155,8 +155,8 @@ export class AuthModel {
                 if (response.data) {
                     const oldId = this.self?.id
                     const newId = response.data.user.id
-                    this.logout()
-                    if (oldId) {
+                    if (oldId != newId) {
+                        this.logout()
                         const event = new CustomEvent("removeCatterpillar", { detail: { id: oldId } })
                         this.catterpillarAdded = false
                         window.dispatchEvent(event)
