@@ -2,7 +2,7 @@ import App from "./App.vue"
 import { createApp } from "vue"
 import router from "./routes"
 import { createPinia } from "pinia"
-import { createHead } from "@unhead/vue"
+import { createHead } from "@unhead/vue/client"
 import Physics from "./services/physics"
 
 // Locale i18n packages

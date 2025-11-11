@@ -8,7 +8,7 @@
 import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import gsap from "gsap"
-import  Icon  from "jao-icons"
+import { Icon } from "jao-icons"
 
 export type YearBlock = {
     blockType: "year"

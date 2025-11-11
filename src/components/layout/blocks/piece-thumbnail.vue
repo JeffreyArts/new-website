@@ -60,7 +60,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 import jaoIcon from "@/components/jao-icon.vue"
-import Icon from "jao-icons"
+import { Icon } from "jao-icons"
 import highlightjs from "./../../highlightjs.vue"
 import { FavoritesService } from "@/services/favorites"
 

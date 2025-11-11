@@ -17,8 +17,7 @@
 import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import gsap from "gsap"
-import  * as jaoIcons  from "jao-icons"
-const { iconsMap } = jaoIcons
+import { iconsMap } from "jao-icons"
 
 /* 
 This icon component uses a two-dimensional grid, with cells of 8x8 pixels - with a gap of 1px around each cell

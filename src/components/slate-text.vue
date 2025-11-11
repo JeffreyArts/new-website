@@ -6,7 +6,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue"
 // import { compile } from "esmBundler"
-// import Icon from "jao-icons"
+// import { Icon } from "jao-icons"
   
 export interface SlateNode {
     children?: Array<SlateNode>
