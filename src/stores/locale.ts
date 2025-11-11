@@ -1,8 +1,7 @@
 import { defineStore } from "pinia"
 import { I18n } from "vue-i18n"
 
-const locale = defineStore({
-    id: "locale",
+const locale = defineStore("locale", {
     state: () => ({
         current: "en",
         $i18n: null as I18n["global"] | null

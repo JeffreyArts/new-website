@@ -9,8 +9,7 @@ export interface PayloadHTTPHeader {
     "Authorization"?: string;
 }
 
-export const Payload = defineStore({
-    id: "Payload",
+export const Payload = defineStore("payload", {
     state: () => ({
         baseUrl: "",
         auth: undefined as AuthModel | undefined,
