@@ -361,14 +361,23 @@ export default defineComponent({
                 // this.logoutAccount()
             }
         },
+        cleanEmail(email: string) {
+            if (!email) return "";
+
+            return email
+                .normalize("NFKC")                 // normalize unicode (important!)
+                .trim()                            // remove leading/trailing spaces
+                .replace(/\s+/g, "")               // remove any internal whitespace
+                .replace(/[\u200B-\u200D\uFEFF]/g, "") // remove zero-width chars
+                .toLowerCase();                    // normalize casing
+        },
         async loginAccount() {
             if (!this.payload.auth) {
                 return
             }
             this.loginError = ""
-
             this.payload.auth.authenticate({
-                email: this.email,
+                email: this.cleanEmail(this.email),
                 password: this.password
             }).then(res => {
                 this.userMenu = "user"
@@ -377,7 +386,7 @@ export default defineComponent({
             })            
         },
         async registerAccount() {
-            const valid = await AccountService.validateEmail(this.email)
+            const valid = await AccountService.validateEmail(this.cleanEmail(this.email))
             
             if (valid) {
                 this.userMenu = "login";
@@ -396,7 +405,7 @@ export default defineComponent({
                     const password = this.payload.auth?.self?.defaultPassword + ""
                     const email = this.payload.auth?.self?.email + ""
                     if (this.payload.auth?.self) {
-                        AccountService.register(this.email, email, password)
+                        AccountService.register(this.cleanEmail(this.email), email, password)
 
                         gsap.to(".email-sent-message", {
                             height,
@@ -460,7 +469,7 @@ export default defineComponent({
             })
 
             this.payload.POST(`${import.meta.env.VITE_PAYLOAD_AUTH_COLLECTION}/forgot-password`, {
-                email: this.email
+                email: this.cleanEmail(this.email)
             })
 
         },
