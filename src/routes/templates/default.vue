@@ -101,6 +101,8 @@ export default defineComponent ({
         "$route.path": {
             async handler() {
                 this.pageLoaded = false
+                this.is404 = false
+
                 await this.loadPage()
 
                 const blokElements = Array.from(document.querySelectorAll("#default-layout .block"))
