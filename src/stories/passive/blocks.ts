@@ -12,7 +12,7 @@ class BlocksStory extends Story {
     async start() {
         console.info("🦩 Blocks story started")
 
-        window.addEventListener("layoutChange", this.onLayoutHasChangedEventBind)
+        window.addEventListener("layoutLoaded", this.onLayoutHasChangedEventBind)
         document.addEventListener("scroll", this.onScrollBind)
         router.beforeEach((to, from, next) => {
             // Clean up blocks before navigating
@@ -45,9 +45,15 @@ class BlocksStory extends Story {
             clearTimeout(this.debounceTimeout)
         }
 
+        // Remove old blocks
+        this.clearBlocks()
+        
         // Set a new timeout
         this.debounceTimeout = setTimeout(() => {
             this.updateBlocks()
+            this.blocks.forEach(block => {
+                block.el = document.getElementById(block.id) as HTMLElement
+            })
         }, 100) // 100ms debounce 
     }
     onLayoutHasChangedEventBind = this.layoutHasChangedEvent.bind(this)
@@ -169,7 +175,7 @@ class BlocksStory extends Story {
             this.controller.ref.removepointerMoveEvent("move-towards-mouse-story-update-mouse-position")
         }
 
-        window.removeEventListener("layoutChange", this.onLayoutHasChangedEventBind)
+        window.removeEventListener("layoutLoaded", this.onLayoutHasChangedEventBind)
         document.removeEventListener("scroll", this.onScrollBind)
 
         // Process the default story destroy

@@ -2,7 +2,6 @@ import Matter from "matter-js"
 import { collisionWall, collisionFood} from "@/model/physics/collisions"
 
 export class Block {
-    composite: Matter.Composite
     body = undefined as Matter.Body | undefined
     world: Matter.World
     id: string
@@ -32,9 +31,6 @@ export class Block {
             this.id = crypto.randomUUID()
         }
 
-        // Create composite
-        this.composite = Matter.Composite.create({ label: `ball,${options.id}` })
-
         this.el.classList.add("hasMatter")
         
         const blockEl = this.el.querySelector("*")
@@ -55,9 +51,6 @@ export class Block {
 
     updateBody() {
         // remove composite bodies
-        this.composite.bodies.forEach(body => {
-            Matter.World.remove(this.world, body)
-        })
 
         this.body = Matter.Bodies.rectangle(this.x, this.y, this.width, this.height, {
             label: "block",
@@ -92,10 +85,6 @@ export class Block {
         if (!this.body) {
             requestAnimationFrame(this.#loop.bind(this))
             return
-        }
-
-        if (this.body.bounds.max.x - this.body.bounds.min.x !== this.width && this.width !== 0) {
-            this.updateBody() 
         }
         
         if (this.isDestroyed) {
