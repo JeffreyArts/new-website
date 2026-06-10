@@ -34,8 +34,6 @@ export default defineComponent ({
         data() {
             return {
                 controller: null as MatterController | null,
-                // clickType: null as string | null,
-                dev: true,
             }
         },
         watch: {
@@ -82,7 +80,7 @@ export default defineComponent ({
                 await this.storyStore.initialised
                 // Check queryparam for ?dev 
                 if (window.location.search.includes("dev")) {
-                    this.toggleDevMode()
+                    this.setDevMode()
                 }
 
                 await this.storyStore.updateConditionalStories()
@@ -108,12 +106,11 @@ export default defineComponent ({
                     this.controller.createCatterpillar({ x: width / 2, y: 0 }, { identity: this.identity })  
                 }
             },
-            toggleDevMode() {
-                this.dev = !this.dev
+            setDevMode() {
                 const twoEl = this.$el.querySelector("[id^='two-js']") as HTMLCanvasElement
                 const rendererEl = this.$el.querySelector("#matter") as HTMLCanvasElement
-                gsap.to(twoEl, {duration: 0.3, opacity: this.dev ? 0 : 1})
-                gsap.to(rendererEl, {duration: 0.3, opacity: this.dev ? 1 : 0})
+                gsap.to(twoEl, {duration: 0.3, opacity: 0})
+                gsap.to(rendererEl, {duration: 0.3, opacity: 1})
             }
         }
     })
