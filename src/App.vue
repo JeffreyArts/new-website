@@ -1,5 +1,5 @@
 <template>
-    <site-header />
+    <site-header v-if="!isInIframe"/>
     <router-view />
     <Modal v-if="showPasswordReset" :is-open="showPasswordReset" :auto-close="false" @close="closePasswordReset" @submit="handlePasswordReset">
         <PasswordReset ref="passwordReset" :token="passwordResetToken" @update:submit-text="updateSubmitText" />
@@ -34,7 +34,8 @@ export default defineComponent({
         return {
             showPasswordReset: false,
             passwordResetToken: "",
-            submitText: "Change password"
+            submitText: "Change password",
+            isInIframe: window.self !== window.top
         }
     },
     setup() {

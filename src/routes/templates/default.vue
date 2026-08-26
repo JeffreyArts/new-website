@@ -1,6 +1,6 @@
 <template>
     <section class="default-template" v-if="!is404">
-        <Breadcrumbs />
+        <Breadcrumbs v-if="!isInIframe"/>
 
         <Layout v-if="pageData?.layout" id="default-layout" ref="default-layout" :options="{
             layoutGap: 40,
@@ -8,9 +8,9 @@
             layoutSize: layoutSize,
             blocks: pageData.blocks
         }" @loaded="loaded"/>
-        <FilterComponent v-if="pageData?.filter?.name && showFilters" :options="pageData?.filter" :pageDetails="pageData" ref="filter" />
+        <FilterComponent v-if="pageData?.filter?.name && showFilters && !isInIframe" :options="pageData?.filter" :pageDetails="pageData" ref="filter" />
     </section>
-    <MatterBox v-if="identity" :identity="identity"></MatterBox>
+    <MatterBox v-if="identity && !isInIframe" :identity="identity"></MatterBox>
     <page404 v-if="is404"/>
 </template>
 
@@ -114,7 +114,8 @@ export default defineComponent ({
             fadeOutTimeout: undefined as undefined | ReturnType<typeof setTimeout>,
             pageIsLoading: null as ReturnType<typeof setTimeout> | null,
             pageData: undefined as PageType | undefined,
-            identity: undefined as IdentityField | undefined
+            identity: undefined as IdentityField | undefined,
+            isInIframe: window.self !== window.top
         }
     },
     watch: {
