@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, nextTick } from "vue"
+import { defineComponent, PropType } from "vue"
 import _ from "lodash"
 import Packer, { Position, Block } from "@/model/packer"
 import gsap from "gsap"
@@ -75,6 +75,7 @@ export default defineComponent ({
             newBlocks: [] as newBlock[],
             blocks: [] as BlockType[],
             sortedBlocks: [] as Position[],
+            screenWidth: window.innerWidth
         }
     },
     computed: {
@@ -113,6 +114,10 @@ export default defineComponent ({
     },
     methods: {
         __onResizeEvent() { 
+            // Only handle resize when the width has changed, not when the height has changed
+            if (this.screenWidth === window.innerWidth) {
+                return
+            }
             clearTimeout(this.timeoutDelay)
             gsap.set(this.$el.querySelectorAll(".block"), {opacity: 0})
             this.timeoutDelay = setTimeout(this.updateAllBlockPositions, 100)
@@ -273,6 +278,9 @@ export default defineComponent ({
                 delay: delay ? .5 : 0,
                 ease: "sine.out",
             })
+
+
+            this.screenWidth = window.innerWidth
         },
         async addNewBlockPositions() {
             if (!this.$el) {
